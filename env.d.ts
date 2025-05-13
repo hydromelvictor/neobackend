@@ -12,5 +12,7 @@ declare namespace NodeJS {
 
         NEO_EMAIL: string;
         NEO_EMAIL_PASSWORD: string;
+
+        MONGO_HOSTNAME: string;
     }
 }

@@ -3,9 +3,7 @@ dotenv.config();
 
 import mongoose, { Connection } from 'mongoose';
 
-const holding: Connection = mongoose.createConnection(
-  'mongodb+srv://victorvaddely:izTaIpmrF5jkC3nz@neo.ldk4lda.mongodb.net/?retryWrites=true&w=majority&appName=neo'
-);
+const holding: Connection = mongoose.createConnection(process.env.MONGO_HOSTNAME);
 
 holding.on('connected', () => {
   console.log('Connexion réussie à la base holding');

@@ -3,7 +3,7 @@ dotenv.config();
 
 import mongoose, { Connection } from 'mongoose';
 
-const shadow: Connection = mongoose.createConnection(process.env.MONGO_HOSTNAME);
+const shadow: Connection = mongoose.createConnection(`${process.env.MONGO_HOSTNAME}`);
 
 shadow.on('connected', () => {
   console.log('Connexion réussie à la base holding');

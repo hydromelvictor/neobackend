@@ -3,7 +3,7 @@ dotenv.config();
 
 import mongoose, { Connection } from 'mongoose';
 
-const holding: Connection = mongoose.createConnection(process.env.MONGO_HOSTNAME);
+const holding: Connection = mongoose.createConnection(`${process.env.MONGO_HOSTNAME}`);
 
 holding.on('connected', () => {
   console.log('Connexion réussie à la base holding');

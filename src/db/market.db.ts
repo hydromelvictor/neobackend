@@ -3,7 +3,7 @@ dotenv.config();
 
 import mongoose, { Connection } from 'mongoose';
 
-const market: Connection = mongoose.createConnection(process.env.MONGO_HOSTNAME);
+const market: Connection = mongoose.createConnection(`${process.env.MONGO_HOSTNAME}`);
 
 market.on('connected', () => {
   console.log('Connexion réussie à la base market');

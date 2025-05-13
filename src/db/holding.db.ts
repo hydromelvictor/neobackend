@@ -4,7 +4,7 @@ dotenv.config();
 import mongoose, { Connection } from 'mongoose';
 
 const holding: Connection = mongoose.createConnection(
-  `mongodb://localhost:27017/${process.env.NEO_HOLDING_DB}`
+  'mongodb+srv://victorvaddely:izTaIpmrF5jkC3nz@neo.ldk4lda.mongodb.net/?retryWrites=true&w=majority&appName=neo'
 );
 
 holding.on('connected', () => {

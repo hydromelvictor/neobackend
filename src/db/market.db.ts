@@ -4,7 +4,7 @@ dotenv.config();
 import mongoose, { Connection } from 'mongoose';
 
 const market: Connection = mongoose.createConnection(
-  `mongodb://localhost:27017/${process.env.NEO_MARKET_DB}`,
+  'mongodb+srv://victorvaddely:izTaIpmrF5jkC3nz@neo.ldk4lda.mongodb.net/?retryWrites=true&w=majority&appName=neo'
 );
 
 market.on('connected', () => {

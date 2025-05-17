@@ -7,10 +7,10 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "./src",
-    "types": [],
+    //"types": [],
     "outDir": "./dist"
   },
-  "include": ["src/**/*.ts", "env.d.ts"],
+  "include": ["src/**/*.ts", "env.d.ts", "types/**/*.d.ts"],
   "types": [],
   
 }

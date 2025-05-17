@@ -5,7 +5,10 @@ import network from '../../db/network.db';
 export interface IReact extends Document {
     message: Types.ObjectId;
     hote: Types.ObjectId;
-    emoji: string;
+    emoji: {
+        name: string,
+        symbole: string;
+    };
 }
 
 interface IReactModel extends mongoose.PaginateModel<IReact> {};
@@ -21,8 +24,8 @@ const ReactSchema = new Schema<IReact>({
         required: true,
     },
     emoji: {
-        type: String,
-        required: true
+        name: String,
+        symbole: String
     }
 }, { timestamps: true })
 ReactSchema.plugin(paginate);

@@ -15,7 +15,6 @@ export interface IAs extends Document {
     context: string;
     task: string;
     tools: string;
-    location: string;
     version: string;
 }
 
@@ -39,7 +38,6 @@ const IASchema = new Schema<IAs>({
     mission: { type: String },
     context: { type: String },
     task: { type: String },
-    location: { type: String },
     version: { type: String },
 }, { timestamps: true })
 

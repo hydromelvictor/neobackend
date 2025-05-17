@@ -25,7 +25,7 @@ export interface IProduct extends Document {
         external: number,
         service: string;
     };
-    warranty: number;
+    warranty: string;
     bonus: Schema.Types.ObjectId[];
 }
 
@@ -56,7 +56,7 @@ const ProductSchema = new Schema<IProduct>({
         external: Number,
         service: String
     },
-    warranty: Number,
+    warranty: String,
     bonus: [{
         type: Schema.Types.ObjectId,
         ref: 'Product'

@@ -54,7 +54,8 @@ const AnnonceSchema = new Schema<IAnnonce>({
     },
     status: {
         type: String,
-        enum: ['pending']
+        enum: ['pending', 'running', 'pass'],
+        default: 'pending'
     },
     view: {
         size: {

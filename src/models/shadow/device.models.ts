@@ -6,11 +6,11 @@ export interface IDevice extends Document {
     _id: Types.ObjectId;
     hote: Types.ObjectId;
     sessionId: string;                  // ID de session (cookie, token temporaire)
+    instantId: string;
     type: string;                        // Type d'activité ('login', 'logout', 'register', 'view', 'click', etc.)
     method: string;                  // Page précédente (header referer)
     ip: string;                          // Adresse IP
     userAgent: string;                   // Navigateur + OS
-    device?: string;                     // Type d'appareil : mobile, desktop, tablet
     browser?: string;                    // Détail du navigateur
     os?: 'Linux' | 'Mac' | 'iOS' | 'Windows' | 'Android' | 'Other';                         // Système d’exploitation
     location?: {
@@ -31,11 +31,11 @@ const DeviceSchema = new Schema<IDevice>({
         required: true 
     },
     sessionId: { type: String },
+    instantId: { type: String },
     type: { type: String, required: true },         // e.g., 'auth', 'navigation', 'interaction'
     method: { type: String, required: true },       // HTTP Method
     ip: { type: String, required: true },
     userAgent: { type: String, required: true },
-    device: { type: String },
     browser: { type: String },
     os: { 
         type: String,

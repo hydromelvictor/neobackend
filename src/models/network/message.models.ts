@@ -46,9 +46,7 @@ const SmSchema = new Schema<ISms>({
         type: mongoose.Schema.Types.ObjectId,
         required: true
     },
-    content: {
-        type: String
-    },
+    content: String,
     state: {
         type: String,
         enum: ['text', 'image', 'video', 'audio', 'file'],

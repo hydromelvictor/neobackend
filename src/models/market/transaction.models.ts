@@ -8,6 +8,8 @@ export interface IAction extends Document {
     type: 'deposit' | 'withdrawal' | 'transfer' | 'payment' | 'refund';
     amount: number;
     currency: string;
+    baseCurrency: string;
+    exchangeRate: number;
     status: 'pending' | 'completed' | 'failed' | 'cancelled';
     description: string;
     from: Schema.Types.ObjectId;
@@ -37,6 +39,14 @@ const ActionSchema = new Schema<IAction>({
     currency: {
         type: String,
         default: 'XOF'
+    },
+    baseCurrency: {
+        type: String,
+        default: 'XOF'
+    },
+    exchangeRate: {
+        type: Number,
+        default: 1
     },
     status: {
         type: String,

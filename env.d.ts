@@ -14,5 +14,14 @@ declare namespace NodeJS {
         NEO_EMAIL_PASSWORD: string;
 
         MONGO_HOSTNAME: string;
+
+        ENCRYPTION_KEY: string;
+        ENCRYPTION_IV: string;
+    }
+}
+
+declare module 'mongoose' {
+    interface Schema {
+      post<T = any>(method: 'init', fn: (this: T) => void): this;
     }
 }

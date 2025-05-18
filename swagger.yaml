@@ -10,6 +10,62 @@ servers:
     description: Serveur de développement local
 
 
+components:
+  schemas:
+    Admin:
+      type: object
+      required:
+        - _id
+        - firstname
+        - lastname
+        - phone
+        - email
+        - cni
+        - authority
+        - online
+        - isAuthenticated
+        - staff
+        - authorization
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        picture:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        cni:
+          type: string
+        position:
+          type: string
+        authority:
+          type: boolean
+        online:
+          type: boolean
+        isAuthenticated:
+          type: boolean
+        staff:
+          type: boolean
+        authorization:
+          type: array
+          items:
+            type: string
+        disconnected:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
 paths:
 
   /admin/load-data:
@@ -22,6 +78,12 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - firstname
+                - lastname
+                - phone
+                - email
+                - cni
               properties:
                 firstname:
                   type: string
@@ -35,7 +97,6 @@ paths:
                   type: string
                 position:
                   type: string
-                  required: false
       responses:
         '200':
           description: >
@@ -52,3 +113,114 @@ paths:
       summary: >
         creation du admin avec avec restriction a aucune action
         le superadmin doit l'octroyer des authorization pour qu'il ai acces a la plateforme
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  
+  /admin/login:
+    post:
+      summary: >
+        connexion par email et reception de code d'authentification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Email envoyer avec success
+  
+  /admin/pass:
+    post:
+      summary: >
+        connexion par code d'authentification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access:
+                    type: string
+                  refresh:
+                    type: string
+  
+  /admin/{id}:
+    get:
+      summary: >
+        recuperation des donnees d'un admin
+      parameters:
+        - name: id
+          in: path
+          schema:
+            type: string
+            format: ObjectId
+          required: true
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+  
+    post:
+      summary: mis a jour des donnes admin
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ObjectId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                picture:
+                  type: string
+                phone:
+                  type: string
+                cni:
+                  type: string
+                position:
+                  type: string

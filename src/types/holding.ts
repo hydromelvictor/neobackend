@@ -56,7 +56,7 @@ export const _RsAdmin = z.object({
     position: z.string().optional(),
     authority: z.boolean().optional(),
     online: z.boolean().optional(),
-    is_authenticated: z.boolean().optional(),
+    isAuthenticated: z.boolean().optional(),
     staff: z.boolean().optional(),
     authorization: z.string().optional(),
     disconnected: z.string().optional(),

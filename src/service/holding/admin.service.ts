@@ -4,20 +4,14 @@ import { confirm, access } from '../../helpers/html.helpers';
 import gmail from '../../helpers/gmail.helpers';
 import { addToBlacklist, removeFromBlacklist } from '../../helpers/codecs.helpers';
 import authenticated from '../authenticated.service';
-import {
-    ManyAdmin,
-    SingleAdmin,
-    SignAdmin,
-    SignAdminSchema,
-    SingleAdminSchema,
-    ManyAdminSchema
-} from './holding';
-import { _XsAdmin, RsAdmin, XsAdmin } from '../../types/holding';
+
+import { _RsAdmin, _XsAdmin, RsAdmin, XsAdmin } from '../../types/holding';
+import { PaginateResult } from 'mongoose';
 
 
 
 export default class Service {
-    async filters (q: any): Promise<any> {
+    private async filters (q: any): Promise<any> {
         const filter: any = {};
 
         if (q.name) {
@@ -88,109 +82,41 @@ export default class Service {
 
         return admin;
     }
-}
 
-class AdminService {
-
-    async filters(q: ManyAdmin): Promise<any> {
-        const filter: any = {};
-
-        if (q.letter) {
-            const regex = new RegExp(`^${q.letter}`, 'i');
-            (filter.$or.length ? filter.$or : []).concat([
-                { firstname: regex },
-                { lastname: regex }
-            ])
-        }
-
-        if (q.name) {
-            const regex = new RegExp(q.name, 'i');
-            (filter.$or.length ? filter.$or : []).concat([
-                { firstname: regex },
-                { lastname: regex }
-            ])
-        }
-
-        if (q.cni) filter.cni = new RegExp(q.cni, 'i');
-        if (q.position) filter.position = new RegExp(q.position, 'i');
-        if (q.online) filter.online = q.online;
-        if (q.is_authenticated) filter.isAuthenticated = q.is_authenticated;
-        if (q.staff) filter.staff = q.staff;
-
-        return filter;
-    }
-
-    // Inscription par email - envoi du lien de confirmation
-    async signUpEmailStep(data: SignAdmin): Promise<boolean> {
-        const result = SignAdminSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        // Vérification si l'admin existe déjà
-        const admin = await Admin.findOne({ email: parsed.email });
-        if (admin) throw new Error(`${parsed.email} existe déjà`);
-
-        // Génération du code de verification
-        const token = await generateToken(parsed);
-        if (!token) throw new Error('Token invalide');
-
-        const code = generateCode(token);
-
-        // Envoi de l'email de confirmation
-        await gmail(
-            parsed.email,
-            'Vérification de compte',
-            confirm(`${parsed.firstname} ${parsed.lastname}`, code)
-        );
-
-        return true;
-    }
-
-    // Finalisation de l'inscription - validation du token
-    async signUpStepEnd(code: string): Promise<IAdmin> {
-        const token = await verify(code);
-        const decoded = await verifyToken(token);
-        const admin = new Admin(decoded);
-        await admin.save();
-
-        return admin;
-    }
-
-    // Connexion par email - envoi du code de vérification
-    async loginEmailStep(email: string): Promise<boolean> {
+    async LoginByEmail(email: string): Promise<boolean> {
         if (!email) throw new Error('Email invalide');
-
+        
         const admin = await Admin.findOne({ email });
         if (!admin) throw new Error(`${email} non reconnu par le système`);
 
-        const code = generateCode(admin._id.toString());
-
-        // Envoi du code de vérification par email
+        const code = addToBlacklist(admin._id.toString())
         await gmail(
             admin.email,
             'Vérification de compte',
             access(`${admin.firstname} ${admin.lastname}`, code)
         );
+
         return true;
     }
 
-    // Finalisation de la connexion - validation du code
-    async loginStepEnd(code: string): Promise<any> {
-        const id = verify(code);
-        if (!id) throw new Error('Code invalide');
+    async LoginPass(code: string): Promise<{ access: string, refresh: string}> {
+        const adminId = removeFromBlacklist(code);
+        if (!adminId) throw new Error('Code invalide');
 
-        const admin = await Admin.findById(id);
+        const admin = await Admin.findById(adminId);
         if (!admin) throw new Error('Utilisateur non trouvé pour ce code');
 
         return await authenticated(admin);
     }
 
-    async get(data: SingleAdmin): Promise<IAdmin> {
-        if (!data._id) throw new Error('identifiant manquant');
-
-        const result = SingleAdminSchema.safeParse(data);
+    async get(data: RsAdmin): Promise<IAdmin> {
+        const result = _RsAdmin.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
+
+        const requiredFiedls = ['_id']
+        for (const field of requiredFiedls)
+            if (!(field in parsed)) throw new Error(`${field} manquant`);
 
         const admin = await Admin.findOne(parsed);
         if (!admin) throw new Error('admin non trouvé');
@@ -198,54 +124,43 @@ class AdminService {
         return admin;
     }
 
-    async find(data: ManyAdmin): Promise<IAdmin[]> {
-        const result = ManyAdminSchema.safeParse(data);
+    async find(data: any, options: any): Promise<PaginateResult<IAdmin>> {
+        const filter = await this.filters(data);
+
+        const result = _RsAdmin.safeParse(filter);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const filter = await this.filters(parsed);
-        const admins = await Admin.find(filter);
+        const admins = await Admin.paginate(parsed, options);
         return admins
     }
 
-    async update(query: SingleAdmin, data: SingleAdmin): Promise<IAdmin> {
-        const resultQuery = SignAdminSchema.safeParse(query);
-        if (!resultQuery.success) throw new Error('invalid data');
-        const parsedQuery = resultQuery.data;
+    async update(query: RsAdmin, data: RsAdmin): Promise<IAdmin> {
+        const admin = await this.get(query);
 
-        const resultData = SignAdminSchema.safeParse(data);
-        if (!resultData.success) throw new Error('invalid data');
-        const parsedData = resultData.data;
-
-        const exist = await this.get(parsedQuery);
-        const upsert = await Admin.updateOne(parsedQuery, parsedData);
-
-        if (!upsert.modifiedCount) throw new Error('updated failed');
-
-        return await this.get({ _id: exist._id });
-    }
-
-    async delete(data: SingleAdmin): Promise<boolean> {
-        const result = SingleAdminSchema.safeParse(data);
+        const result = _RsAdmin.safeParse(data)
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const exist = await this.get(parsed);
-        const rmsert = await exist.deleteOne();
-        if (!rmsert.deletedCount) throw new Error('deleted failed');
+        await admin.updateOne(parsed);
+        return await this.get({ _id: admin._id });
+    }
+
+    async remove(data: RsAdmin): Promise<boolean> {
+        const admin = await this.get(data);
+        await admin.deleteOne();
 
         return true;
     }
 
-    async size(data: ManyAdmin): Promise<number> {
-        const result = ManyAdminSchema.safeParse(data);
+    async size(data: any): Promise<number> {
+        const filter = await this.filters(data);
+
+        const result = _RsAdmin.safeParse(filter);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const filter = await this.filters(parsed);
-        const total = await Admin.countDocuments(filter);
+        const total = await Admin.countDocuments(parsed);
         return total;
     }
 }
-
-

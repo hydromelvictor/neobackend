@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: NEO DOCUMENTATION
+  version: 1.0.0
+  description: >
+    API BACKEND NEO
+
+servers:
+  - url: http://localhost:3000/
+    description: Serveur de développement local
+
+
+paths:
+
+  /admin/load-data:
+    post:
+      summary: >
+        collecte les donnee d'inscription d'un admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                phone:
+                  type: string
+                email:
+                  type: string
+                cni:
+                  type: string
+                position:
+                  type: string
+                  required: false
+      responses:
+        '200':
+          description: >
+            Email envoyer a l'admin avec un code de validation a 6 chiffre
+        '400':
+          description: >
+            echecs de la requete pour données invalide
+            soit donnnes incomplete
+            soit donnees de type differents attendu
+            soit erreur a la genaration du token (rare)
+  
+  /admin/register:
+    post:
+      summary: >
+        creation du admin avec avec restriction a aucune action
+        le superadmin doit l'octroyer des authorization pour qu'il ai acces a la plateforme

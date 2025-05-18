@@ -19,6 +19,7 @@ export interface IMentor extends Document {
     staff: boolean;
     disconnected: string;
     codecs: string;
+    authorization: string[];
     referClick: number;
     comparePassword(password: string): Promise<boolean>;
 }
@@ -38,6 +39,7 @@ const MentorSchema = new Schema<IMentor>({
     online: { type: Boolean, default: false },
     isAuthenticated: { type: Boolean, default: false },
     staff: { type: Boolean, default: false },
+    authorization: [String],
     disconnected: { type: String },
     codecs: { type: String, unique: true },
     referClick: { type: Number, default: 0},

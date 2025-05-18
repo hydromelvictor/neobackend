@@ -13,6 +13,7 @@ export interface ILead extends Document {
   online: boolean;
   isAuthenticated: boolean;
   staff: boolean;
+  authorization: string[];
   disconnected: string;
 }
 
@@ -27,6 +28,7 @@ const LeadSchema = new Schema<ILead>({
     online: { type: Boolean, default: false },
     isAuthenticated: { type: Boolean, default: false },
     staff: { type: Boolean, default: false },
+    authorization: [String],
     disconnected: { type: String }
 }, { timestamps: true });
 

@@ -12,9 +12,11 @@ export interface IAdmin extends Document {
   email: string;
   cni: string;
   position: string;
+  authority: boolean;
   online: boolean;
   isAuthenticated: boolean;
   staff: boolean;
+  authorization: string[];
   disconnected: string;
 }
 
@@ -29,9 +31,11 @@ const AdminSchema = new Schema<IAdmin>({
   email: { type: String, unique: true, required: true },
   cni: { type: String, unique: true },
   position: { type: String },
+  authority: { type: Boolean, default: false },
   online: { type: Boolean, default: false },
   isAuthenticated: { type: Boolean, default: false },
   staff: { type: Boolean, default: false },
+  authorization: [String],
   disconnected: { type: String }
 }, { timestamps: true });
 

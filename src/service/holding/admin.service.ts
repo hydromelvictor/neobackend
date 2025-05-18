@@ -2,7 +2,7 @@ import Admin, { IAdmin } from '../../models/holding/admin.models';
 import { generateToken, verifyToken } from '../../helpers/token.helpers';
 import { confirm, access } from '../../helpers/html.helpers';
 import gmail from '../../helpers/gmail.helpers';
-import { generateCode, addToBlacklist, blacklist, removeFromBlacklist } from '../../helpers/codecs.helpers';
+import { addToBlacklist, removeFromBlacklist } from '../../helpers/codecs.helpers';
 import authenticated from '../authenticated.service';
 import {
     ManyAdmin,
@@ -12,8 +12,83 @@ import {
     SingleAdminSchema,
     ManyAdminSchema
 } from './holding';
-import verify from '../verify.service';
+import { _XsAdmin, RsAdmin, XsAdmin } from '../../types/holding';
 
+
+
+export default class Service {
+    async filters (q: any): Promise<any> {
+        const filter: any = {};
+
+        if (q.name) {
+            const regex = { $regex: q.name, $options: 'i' };
+            (filter.$or.length ? filter.$or : []).concat([
+                { firstname: regex },
+                { lastname: regex }
+            ])
+        }
+
+        if (q.letter) {
+            const regex = { $regex: `^${q.letter}`, $options: 'i' };
+            (filter.$or.length ? filter.$or : []).concat([
+                { firstname: regex },
+                { lastname: regex }
+            ])
+        }
+
+        if (q.before) {
+            const date = new Date(q.before);
+            date.setHours(23, 59, 59, 999);
+            filter.createdAt = { $lte: date };
+        }
+
+        if (q.after) {
+            const date = new Date(q.after);
+            date.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: date };
+        }
+        
+
+        if (q.position) filter.position = { $regex: q.position, $options: 'i' };
+        if (q.online) filter.online = q.online;
+        if (q.is_authenticated) filter.isAuthenticated = q.is_authenticated;
+        if (q.staff) filter.staff = q.staff;
+    }
+
+    async SignUpLoadData(data: XsAdmin): Promise<boolean> {
+        const result = _XsAdmin.safeParse(data);
+        if (!result.success) throw new Error('invalid data');
+        const parsed = result.data;
+
+        const admin = await Admin.findOne({ email: parsed.email });
+        if (admin) throw new Error(`${parsed.email} existe déjà`);
+
+        const token = await generateToken(parsed);
+        if (!token) throw new Error('Token invalide');
+
+        const code = addToBlacklist(token);
+        await gmail(
+            parsed.email,
+            'Vérification de compte',
+            confirm(`${parsed.firstname} ${parsed.lastname}`, code)
+        );
+
+        return true;
+    }
+
+    async RegisterAdmin(code: string): Promise<IAdmin> {
+        const token = removeFromBlacklist(code);
+        if (!token) throw new Error('token invalid');
+
+        const decoded = await verifyToken(token);
+
+        const admin = new Admin(decoded);
+        admin.authorization = []
+        await admin.save();
+
+        return admin;
+    }
+}
 
 class AdminService {
 
@@ -173,4 +248,4 @@ class AdminService {
     }
 }
 
-export default AdminService;
+

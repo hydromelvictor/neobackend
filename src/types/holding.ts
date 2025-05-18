@@ -35,7 +35,6 @@ const GeoJSONPointSchema = z.object({
 export const _XsAdmin = z.object({
     firstname: z.string(),
     lastname: z.string(),
-    picture: z.string().optional(),
     phone: z.string(),
     email: z.string().email(),
     cni: z.string(),
@@ -55,9 +54,11 @@ export const _RsAdmin = z.object({
     email: z.string().email().optional(),
     cni: z.string().optional(),
     position: z.string().optional(),
+    authority: z.boolean().optional(),
     online: z.boolean().optional(),
     is_authenticated: z.boolean().optional(),
     staff: z.boolean().optional(),
+    authorization: z.string().optional(),
     disconnected: z.string().optional(),
     before: z.preprocess(
         (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
@@ -136,9 +137,11 @@ export const _RsMember = z.object({
     position: z.string().optional(),
     picture: z.string().optional(),
     password: PasswordHash.optional(),
+    authority: z.boolean().optional(),
     online: z.boolean().optional(),
     is_authenticated: z.boolean().optional(),
     staff: z.boolean().optional(),
+    authorization: z.string().optional(),
     disconnected: z.string().optional(),
     before: z.preprocess(
         (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),

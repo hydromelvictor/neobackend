@@ -13,9 +13,11 @@ export interface IMember extends Document {
     position: string;
     picture?: string;
     password: string;
+    authority: boolean;
     online: boolean;
     isAuthenticated: boolean;
     staff: boolean;
+    authorization: string[];
     disconnected: string;
     comparePassword(password: string): Promise<boolean>;
 }
@@ -34,9 +36,11 @@ const MemberSchema = new Schema<IMember>({
     position: { type: String },
     picture: { type: String },
     password: { type: String },
+    authority: { type: Boolean, default: false },
     online: { type: Boolean, default: false },
     isAuthenticated: { type: Boolean, default: false },
     staff: { type: Boolean, default: false },
+    authorization: [String],
     disconnected: { type: String }
 }, { timestamps: true });
 

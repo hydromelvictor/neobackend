@@ -1,181 +1,115 @@
-import { generateCode } from "../../helpers/codecs.helpers";
-import gmail from "../../helpers/gmail.helpers";
+import { PaginateResult, Types } from "mongoose";
 import Member, { IMember } from "../../models/holding/member.models";
-import Org from "../../models/holding/org.models";
-import authenticated from "../authenticated.service";
-import {
-    MemberRegister,
-    MemberRegisterSchema,
-    MemberLogin,
-    MemberLoginSchema,
-    SingleMember,
-    SingleMemberSchema,
-    ManyMember,
-    ManyMemberSchema
-} from "./holding";
-import { confirm } from "../../helpers/html.helpers";
-import { PaginateResult } from "mongoose";
-import verify from "../verify.service";
+import { _XsMember, RsMember, XsMember } from "../../types/holding";
+import authenticated from "../../utils/authenticated.utils";
 import reset from "../reset.service";
 import logout from "../logout.service";
 
 
-class MemberService {
-
-    async filters(q: ManyMember): Promise<any> {
+export default class Service {
+    private filters(q: any): any {
         const filter: any = {};
 
         if (q.org) filter.org = q.org;
         if (q.name) {
-            const regex = new RegExp(q.name, 'i');
+            const regex = { $regex: q.name, $options: 'i' };
             filter.$or = [
                 { firstname: regex },
                 { lastname: regex },
                 { username: regex }
             ]
         }
-        if (q.position) filter.position = new RegExp(q.position, 'i');
+        if (q.position) filter.position = { $regex: q.position, $options: 'i' };
         if (q.online) filter.online = q.online;
         if (q.is_authenticated) filter.isAuthenticated = q.is_authenticated;
         if (q.staff) filter.staff = q.staff;
+        if (q.before) {
+            const date = new Date(q.before);
+            date.setHours(23, 59, 59, 999);
+            filter.createdAt = { $lte: date };
+        }
 
-        if (q.before || q.after) {
-            filter.createdAt = {};
-            if (q.before) {
-                filter.createdAt.$lt = new Date(q.before);
-            }
-            if (q.after) {
-                filter.createdAt.$gt = new Date(q.after);
-            }
+        if (q.after) {
+            const date = new Date(q.after);
+            date.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: date };
         }
 
         return filter;
     }
 
-    async register(data: MemberRegister): Promise<boolean> {
-        const result = MemberRegisterSchema.safeParse(data);
+    async Create(data: XsMember): Promise<IMember> {
+        const result = _XsMember.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const exist = await Member.findOne({ username: parsed.username });
-        if (exist) throw new Error(`${parsed.username} existe deja`);
+        const exist = await Member.findOne({ email: parsed.email });
+        if (exist) throw new Error(`${parsed.email} existe deja dans le systeme`);
 
         const member = new Member(parsed);
         await member.save();
-
-        return true;
+        return member;
     }
 
-    async login(data: MemberLogin): Promise<{ access: string, refresh: string }> {
-        const result = MemberLoginSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
+    async Login(credentials: { email: string, password: string }): Promise<{ access: string, refresh: string }> {
+        if (!('email' in credentials) || !('password' in credentials))
+            throw new Error('email ou password manquant');
 
-        const member = await Member.findOne({ username: parsed.username });
-        if (!member) throw new Error('user not found');
+        const member = await Member.findOne({ email: credentials.email });
+        if (!member) throw new Error('member not found');
 
-        const check = await member.comparePassword(parsed.password);
-        if (!check) throw new Error('password invalid');
+        const check = await member.comparePassword(credentials.password);
+        if (!check) throw new Error('password invalide');
 
         return await authenticated(member);
     }
 
-    async forgot(email: string): Promise<void> {
-        if (!email) throw new Error('email not found');
-
-        const member = await Member.findOne({ email });
-        if (!member) throw new Error('organisation with this email not found');
-
-        const code = generateCode(member._id.toString());
-        await gmail(
-            email,
-            'REINITIALISATION DE MOT DE PASSE',
-            confirm(`${member.firstname} ${member.lastname}`, code)
-        );
-
-        return;
+    async Logout(id: string | Types.ObjectId): Promise<boolean> {
+        const member = await this.Get(id);
+        return await logout(member);
     }
 
-    async verify(code: string): Promise<IMember> {
-        const decoded: any = verify(code);
-        if (!decoded) throw new Error('code invalid');
-
-        return await this.get({ _id: decoded });
+    async ResetPassword(id: string | Types.ObjectId, password: string): Promise<boolean> {
+        const member = await this.Get(id);
+        return await reset(password, member);
     }
 
-    async reset(password: string, _id: any): Promise<boolean> {
-        const member = await this.get({ _id });
-        return reset(password, member);
-    }
-
-    async logout(_id: any): Promise<boolean> {
-        const member = await this.get({ _id });
-        return logout(member);
-    }
-
-    async get(data: SingleMember): Promise<IMember> {
-        if (!data._id) throw new Error('_id missing');
-
-        const result = SingleMemberSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const member = await Member.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<IMember> {
+        const member = await Member.findById(id);
         if (!member) throw new Error('member not found');
 
         return member;
     }
 
-    async find(data: ManyMember, page: number = 1, limit: number = 10): Promise<PaginateResult<IMember>> {
-        const result = ManyMemberSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const members = await Member.paginate(filter, { page, limit });
+    async Find(data: any, options: any): Promise<PaginateResult<IMember>> {
+        const filter = this.filters(data);
+        const members = await Member.paginate(data, options);
         return members;
     }
 
-    async update(query: SingleMember, data: SingleMember): Promise<IMember> {
-        const resultQuery = SingleMemberSchema.safeParse(query);
-        if (!resultQuery.success) throw new Error('invalid data');
-        const parsedQuery = resultQuery.data;
+    async Update(id: string | Types.ObjectId, data: RsMember): Promise<IMember> {
+        const member = await this.Get(id);
 
-        const resultData = SingleMemberSchema.safeParse(data);
-        if (!resultData.success) throw new Error('invalid data');
-        const parsedData = resultData.data;
-
-        const exist = await this.get(parsedQuery);
-        const upsert = await Member.updateOne(parsedQuery, parsedData);
-
-        if (!upsert.modifiedCount) throw new Error('updated failed');
-
-        return await this.get({ _id: exist._id });
-    }
-
-    async delete(data: SingleMember): Promise<boolean> {
-        const result = SingleMemberSchema.safeParse(data);
+        const result = _XsMember.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const exist = await this.get(parsed);
-        const rmsert = await exist.deleteOne();
+        Object.assign(member, parsed)
+        await member.save();
+        
+        return await this.Get(member._id);
+    }
 
-        if (!rmsert.deletedCount) throw new Error('deleted failed');
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const member = await this.Get(id);
+        await member.deleteOne();
 
         return true;
     }
 
-    async size(data: ManyMember): Promise<number> {
-        const result = ManyMemberSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
         const total = await Member.countDocuments(filter);
-
         return total;
     }
 }
-
-export default MemberService;

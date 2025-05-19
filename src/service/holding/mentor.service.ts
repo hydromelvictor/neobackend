@@ -1,69 +1,62 @@
+import { PaginateResult, Types } from "mongoose";
+import { addToBlacklist, OneUseToken, removeFromBlacklist } from "../../helpers/codecs.helpers";
+import gmail from "../../helpers/gmail.helpers";
+import { confirm } from "../../helpers/html.helpers";
+import { generateToken, verifyToken } from "../../helpers/token.helpers";
 import Mentor, { IMentor } from "../../models/holding/mentor.models";
-import { generateToken, verifyToken } from '../../helpers/token.helpers';
-import { confirm } from '../../helpers/html.helpers';
-import { generateCode, shortUUID } from '../../helpers/codecs.helpers';
-import gmail from '../../helpers/gmail.helpers';
-import { ManyMentor, ManyMentorSchema, SignMentor, SignMentorSchema, SingleMentor, SingleMentorSchema } from "./holding";
-import authenticated from "../authenticated.service";
-import checked from "../verify.service";
-import { PaginateResult } from "mongoose";
-import AccountService from "../market/account.service";
+import { _RsMentor, _XsMentor, RsMentor, XsMentor } from "../../types/holding";
+import authenticated from "../../utils/authenticated.utils";
+import logout from "../logout.service";
+import reset from "../reset.service";
 
-
-class MentorService {
-    private account: AccountService;
-
-    constructor() {
-        this.account = new AccountService();
-    }
-
-    async filters(q: ManyMentor): Promise<any> {
-        const filter: any = {}
+export default class Service {
+    private filters(q: any): any {
+        const filter: any = {};
 
         if (q.letter) {
-            const regex = new RegExp(`^${q.letter}`, 'i');
-            filter.$or = [
-                { firstname: regex },
-                { lastname: regex }
-            ]
-        }
-
-        if (q.name) {
-            const regex = new RegExp(q.name, 'i');
+            const regex = { $regex: q.letter, $options: 'i' };
             (filter.$or.length ? filter.$or : []).concat([
                 { firstname: regex },
                 { lastname: regex }
             ])
         }
-
-        if (q.state) {
-            const regex = new RegExp(q.state, 'i');
+        if (q.name) {
+            const regex = { $regex: q.name, $options: 'i' };
+            (filter.$or.length ? filter.$or : []).concat([
+                { firstname: regex },
+                { lastname: regex }
+            ])
+        }
+        if (q.zone) {
+            const regex = { $regex: q.zone, $options: 'i' };
             (filter.$or.length ? filter.$or : []).concat([
                 { country: regex },
                 { city: regex }
             ])
         }
-
-        if (q.position) filter.position = new RegExp(q.position, 'i');
+        if (q.position) filter.position = { $regex: q.position, $options: 'i' };
+        if (q.min) filter.referClick.$gte = q.min;
+        if (q.max) filter.referClick.$lte = q.max;
         if (q.online) filter.online = q.online;
         if (q.is_authenticated) filter.isAuthenticated = q.is_authenticated;
         if (q.staff) filter.staff = q.staff;
+        if (q.before) {
+            const date = new Date(q.before);
+            date.setHours(23, 59, 59, 999);
+            filter.createdAt = { $lte: date };
+        }
 
-        if (q.before || q.after) {
-            filter.createdAt = {};
-            if (q.before) {
-                filter.createdAt.$lt = new Date(q.before);
-            }
-            if (q.after) {
-                filter.createdAt.$gt = new Date(q.after);
-            }
+        if (q.after) {
+            const date = new Date(q.after);
+            date.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: date };
         }
 
         return filter;
     }
 
-    async signUpEmailStep(data: SignMentor): Promise<boolean> {
-        const result = SignMentorSchema.safeParse(data);
+    async SignUpToEmail(data: XsMentor): Promise<boolean> {
+        const result = _XsMentor.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
@@ -73,117 +66,96 @@ class MentorService {
         const token = await generateToken(parsed);
         if (!token) throw new Error('Token invalide');
 
-        const code = generateCode(token);
+        const code = addToBlacklist(token);
         await gmail(
             parsed.email,
             'Vérification de compte',
             confirm(`${parsed.firstname} ${parsed.lastname}`, `${code}`)
-        );
+        )
 
         return true;
     }
 
-    async signUpVerifyStep(code: string): Promise<string> {
-        const token = await checked(code);
+    async Register(code: string): Promise<string | Types.ObjectId> {
+        const token = removeFromBlacklist(code);
+        if (!token) throw new Error('code invalid');
+
         const decoded = await verifyToken(token);
         if (!decoded) throw new Error('code invalid');
 
         const mentor = new Mentor(decoded);
         await mentor.save();
 
-        await this.account.create({ owner: mentor._id });
-
-        const newtoken = await generateToken({ _id: mentor._id });
-        if (!newtoken) throw new Error('generate token failed');
-
-        return newtoken;
+        return mentor._id;
     }
 
-    async signUpPasswordStep(password: string, decoded: any): Promise<boolean> {
-        if (!password || !decoded) throw new Error('data invalid');
-
-        const mentor = await Mentor.findById(decoded);
-        if (!mentor) throw new Error('mentor not found');
-
+    async AddPassword(id: string | Types.ObjectId, password: string): Promise<boolean> {
+        const mentor = await this.Get(id);
         mentor.password = password;
-        mentor.codecs = shortUUID();
+        mentor.codecs = OneUseToken();
         await mentor.save();
 
         return true;
     }
 
-    async login(email: string, password: string): Promise<any> {
-        if (!email || !password) throw new Error('champs manquants');
+    async Login(credentials: { email: string, password: string }): Promise<{ access: string, refresh: string }> {
+        if (!('email' in credentials) || !('password' in credentials))
+            throw new Error('email ou password manquant');
 
-        const mentor = await Mentor.findOne({ email });
+        const mentor = await Mentor.findOne({ email: credentials.email });
         if (!mentor) throw new Error('mentor not found');
 
-        const check = await mentor.comparePassword(password);
+        const check = await mentor.comparePassword(credentials.password);
         if (!check) throw new Error('password invalid');
 
         return await authenticated(mentor);
     }
 
-    async get(data: SingleMentor): Promise<IMentor> {
-        const result = SingleMentorSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
+    async Logout(id: string | Types.ObjectId): Promise<boolean> {
+        const mentor = await this.Get(id);
+        return await logout(mentor);
+    }
 
-        const mentor = await Mentor.findOne(parsed);
-        if (!mentor) throw new Error('mentor non trouve');
+    async ResetPassword(id: string | Types.ObjectId, password: string): Promise<boolean> {
+        const mentor = await this.Get(id);
+        return await reset(password, mentor);
+    }
+
+    async Get(id: string | Types.ObjectId): Promise<IMentor> {
+        const mentor = await Mentor.findById(id);
+        if (!mentor) throw new Error('mentor not found');
 
         return mentor;
     }
 
-    async find(data: ManyMentor, page: number = 1, limit: number = 10): Promise<PaginateResult<IMentor>> {
-        const result = ManyMentorSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const mentors = await Mentor.paginate(filter, { page, limit });
+    async Find(data: any, options: any): Promise<PaginateResult<IMentor>> {
+        const filter = this.filters(data);
+        const mentors = await Mentor.paginate(filter, options);
         return mentors;
     }
 
-    async update(query: SingleMentor, data: SingleMentor): Promise<IMentor> {
-        const resultQuery = SingleMentorSchema.safeParse(query);
-        if (!resultQuery.success) throw new Error('invalid data');
-        const parsedQuery = resultQuery.data;
-
-        const resultData = SingleMentorSchema.safeParse(data);
-        if (!resultData.success) throw new Error('invalid data');
-        const parsedData = resultData.data;
-
-        const exist = await this.get(parsedQuery);
-        const upsert = await Mentor.updateOne(parsedQuery, parsedData);
-
-        if (!upsert.modifiedCount) throw new Error('updated failed');
-
-        return await this.get({ _id: exist._id });
-    }
-
-    async delete(data: SingleMentor): Promise<boolean> {
-        const result = SingleMentorSchema.safeParse(data);
+    async Update(id: string | Types.ObjectId, data: RsMentor): Promise<IMentor> {
+        const mentor = await this.Get(id);
+        
+        const result = _RsMentor.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const exist = await this.get(parsed);
-        const rmsert = await exist.deleteOne();
+        Object.assign(mentor, parsed);
+        await mentor.save();
+        return await this.Get(mentor._id);
+    }
 
-        if (!rmsert.deletedCount) throw new Error('deleted failed');
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const mentor = await this.Get(id);
+        await mentor.deleteOne()
 
         return true;
     }
 
-    async count(data: ManyMentor): Promise<number> {
-        const result = ManyMentorSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
         const total = await Mentor.countDocuments(filter);
         return total;
     }
 }
-
-export default MentorService;

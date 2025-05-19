@@ -1,103 +1,103 @@
-import { PaginateResult } from "mongoose";
+import { PaginateResult, Types } from "mongoose";
 import Lead, { ILead } from "../../models/holding/lead.models";
-import { ManyLead, ManyLeadSchema, SingleLead, SingleLeadSchema } from "./holding";
+import { _XsLead, XsLead } from "../../types/holding";
+import authenticated from "../../utils/authenticated.utils";
+import logout from "../logout.service";
 
-export default class LeadService {
 
-    async filters(q: ManyLead): Promise<any> {
+export default class Service {
+    private filters(q: any): any {
         const filter: any = {};
-        
+
         if (q.name) {
-            const regex = new RegExp(q.name, 'i');
-            filter.$or = [
+            const regex = { $regex: q.name, $options: 'i' };
+            (filter.$or.length ? filter.$or : []).concat([
                 { firstname: regex },
                 { lastname: regex }
-            ]
+            ])
         }
-        if (q.address) filter.address = new RegExp(q.address, 'i');
+
+        if (q.letter) {
+            const regex = { $regex: `^${q.letter}`, $options: 'i' };
+            (filter.$or.length ? filter.$or : []).concat([
+                { firstname: regex },
+                { lastname: regex }
+            ])
+        }
+
+        if (q.address) filter.address = { $regex: q.address, $options: 'i' };
+
+        if (q.before) {
+            const date = new Date(q.before);
+            date.setHours(23, 59, 59, 999);
+            filter.createdAt = { $lte: date };
+        }
+
+        if (q.after) {
+            const date = new Date(q.after);
+            date.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: date };
+        }
+
         if (q.online) filter.online = q.online;
         if (q.is_authenticated) filter.isAuthenticated = q.is_authenticated;
         if (q.staff) filter.staff = q.staff;
-        if (q.before || q.after) {
-            filter.createdAt = {};
-            if (q.before) {
-                filter.createdAt.$lt = new Date(q.before);
-            }
-            if (q.after) {
-                filter.createdAt.$gt = new Date(q.after);
-            }
-        }
+
         return filter;
     }
 
-    async fakeLead(): Promise<ILead> {
+    async Create(): Promise<ILead> {
         const lead = new Lead();
+        lead.online = true;
+        lead.isAuthenticated = true;
         await lead.save();
         return lead;
     }
 
-    async get(data: SingleLead): Promise<ILead> {
-        if (!data._id || !data.phone) throw new Error('identifier missing');
+    async Login(id: string | Types.ObjectId): Promise<{ access: string, refresh: string}> {
+        const lead = await this.Get(id);
+        return await authenticated(lead);
+    }
 
-        const result = SingleLeadSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
+    async Logout(id: string | Types.ObjectId): Promise<boolean> {
+        const lead = await this.Get(id);
+        return await logout(lead);
+    }
 
-        const lead = await Lead.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<ILead> {
+        const lead = await Lead.findById(id);
         if (!lead) throw new Error('lead not found');
 
         return lead;
     }
 
-    async find(data: ManyLead, page: number = 1, limit: number = 10): Promise<PaginateResult<ILead>> {
-        const result = ManyLeadSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const leads = await Lead.paginate(filter, { page, limit });
-
+    async Find(data: any, options: any): Promise<PaginateResult<ILead>> {
+        const filter = this.filters(data);
+        const leads = await Lead.paginate(filter, options);
         return leads;
     }
 
-    async update(query: SingleLead, data: SingleLead): Promise<ILead> {
-        const resultQuery = SingleLeadSchema.safeParse(query);
-        if (!resultQuery.success) throw new Error('invalid data');
-        const parsedQuery = resultQuery.data;
-
-        const resultData = SingleLeadSchema.safeParse(data);
-        if (!resultData.success) throw new Error('invalid data');
-        const parsedData = resultData.data;
-
-        const exist = await this.get(parsedQuery);
-        const upsert = await Lead.updateOne(parsedQuery, parsedData);
-
-        if (!upsert.modifiedCount) throw new Error('update failed');
-
-        return await this.get({ _id: exist._id });
-    }
-
-    async delete(data: SingleLead): Promise<boolean> {
-        const result = SingleLeadSchema.safeParse(data);
+    async Update(id: string | Types.ObjectId, data: XsLead): Promise<ILead> {
+        const lead = await this.Get(id);
+        const result = _XsLead.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const exist = await this.get(parsed);
-        const rmsert = await exist.deleteOne();
+        Object.assign(lead, parsed)
+        await lead.save();
+        return await this.Get(lead._id);
+    }
 
-        if (!rmsert.deletedCount) throw new Error('deleted failed');
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const lead = await this.Get(id);
+        await lead.deleteOne();
 
         return true;
     }
 
-    async size(data: ManyLead): Promise<number> {
-        const result = ManyLeadSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
         const total = await Lead.countDocuments(filter);
-
         return total;
     }
 }

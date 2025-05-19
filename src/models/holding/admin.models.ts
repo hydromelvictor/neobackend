@@ -13,6 +13,7 @@ export interface IAdmin extends Document {
   cni: string;
   position: string;
   authority: boolean;
+  recorvery: string;
   online: boolean;
   isAuthenticated: boolean;
   staff: boolean;
@@ -32,6 +33,11 @@ const AdminSchema = new Schema<IAdmin>({
   cni: { type: String, unique: true },
   position: { type: String },
   authority: { type: Boolean, default: false },
+  recorvery: {
+    type: String,
+    unique: true,
+    required: true
+  },
   online: { type: Boolean, default: false },
   isAuthenticated: { type: Boolean, default: false },
   staff: { type: Boolean, default: false },

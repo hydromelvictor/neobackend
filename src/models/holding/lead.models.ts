@@ -28,7 +28,72 @@ const LeadSchema = new Schema<ILead>({
     online: { type: Boolean, default: false },
     isAuthenticated: { type: Boolean, default: false },
     staff: { type: Boolean, default: false },
-    authorization: [String],
+    authorization: {
+      type: [String],
+      default: [
+        'READ_LEAD',
+        'UPDATE_LEAD',
+
+        'READ_ACCOUNT',
+
+        'CREATE_ORDER',
+        'READ_ORDER',
+        'LIST_ORDER',
+        'UPDATE_ORDER',
+
+        'READ_PRODUCT',
+        'LIST_PRODUCT',
+
+        'CREATE_REVIEW',
+        'READ_REVIEW',
+        'LIST_REVIEW',
+        'UPDATE_REVIEW',
+        'DELETE_REVIEW',
+
+        'CREATE_TRANSACTION',
+        'READ_TRANSACTION',
+        'LIST_TRANSACTION',
+        'UPDATE_TRANSACTION',
+
+        'CREATE_ATTACHMENT',
+        'READ_ATTACHMENT',
+        'LIST_ATTACHMENT',
+        'UPDATE_ATTACHMENT',
+        'DELETE_ATTACHMENT',
+
+        'CREATE_DISCUSSION',
+        'READ_DISCUSSION',
+        'LIST_DISCUSSION',
+        'UPDATE_DISCUSSION',
+        'DELETE_DISCUSSION',
+
+        'CREATE_MEET',
+        'READ_MEET',
+        'LIST_MEET',
+
+        'CREATE_MESSAGE',
+        'READ_MESSAGE',
+        'LIST_MESSAGE',
+        'UPDATE_MESSAGE',
+        'DELETE_MESSAGE',
+
+        'CREATE_REACTION',
+        'READ_REACTION',
+        'LIST_REACTION',
+        'UPDATE_REACTION',
+        'DELETE_REACTION',
+
+        'READ_STATUS',
+        'LIST_STATUS',
+
+        'CREATE_VIEW',
+        'READ_VIEW',
+        'LIST_VIEW',
+
+        'READ_ANNONCE',
+        'LIST_ANNONCE',
+    ]
+    },
     disconnected: { type: String }
 }, { timestamps: true });
 

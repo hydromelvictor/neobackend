@@ -10,10 +10,10 @@ export const addToBlacklist = (username: string) => {
   do {
     code = Math.floor(100000 + Math.random() * 900000).toString();
   } while (blacklist[code]);
-  
+
   blacklist[code] = username;
   console.log(`Code ${code} ajouté pour l'utilisateur ${username}`);
-  
+
   return code;
 };
 
@@ -24,7 +24,7 @@ export const removeFromBlacklist = (code: string) => {
   if (blacklist[code]) {
     const result = blacklist[code];
     delete blacklist[code];
-    
+
     console.log(`Code ${code} supprimé de la blacklist.`);
 
     return result;
@@ -34,4 +34,4 @@ export const removeFromBlacklist = (code: string) => {
 };
 
 
-export const shortUUID = () => ShortUniqueId.generate();
+export const OneUseToken = () => ShortUniqueId.generate();

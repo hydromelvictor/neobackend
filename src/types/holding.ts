@@ -43,68 +43,26 @@ export const _XsAdmin = z.object({
 export type XsAdmin = z.infer<typeof _XsAdmin>
 
 export const _RsAdmin = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     firstname: z.string().optional(),
     lastname: z.string().optional(),
     picture: z.string().optional(),
     phone: z.string().optional(),
     email: z.string().email().optional(),
     cni: z.string().optional(),
-    position: z.string().optional(),
-    authority: z.boolean().optional(),
-    online: z.boolean().optional(),
-    isAuthenticated: z.boolean().optional(),
-    staff: z.boolean().optional(),
-    authorization: z.string().optional(),
-    disconnected: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
+    position: z.string().optional()
 })
 export type RsAdmin = z.infer<typeof _RsAdmin>
 
 
 export const _XsLead = z.object({
-    firstname: z.string(),
-    lastname: z.string(),
-    picture: z.string().optional(),
-    phone: z.string(),
-    address: z.string().optional()
-})
-export type XsLead = z.infer<typeof _XsLead>
-
-export const _RsLead = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     firstname: z.string().optional(),
     lastname: z.string().optional(),
     picture: z.string().optional(),
     phone: z.string().optional(),
-    address: z.string().optional(),
-    online: z.boolean().optional(),
-    is_authenticated: z.boolean().optional(),
-    staff: z.boolean().optional(),
-    disconnected: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
+    address: z.string().optional()
 })
-export type RsLead = z.infer<typeof _RsLead>
+export type XsLead = z.infer<typeof _XsLead>
+
 
 export const _XsMember = z.object({
     org: z.preprocess(
@@ -116,16 +74,12 @@ export const _XsMember = z.object({
     email: z.string().email(),
     phone: z.string(),
     position: z.string(),
-    picture: z.string().optional(),
-    password: PasswordHash
+    password: PasswordHash,
+    authority: z.boolean().optional()
 })
 export type XsMember = z.infer<typeof _XsMember>
 
 export const _RsMember = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     org: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
@@ -136,21 +90,7 @@ export const _RsMember = z.object({
     phone: z.string().optional(),
     position: z.string().optional(),
     picture: z.string().optional(),
-    password: PasswordHash.optional(),
-    authority: z.boolean().optional(),
-    online: z.boolean().optional(),
-    is_authenticated: z.boolean().optional(),
-    staff: z.boolean().optional(),
-    authorization: z.string().optional(),
-    disconnected: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
+    password: PasswordHash.optional()
 })
 export type RsMember = z.infer<typeof _RsMember>
 
@@ -161,18 +101,11 @@ export const _XsMentor = z.object({
     city: z.string(),
     position: z.string(),
     phone: z.string(),
-    email: z.string().email(),
-    picture: z.string().optional(),
-    password: PasswordHash,
-    codecs: z.string()
+    email: z.string().email()
 })
 export type XsMentor = z.infer<typeof _XsMentor>
 
 export const _RsMentor = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     firstname: z.string().optional(),
     lastname: z.string().optional(),
     country: z.string().optional(),
@@ -183,22 +116,7 @@ export const _RsMentor = z.object({
     picture: z.string().optional(),
     password: PasswordHash.optional(),
     codecs: z.string().optional(),
-    referClick:  z.number().min(0).optional(),
-    // referClick
-    max: z.number().min(0).optional(),
-    min: z.number().min(0).optional(),
-    online: z.boolean().optional(),
-    is_authenticated: z.boolean().optional(),
-    staff: z.boolean().optional(),
-    disconnected: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
+    referClick:  z.number().min(0).optional()
 })
 export type RsMentor = z.infer<typeof _RsMentor>
 
@@ -221,7 +139,6 @@ export const _XsOrg = z.object({
     ),
     service: z.string(),
     area: z.string(),
-    picture: z.string().optional()
 })
 export type Xsorg = z.infer<typeof _XsOrg>
 
@@ -248,14 +165,6 @@ export const _RsOrg = z.object({
     ),
     service: z.string().optional(),
     area: z.string().optional(),
-    picture: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
+    picture: z.string().optional()
 })
 export type RsOrg = z.infer<typeof _RsOrg>

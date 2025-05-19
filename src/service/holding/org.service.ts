@@ -1,24 +1,13 @@
-import { JwtPayload } from "jsonwebtoken";
-import { generateToken, verifyToken } from "../../helpers/token.helpers";
-import Org, { IOrg } from "../../models/holding/org.models";
-import {
-    SignUpDataOrgLoading,
-    OrgRegisterSchema,
-    SignUpDataOrgRegister,
-    OrgLoadingSchema,
-    SingleOrg,
-    SingleOrgSchema,
-    ManyOrg,
-    ManyOrgSchema
-} from "./holding";
-import { generateCode } from "../../helpers/codecs.helpers";
-import gmail from "../../helpers/gmail.helpers";
-import { confirm } from "../../helpers/html.helpers";
-import verify from "../verify.service";
-import { PaginateResult } from "mongoose";
-import AccountService from "../market/account.service";
-import { IAccount } from "../../models/market/account.models";
 
+
+export default class Service {
+    private filters(q: any): any {
+        const filter: any = {};
+
+        if (q.reason) filter.reason = { $regex: q.reason, $options: 'i' };
+        
+    }
+}
 
 class OrgService {
     private account: AccountService;
@@ -30,7 +19,7 @@ class OrgService {
     async filters(q: ManyOrg): Promise<any> {
         const filter: any = {};
 
-        if (q.reason) filter.reason = new RegExp(q.reason, 'i');
+         = new RegExp(q.reason, 'i');
         if (q.mentor) filter.mentor = q.mentor;
         if (q.social) filter.social = q.social;
         if (q.country) filter.country = new RegExp(q.country, 'i');

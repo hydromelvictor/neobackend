@@ -12,6 +12,14 @@ servers:
 
 components:
   schemas:
+    Authenticated:
+      type: object
+      properties:
+        access:
+          type: string
+        refresh:
+          type: string
+
     Admin:
       type: object
       required:
@@ -44,6 +52,99 @@ components:
         cni:
           type: string
         position:
+          type: string
+        authority:
+          type: boolean
+        online:
+          type: boolean
+        isAuthenticated:
+          type: boolean
+        staff:
+          type: boolean
+        authorization:
+          type: array
+          items:
+            type: string
+        disconnected:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Lead:
+      type: object
+      required:
+        - _id
+        - online
+        - isAuthenticated
+        - staff
+        - authorization
+        - createdAt
+        - updatedAt
+      properties:
+        _id:
+          type: string
+        firstname:
+          type: string
+        lastname:
+          type: string
+        picture:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        online:
+          type: boolean
+        isAuthenticated:
+          type: boolean
+        staff:
+          type: boolean
+        authorization:
+          type: array
+          items:
+            type: string
+        disconnected:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    Member:
+      type: object
+      required:
+        - org
+        - firstname
+        - lastname
+        - email
+        - phone
+        - position
+        - password
+      properties:
+        _id:
+          type: string
+        org:
+          type: string
+          format: ObjectId
+        firstname:
+          type: string
+        lastname:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        picture:
+          type: string
+        position:
+          type: string
+        password:
           type: string
         authority:
           type: boolean
@@ -148,6 +249,17 @@ paths:
       responses:
         '200':
           description: Email envoyer avec success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authenticated'
+  
+  /admin/logout:
+    get:
+      summary: logout admin
+      responses:
+        '200':
+          description: success
   
   /admin/pass:
     post:
@@ -176,7 +288,133 @@ paths:
                     type: string
                   refresh:
                     type: string
-  
+  /admin:
+    get:
+      summary: lister les admins selon ou/et avec des critere
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: letter
+          in: query
+          schema:
+            type: string
+        - name: before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: position
+          in: query
+          schema:
+            type: string
+        - name: online
+          in: query
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+        - name: is_authenticated
+          in: query
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+        - name: staff
+          in: query
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+        - name: page
+          in: query
+          schema:
+            type: number
+        - name: limit
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Admin'
+
+  /admin/check-email:
+    post:
+      summary: verifier le nouveau email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: success
+
+  /admin/update-email:
+    put:
+      summary: mis a jour du mail admin
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              required:
+                - code
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+
+  /admin/recovery:
+    post:
+      summary: code de recuperation de code si l'email est perdu
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              required:
+                - recovery
+              properties:
+                recovery:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+
   /admin/{id}:
     get:
       summary: >
@@ -196,7 +434,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Admin'
   
-    post:
+    put:
       summary: mis a jour des donnes admin
       parameters:
         - name: id
@@ -206,7 +444,7 @@ paths:
             type: string
             format: ObjectId
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
@@ -224,3 +462,274 @@ paths:
                   type: string
                 position:
                   type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Admin'
+
+    delete:
+      summary: suppression des donnees administrateur
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ObjectId
+      responses:
+        '204':
+          description: success
+  
+  /stats/admin:
+    get:
+      summary: nombre d'element selon la requete
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: letter
+          in: query
+          schema:
+            type: string
+        - name: before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: position
+          in: query
+          schema:
+            type: string
+        - name: online
+          in: query
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+        - name: is_authenticated
+          in: query
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+        - name: staff
+          in: query
+          schema:
+            type: boolean
+            enum:
+              - true
+              - false
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: number
+
+  /lead:
+    post:
+      summary: creation  de lead
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+    
+    get:
+      summary: recuperation de plusieurs leads
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: letter
+          in: query
+          schema:
+            type: string
+        - name: address
+          in: query
+          schema:
+            type: string
+        - name: before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: online
+          in: query
+          schema:
+            type: boolean
+        - name: is_authenticated
+          in: query
+          schema:
+            type: boolean
+        - name: staff
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Lead'
+  
+  /lead/{id}:
+    post:
+      summary: connexion d'un lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ObjectId
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Authenticated'
+    
+    get:
+      summary: recuperation d'un profil lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ObjectId
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+    
+    put:
+      summary: mis a jour du lead
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ObjectId
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                picture:
+                  type: string
+                phone:
+                  type: string
+                address:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Lead'
+
+    delete:
+      summary: suppression d'un lead
+      parameters:
+        - name: _id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: ObjectId
+      responses:
+        '200':
+          description: success
+
+  /lead/logout:
+    get:
+      summary: logout lead
+      responses:
+        '200':
+          description: success
+  
+  /stats/lead:
+    get:
+      summary: total lead
+      parameters:
+        - name: name
+          in: query
+          schema:
+            type: string
+        - name: letter
+          in: query
+          schema:
+            type: string
+        - name: address
+          in: query
+          schema:
+            type: string
+        - name: before
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: after
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: online
+          in: query
+          schema:
+            type: boolean
+        - name: is_authenticated
+          in: query
+          schema:
+            type: boolean
+        - name: staff
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: number
+  
+  
+

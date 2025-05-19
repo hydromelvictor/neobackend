@@ -1,17 +1,18 @@
 import Admin, { IAdmin } from '../../models/holding/admin.models';
 import { generateToken, verifyToken } from '../../helpers/token.helpers';
-import { confirm, access } from '../../helpers/html.helpers';
+import { confirm, access, sending } from '../../helpers/html.helpers';
 import gmail from '../../helpers/gmail.helpers';
-import { addToBlacklist, removeFromBlacklist } from '../../helpers/codecs.helpers';
-import authenticated from '../authenticated.service';
+import { addToBlacklist, removeFromBlacklist, OneUseToken } from '../../helpers/codecs.helpers';
+import authenticated from '../../utils/authenticated.utils';
 
 import { _RsAdmin, _XsAdmin, RsAdmin, XsAdmin } from '../../types/holding';
-import { PaginateResult } from 'mongoose';
+import { PaginateResult, Types } from 'mongoose';
+import logout from '../logout.service';
 
 
 
 export default class Service {
-    private async filters (q: any): Promise<any> {
+    private filters(q: any): any {
         const filter: any = {};
 
         if (q.name) {
@@ -41,12 +42,13 @@ export default class Service {
             date.setHours(0, 0, 0, 0);
             filter.createdAt = { $gte: date };
         }
-        
 
         if (q.position) filter.position = { $regex: q.position, $options: 'i' };
         if (q.online) filter.online = q.online;
         if (q.is_authenticated) filter.isAuthenticated = q.is_authenticated;
         if (q.staff) filter.staff = q.staff;
+
+        return filter;
     }
 
     async SignUpLoadData(data: XsAdmin): Promise<boolean> {
@@ -75,9 +77,11 @@ export default class Service {
         if (!token) throw new Error('token invalid');
 
         const decoded = await verifyToken(token);
+        if (!decoded) throw new Error('token invalide')
 
         const admin = new Admin(decoded);
         admin.authorization = []
+        admin.recorvery = OneUseToken()
         await admin.save();
 
         return admin;
@@ -85,7 +89,7 @@ export default class Service {
 
     async LoginByEmail(email: string): Promise<boolean> {
         if (!email) throw new Error('Email invalide');
-        
+
         const admin = await Admin.findOne({ email });
         if (!admin) throw new Error(`${email} non reconnu par le système`);
 
@@ -99,7 +103,7 @@ export default class Service {
         return true;
     }
 
-    async LoginPass(code: string): Promise<{ access: string, refresh: string}> {
+    async LoginPass(code: string): Promise<{ access: string, refresh: string }> {
         const adminId = removeFromBlacklist(code);
         if (!adminId) throw new Error('Code invalide');
 
@@ -109,58 +113,83 @@ export default class Service {
         return await authenticated(admin);
     }
 
-    async get(data: RsAdmin): Promise<IAdmin> {
-        const result = _RsAdmin.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
+    async Logout(id: string | Types.ObjectId): Promise<boolean> {
+        const admin = await this.Get(id);
+        return await logout(admin);
+    }
 
-        const requiredFiedls = ['_id']
-        for (const field of requiredFiedls)
-            if (!(field in parsed)) throw new Error(`${field} manquant`);
-
-        const admin = await Admin.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<IAdmin> {
+        const admin = await Admin.findById(id);
         if (!admin) throw new Error('admin non trouvé');
 
         return admin;
     }
 
-    async find(data: any, options: any): Promise<PaginateResult<IAdmin>> {
-        const filter = await this.filters(data);
-
-        const result = _RsAdmin.safeParse(filter);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const admins = await Admin.paginate(parsed, options);
+    async Find(data: any, options: any): Promise<PaginateResult<IAdmin>> {
+        const filter = this.filters(data);
+        const admins = await Admin.paginate(filter, options);
         return admins
     }
 
-    async update(query: RsAdmin, data: RsAdmin): Promise<IAdmin> {
-        const admin = await this.get(query);
+    async Update(id: string | Types.ObjectId, data: RsAdmin): Promise<IAdmin> {
+        const admin = await this.Get(id);
 
         const result = _RsAdmin.safeParse(data)
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        await admin.updateOne(parsed);
-        return await this.get({ _id: admin._id });
+        Object.assign(admin, parsed);
+        await admin.save();
+        
+        return await this.Get(admin._id);
     }
 
-    async remove(data: RsAdmin): Promise<boolean> {
-        const admin = await this.get(data);
+    async CheckEmailUpdate(id: string | Types.ObjectId, email: string): Promise<boolean> {
+        const admin = await this.Get(id);
+        if (admin.email !== email) throw new Error('invalid email');
+
+        const code = addToBlacklist(email);
+        await gmail(
+            admin.email,
+            'CODE DE VERIFICATION',
+            sending(`${admin.firstname} ${admin.lastname}`, code)
+        )
+
+        return true;
+    }
+
+    async UpdateEmail(code: string): Promise<IAdmin> {
+        const email = removeFromBlacklist(code);
+        if (!email) throw new Error('code invalide');
+
+        const admin = await Admin.findOne({ email });
+        if (!admin) throw new Error('admin not found');
+
+        admin.email = email;
+        await admin.save()
+
+        return await this.Get(admin._id);
+    }
+
+    async Recovery(token: string): Promise<IAdmin> {
+        const admin = await Admin.findOne({ recorvery: token });
+        if (!admin) throw new Error('admin not found');
+
+        admin.recorvery = OneUseToken();
+        await admin.save();
+        return admin;
+    }
+
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const admin = await this.Get(id);
         await admin.deleteOne();
 
         return true;
     }
 
-    async size(data: any): Promise<number> {
-        const filter = await this.filters(data);
-
-        const result = _RsAdmin.safeParse(filter);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const total = await Admin.countDocuments(parsed);
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
+        const total = await Admin.countDocuments(filter);
         return total;
     }
 }

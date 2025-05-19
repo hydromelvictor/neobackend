@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import logger from '../../helpers/logger.helpers';
 import MentorService from '../../service/holding/mentor.service';
-import forgot from '../../service/forgot.service';
+import forgot from '../../service/verify.service';
 import verify from '../../service/verify.service';
 import reset from '../../service/reset.service';
 import logout from '../../service/logout.service';

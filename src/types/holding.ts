@@ -140,13 +140,9 @@ export const _XsOrg = z.object({
     service: z.string(),
     area: z.string(),
 })
-export type Xsorg = z.infer<typeof _XsOrg>
+export type XsOrg = z.infer<typeof _XsOrg>
 
 export const _RsOrg = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     reason: z.string().optional(),
     mentor: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),

@@ -1,3 +1,10 @@
+import { PaginateResult, Types } from "mongoose";
+import { addToBlacklist, removeFromBlacklist } from "../../helpers/codecs.helpers";
+import gmail from "../../helpers/gmail.helpers";
+import { confirm } from "../../helpers/html.helpers";
+import { generateToken, verifyToken } from "../../helpers/token.helpers";
+import Org, { IOrg } from "../../models/holding/org.models";
+import { _RsOrg, _XsOrg, RsOrg, XsOrg } from "../../types/holding";
 
 
 export default class Service {
@@ -5,25 +12,16 @@ export default class Service {
         const filter: any = {};
 
         if (q.reason) filter.reason = { $regex: q.reason, $options: 'i' };
-        
-    }
-}
-
-class OrgService {
-    private account: AccountService;
-
-    constructor() {
-        this.account = new AccountService();
-    }
-
-    async filters(q: ManyOrg): Promise<any> {
-        const filter: any = {};
-
-         = new RegExp(q.reason, 'i');
         if (q.mentor) filter.mentor = q.mentor;
-        if (q.social) filter.social = q.social;
-        if (q.country) filter.country = new RegExp(q.country, 'i');
-        if (q.state) filter.state = new RegExp(q.state);
+        if (q.social) filter.social = { $regex: q.social, $options: 'i' };
+        if (q.sector) filter.sector = q.sector;
+        if (q.zone) {
+            const regex = { $regex: q.zone, $options: 'i' };
+            filter.$or = [
+                { country: regex },
+                { state: regex }
+            ]
+        }
         if (q.lon && q.lat) {
             filter.location = {
                 $near: {
@@ -35,123 +33,98 @@ class OrgService {
                 }
             };
         }
-        if (q.sector) filter.sector = q.sector;
-        if (q.service) filter.service = new RegExp(q.service, 'i');
-        if (q.area) filter.area = new RegExp(q.area, 'i');
-        if (q.before || q.after) {
-            filter.createdAt = {};
-            if (q.before) {
-                filter.createdAt.$lte = new Date(q.before);
-            }
-            if (q.after) {
-                filter.createdAt.$gte = new Date(q.after);
-            }
+        if (q.service) filter.service = { $regex: q.service, $options: 'i' };
+        if (q.area) filter.area = { $regex: q.area, $options: 'i' };
+        if (q.before) {
+            const date = new Date(q.before);
+            date.setHours(23, 59, 59, 999);
+            filter.createdAt = { $lte: date };
+        }
+
+        if (q.after) {
+            const date = new Date(q.after);
+            date.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: date };
         }
 
         return filter;
     }
 
-    async register(data: SignUpDataOrgRegister): Promise<string> {
-        const result = OrgRegisterSchema.safeParse(data);
+    async SignUpLoading(data: XsOrg): Promise<boolean> {
+        const result = _XsOrg.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
 
-        const exist = await Org.findOne({ reason: parsed.reason });
-        if (exist) throw new Error(`${parsed.reason} exists deja`);
+        const exist = await Org.findOne({ $or: [
+            { reason: parsed.reason },
+            { phone: parsed.phone },
+            { email: parsed.email }
+        ]})
+        if (exist) throw new Error(`${parsed.reason}, ${parsed.phone} ou ${parsed.email} exist deja`);
 
         const token = await generateToken(parsed);
         if (!token) throw new Error('erreur token');
 
-        return token;
-    }
-
-    async loading(data: SignUpDataOrgLoading, token: string): Promise<boolean> {
-        const result = OrgLoadingSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const exist = await Org.findOne({ email: parsed.email });
-        if (!exist) throw new Error(`${parsed.email} exist deja`);
-
-        const decoded = await verifyToken(token) as JwtPayload;
-        if (!decoded) throw new Error('token invalid');
-
-        const newToken = await generateToken({ ...parsed, ...decoded });
-        if (!newToken) throw new Error('generate token failed');
-
-        const code = generateCode(newToken);
+        const code = addToBlacklist(token);
 
         await gmail(
             parsed.email,
             'Verification de compte',
-            confirm(decoded.reason, code)
-        );
+            confirm(parsed.reason, code)
+        )
 
         return true;
     }
 
-    async verify(code: string): Promise<{ org: IOrg, acc: IAccount }> {
-        const token = await verify(code);
-        const decoded = await verifyToken(token);
-        if (!decoded) throw new Error('code invalid');
+    async Register(code: string): Promise<IOrg> {
+        const token = removeFromBlacklist(code);
+        if (!token) throw new Error('code invalide');
+
+        const decoded = verifyToken(token);
+        if (!decoded) throw new Error('invalide token');
 
         const org = new Org(decoded);
         await org.save();
 
-        const acc = await this.account.create({ owner: org._id });
-        return { org, acc };
+        return org;
     }
 
-    async get(data: SingleOrg): Promise<IOrg> {
-        if (!data._id) throw new Error('_id missing');
-
-        const result = SingleOrgSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const org = await Org.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<IOrg> {
+        const org = await Org.findById(id);
         if (!org) throw new Error('org not found');
 
         return org;
     }
 
-    async find(data: ManyOrg, page: number = 1, limit: number = 10): Promise<PaginateResult<IOrg>> {
-        const result = ManyOrgSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const orgs = await Org.paginate(filter, { page, limit });
+    async Find(data: any, options: any): Promise<PaginateResult<IOrg>> {
+        const filter = this.filters(data);
+        const orgs = await Org.paginate(filter, options);
         return orgs;
     }
 
-    async update(query: SingleOrg, data: SingleOrg): Promise<IOrg> {
-        const org = await this.get(query);
-
-        const result = SingleOrgSchema.safeParse(data);
+    async Update(id: string | Types.ObjectId, data: RsOrg): Promise<IOrg> {
+        const org = await this.Get(id);
+        const result = _RsOrg.safeParse(data);
         if (!result.success) throw new Error('invalid data');
         const parsed = result.data;
-        await org.updateOne(parsed);
 
-        return await this.get({ _id: org._id });
+        Object.assign(org, parsed);
+        await org.save();
+
+        return await this.Get(org._id);
     }
 
-    async delete(data: SingleOrg): Promise<boolean> {
-        const org = await this.get(data);
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const org = await this.Get(id);
         await org.deleteOne();
+
         return true;
     }
 
-    async size(data: ManyOrg): Promise<number> {
-        const result = ManyOrgSchema.safeParse(data);
-        if (!result.success) throw new Error('invalid data');
-        const parsed = result.data;
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
 
-        const filter = await this.filters(parsed);
-        const total = await Org.countDocuments(filter);
-
+        const total = Org.countDocuments(filter);
         return total;
     }
 }
-
-export default OrgService;

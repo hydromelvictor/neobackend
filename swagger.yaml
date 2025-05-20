@@ -11,110 +11,208 @@ servers:
 
 
 components:
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: ObjectId
+    Name:
+      name: name
+      in: query
+      schema:
+        type: string
+    Letter:
+      name: letter
+      in: query
+      schema:
+        type: string
+    Before:
+      name: before
+      in: query
+      schema:
+        type: string
+        format: date-time
+    After:
+      name: after
+      in: query
+      schema:
+        type: string
+        format: date-time
+    Position:
+      name: position
+      in: query
+      schema:
+        type: string
+    Online:
+      name: online
+      in: query
+      schema:
+        type: boolean
+        enum:
+          - true
+          - false
+    IsAuthenticated:
+      name: is_authenticated
+      in: query
+      schema:
+        type: boolean
+        enum:
+          - true
+          - false
+    Staff:
+      name: staff
+      in: query
+      schema:
+        type: boolean
+        enum:
+          - true
+          - false
+    Page:
+      name: page
+      in: query
+      schema:
+        type: number
+    Limit:
+      name: limit
+      in: query
+      schema:
+        type: number
+    Address:
+      name: address
+      in: query
+      schema:
+        type: string
+    Org:
+      name: org
+      in: query
+      schema:
+        type: string
+        format: ObjectId
+
   schemas:
     Authenticated:
       type: object
       properties:
         access:
           type: string
+          description: token d'access uniquement a la route nones
         refresh:
           type: string
+          description: token de rafraichissement du token d'access
 
     Admin:
       type: object
       required:
-        - _id
         - firstname
         - lastname
         - phone
         - email
         - cni
-        - authority
-        - online
-        - isAuthenticated
-        - staff
-        - authorization
-        - createdAt
-        - updatedAt
       properties:
         _id:
           type: string
+          format: ObjectId
+          description: identifiant unique
         firstname:
           type: string
+          description: prenoms
         lastname:
           type: string
+          description: nom
         picture:
           type: string
+          description: lien vers l'image de profil
         phone:
           type: string
+          description: numero telephonique personnel
         email:
           type: string
+          description: adresse mail personnel
         cni:
           type: string
+          description: numero de piece identité national
         position:
           type: string
+          description: fonction
         authority:
           type: boolean
+          description: defini le superadmin l'utilisateur ayant absolument tout les droit
         online:
           type: boolean
+          description: permet d'identifier un utilisateur en ligne
         isAuthenticated:
           type: boolean
+          description: permet d'identifierun utilisateur authentifier
         staff:
           type: boolean
+          description: permet d'identifier les admins
         authorization:
           type: array
           items:
             type: string
+          description: definis les authorisation des utilisateurs
         disconnected:
           type: string
+          description: dernier date de deconnexion
         createdAt:
           type: string
           format: date-time
+          description: date de creation de l'utilisateur
         updatedAt:
           type: string
           format: date-time
+          description: derniere mis a jour de l'utilisateur
 
     Lead:
       type: object
-      required:
-        - _id
-        - online
-        - isAuthenticated
-        - staff
-        - authorization
-        - createdAt
-        - updatedAt
       properties:
         _id:
           type: string
+          format: ObjectId
+          description: identifiant unique
         firstname:
           type: string
+          description: prenoms
         lastname:
           type: string
+          description: nom
         picture:
           type: string
+          description: lien vers l'image de profil
         phone:
           type: string
+          description: numero telephonique personnel
         address:
           type: string
+          description: lieu d'habitation
         online:
           type: boolean
+          description: permet d'identifier un utilisateur en ligne
         isAuthenticated:
           type: boolean
+          description: permet d'identifierun utilisateur authentifier
         staff:
           type: boolean
+          description: permet d'identifier les admins
         authorization:
           type: array
           items:
             type: string
+          description: definis les authorisation des utilisateurs
         disconnected:
           type: string
+          description: dernier date de deconnexion
         createdAt:
           type: string
           format: date-time
+          description: date de creation de l'utilisateur
         updatedAt:
           type: string
           format: date-time
+          description: derniere mis a jour de l'utilisateur
 
     Member:
       type: object
@@ -129,43 +227,235 @@ components:
       properties:
         _id:
           type: string
+          format: ObjectId
+          description: identifiant unique
         org:
           type: string
           format: ObjectId
+          description: identifiant de l'organisation proprietaire
         firstname:
           type: string
+          description: prenoms
         lastname:
           type: string
+          description: nom
         phone:
           type: string
+          description: numero telephonique personnel
         email:
           type: string
+          description: adresse mail personnel
         picture:
           type: string
+          description: photo de profil
         position:
           type: string
+          description: fonction
         password:
           type: string
+          description: >
+            mot de pass fort
+            - 8 caracteres
+            - une lettre majuscule minimum
+            - une lettre minuscule minimum
+            - un chiffre minimum
+            - un caractere special minimum
         authority:
           type: boolean
+          description: defini le membre ayant droit de modification des donnees de l'entreprise
         online:
           type: boolean
+          description: permet d'identifier un utilisateur en ligne
         isAuthenticated:
           type: boolean
+          description: permet d'identifierun utilisateur authentifier
         staff:
           type: boolean
+          description: permet d'identifier les admins
         authorization:
           type: array
           items:
             type: string
+          description: definis les authorisation des utilisateurs
         disconnected:
           type: string
+          description: dernier date de deconnexion
         createdAt:
           type: string
           format: date-time
+          description: date de creation de l'utilisateur
         updatedAt:
           type: string
           format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Mentor:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - country
+        - city
+        - position
+        - phone
+        - email
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        firstname:
+          type: string
+          description: prenoms
+        lastname:
+          type: string
+          description: nom
+        country:
+          type: string
+          description: pays d'habitation
+        city:
+          type: string
+          description: ville d'habitation
+        position:
+          type: string
+          description: fonction
+        phone:
+          type: string
+          description: numero telephonique personnel
+        email:
+          type: string
+          description: adresse mail personnel
+        picture:
+          type: string
+          description: lien vers l'image de profil
+        password:
+          type: string
+          description: >
+            mot de pass fort
+            - 8 caracteres
+            - une lettre majuscule minimum
+            - une lettre minuscule minimum
+            - un chiffre minimum
+            - un caractere special minimum
+        codecs:
+          type: string
+          description: code de parainage
+        referClick:
+          type: number
+          description: nombre de fois le lien est cliquer
+        online:
+          type: boolean
+          description: permet d'identifier un utilisateur en ligne
+        isAuthenticated:
+          type: boolean
+          description: permet d'identifierun utilisateur authentifier
+        staff:
+          type: boolean
+          description: permet d'identifier les admins
+        authorization:
+          type: array
+          items:
+            type: string
+          description: definis les authorisation des utilisateurs
+        disconnected:
+          type: string
+          description: dernier date de deconnexion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Org:
+      type: object
+      required:
+        - reason
+        - social
+        - country
+        - state
+        - address
+        - location
+        - phone
+        - email
+        - sector
+        - service
+        - area
+      properties:
+        reason:
+          type: string
+          description: nom de l'organisation
+        mentor:
+          type: string
+          format: ObjectId
+          description: identifiant du referant
+        social:
+          type: string
+          description: type de societe
+          enum:
+            - SNC
+            - SCS
+            - SA
+            - SAS
+            - SASU
+            - SARL
+            - EURL
+            - SCOP
+            - SCIC
+            - EI
+            - EIRL
+            - Micro-entreprise
+        country:
+          type: string
+          description: pays
+        state:
+          type: string
+          description: ville/coummune
+        address:
+          type: string
+          description: location verbale
+        location:
+          type: object
+          properties:
+            type:
+              type: string
+            coordinates:
+              type: array
+              items:
+                type: number
+        phone:
+          type: string
+          description: numero professionnel de l'organisation
+        email:
+          type: string
+          description: email professionnel de l'organisation
+        sector:
+          type: string
+          format: ObjectId
+          description: identifiant du sector principal de l'organisation
+        service:
+          type: string
+          description: service fournis
+        area:
+          type: string
+          description: zone d'action
+        picture:
+          type: string
+          description: photo de profil de l'organisation
+
+    Credentials:
+      type: object
+      required:
+        - email
+        - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
 
 paths:
 
@@ -178,26 +468,7 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - firstname
-                - lastname
-                - phone
-                - email
-                - cni
-              properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
-                phone:
-                  type: string
-                email:
-                  type: string
-                cni:
-                  type: string
-                position:
-                  type: string
+              $ref: '#/components/schemas/Admin'
       responses:
         '200':
           description: >
@@ -288,61 +559,21 @@ paths:
                     type: string
                   refresh:
                     type: string
+  
   /admin:
     get:
       summary: lister les admins selon ou/et avec des critere
       parameters:
-        - name: name
-          in: query
-          schema:
-            type: string
-        - name: letter
-          in: query
-          schema:
-            type: string
-        - name: before
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: after
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: position
-          in: query
-          schema:
-            type: string
-        - name: online
-          in: query
-          schema:
-            type: boolean
-            enum:
-              - true
-              - false
-        - name: is_authenticated
-          in: query
-          schema:
-            type: boolean
-            enum:
-              - true
-              - false
-        - name: staff
-          in: query
-          schema:
-            type: boolean
-            enum:
-              - true
-              - false
-        - name: page
-          in: query
-          schema:
-            type: number
-        - name: limit
-          in: query
-          schema:
-            type: number
+        - $ref: '#/components/parameters/Name'
+        - $ref: '#/components/parameters/Letter'
+        - $ref: '#/components/parameters/Before'
+        - $ref: '#/components/parameters/After'
+        - $ref: '#/components/parameters/Position'
+        - $ref: '#/components/parameters/Online'
+        - $ref: '#/components/parameters/IsAuthenticated'
+        - $ref: '#/components/parameters/Staff'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
           description: success
@@ -420,12 +651,7 @@ paths:
       summary: >
         recuperation des donnees d'un admin
       parameters:
-        - name: id
-          in: path
-          schema:
-            type: string
-            format: ObjectId
-          required: true
+        - $ref: '#/components/parameters/Id'
       responses:
         '200':
           description: success
@@ -437,31 +663,13 @@ paths:
     put:
       summary: mis a jour des donnes admin
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: ObjectId
+        - $ref: '#/components/parameters/Id'
       requestBody:
         required: false
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
-                picture:
-                  type: string
-                phone:
-                  type: string
-                cni:
-                  type: string
-                position:
-                  type: string
+              $ref: '#/components/schemas/Admin'
       responses:
         '200':
           description: success
@@ -473,12 +681,7 @@ paths:
     delete:
       summary: suppression des donnees administrateur
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: ObjectId
+        - $ref: '#/components/parameters/Id'
       responses:
         '204':
           description: success
@@ -487,49 +690,14 @@ paths:
     get:
       summary: nombre d'element selon la requete
       parameters:
-        - name: name
-          in: query
-          schema:
-            type: string
-        - name: letter
-          in: query
-          schema:
-            type: string
-        - name: before
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: after
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: position
-          in: query
-          schema:
-            type: string
-        - name: online
-          in: query
-          schema:
-            type: boolean
-            enum:
-              - true
-              - false
-        - name: is_authenticated
-          in: query
-          schema:
-            type: boolean
-            enum:
-              - true
-              - false
-        - name: staff
-          in: query
-          schema:
-            type: boolean
-            enum:
-              - true
-              - false
+        - $ref: '#/components/parameters/Name'
+        - $ref: '#/components/parameters/Letter'
+        - $ref: '#/components/parameters/Before'
+        - $ref: '#/components/parameters/After'
+        - $ref: '#/components/parameters/Position'
+        - $ref: '#/components/parameters/Online'
+        - $ref: '#/components/parameters/IsAuthenticated'
+        - $ref: '#/components/parameters/Staff'
       responses:
         '200':
           description: success
@@ -537,6 +705,7 @@ paths:
             application/json:
               schema:
                 type: number
+
 
   /lead:
     post:
@@ -552,40 +721,15 @@ paths:
     get:
       summary: recuperation de plusieurs leads
       parameters:
-        - name: name
-          in: query
-          schema:
-            type: string
-        - name: letter
-          in: query
-          schema:
-            type: string
-        - name: address
-          in: query
-          schema:
-            type: string
-        - name: before
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: after
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: online
-          in: query
-          schema:
-            type: boolean
-        - name: is_authenticated
-          in: query
-          schema:
-            type: boolean
-        - name: staff
-          in: query
-          schema:
-            type: boolean
+        - $ref: '#/components/parameters/Name'
+        - $ref: '#/components/parameters/Letter'
+        - $ref: '#/components/parameters/Address'
+        - $ref: '#/components/parameters/Before'
+        - $ref: '#/components/parameters/Online'
+        - $ref: '#/components/parameters/IsAuthenticated'
+        - $ref: '#/components/parameters/Staff'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/Limit'
       responses:
         '200':
           description: success
@@ -600,12 +744,7 @@ paths:
     post:
       summary: connexion d'un lead
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: ObjectId
+        - $ref: '#/components/parameters/Id'
       responses:
         '200':
           description: success
@@ -617,12 +756,7 @@ paths:
     get:
       summary: recuperation d'un profil lead
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: ObjectId
+        - $ref: '#/components/parameters/Id'
       responses:
         '200':
           description: success
@@ -634,29 +768,13 @@ paths:
     put:
       summary: mis a jour du lead
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: ObjectId
+        - $ref: '#/components/parameters/Id'
       requestBody:
         required: false
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
-                picture:
-                  type: string
-                phone:
-                  type: string
-                address:
-                  type: string
+              $ref: '#/components/schemas/Lead'
       responses:
         '200':
           description: success
@@ -668,12 +786,7 @@ paths:
     delete:
       summary: suppression d'un lead
       parameters:
-        - name: _id
-          in: path
-          required: true
-          schema:
-            type: string
-            format: ObjectId
+        - $ref: '#/components/parameters/Id'
       responses:
         '200':
           description: success
@@ -689,40 +802,13 @@ paths:
     get:
       summary: total lead
       parameters:
-        - name: name
-          in: query
-          schema:
-            type: string
-        - name: letter
-          in: query
-          schema:
-            type: string
-        - name: address
-          in: query
-          schema:
-            type: string
-        - name: before
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: after
-          in: query
-          schema:
-            type: string
-            format: date-time
-        - name: online
-          in: query
-          schema:
-            type: boolean
-        - name: is_authenticated
-          in: query
-          schema:
-            type: boolean
-        - name: staff
-          in: query
-          schema:
-            type: boolean
+        - $ref: '#/components/parameters/Name'
+        - $ref: '#/components/parameters/Letter'
+        - $ref: '#/components/parameters/Address'
+        - $ref: '#/components/parameters/Before'
+        - $ref: '#/components/parameters/Online'
+        - $ref: '#/components/parameters/IsAuthenticated'
+        - $ref: '#/components/parameters/Staff'
       responses:
         '200':
           description: success
@@ -730,6 +816,146 @@ paths:
             application/json:
               schema:
                 type: number
-  
-  
 
+
+  /member:
+    get:
+      summary: recuperation de masse
+      parameters:
+        - $ref: "#/components/parameters/Org"
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/Position"
+        - $ref: "#/components/parameters/Online"
+        - $ref: "#/components/parameters/IsAuthenticated"
+        - $ref: "#/components/parameters/Staff"
+        - $ref: "#/components/parameters/Before"
+        - $ref: "#/components/parameters/After"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Member"
+  /member/{id}:
+    post:
+      summary: creation de compte membre
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Member"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+    
+    get:
+      summary: recuperation d'un membre
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+    
+    put:
+      summary: mis a jour 
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Member"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Member"
+    
+    delete:
+      summary: suppression
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        '204':
+          description: success
+
+  /member/login:
+    post:
+      summary: login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Credentials"
+
+  /member/logout:
+    get:
+      summary: logout
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        '200':
+          description: success
+  
+  /member/reset:
+    post:
+      summary: reinitialisation de mot de pass
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        '200':
+          description: success
+
+  /stats/member:
+    get:
+      summary: stats membre
+      parameters:
+        - $ref: "#/components/parameters/Org"
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/Position"
+        - $ref: "#/components/parameters/Online"
+        - $ref: "#/components/parameters/IsAuthenticated"
+        - $ref: "#/components/parameters/Staff"
+        - $ref: "#/components/parameters/Before"
+        - $ref: "#/components/parameters/After"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: number

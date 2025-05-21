@@ -91,6 +91,21 @@ components:
       schema:
         type: string
         format: ObjectId
+    Min:
+      name: min
+      in: query
+      schema:
+        type: number
+    Max:
+      name: max
+      in: query
+      schema:
+        type: number
+    Zone:
+      name: zone
+      in: query
+      schema:
+        type: string
 
   schemas:
     Authenticated:
@@ -841,12 +856,14 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/Member"
+  
   /member/{id}:
     post:
       summary: creation de compte membre
       parameters:
         - $ref: "#/components/parameters/Id"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -876,6 +893,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Id"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -900,6 +918,7 @@ paths:
     post:
       summary: login
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -927,6 +946,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/Id"
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -952,6 +972,188 @@ paths:
         - $ref: "#/components/parameters/After"
         - $ref: "#/components/parameters/Page"
         - $ref: "#/components/parameters/Limit"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: number
+
+
+  /mentor/load-email:
+    post:
+      summary: chargement des donnees et envoie de mail de verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Mentor"
+      responses:
+        '200':
+          description: success
+  
+  /mentor/save:
+    post:
+      summary: enregistrement des donnees apres verification
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mentor"
+  
+  /mentor/add-password:
+    post:
+      summary: ajouter d'un password
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:
+                password:
+                  type: string
+      responses:
+        '200':
+          description: success
+  
+  /mentor/login:
+    post:
+      summary: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Authenticated"
+  
+  /mentor/logout:
+    get:
+      summary: logout
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        '200':
+          description: success
+  
+  /mentor/reset:
+    post:
+      summary: reset password
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: string
+              properties:
+                password:
+                  type: string
+      responses:
+        '200':
+          description: success
+  
+  /mentor/{id}:
+    get:
+      summary: recuperation d'un mentor
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mentor"
+    
+    put:
+      summary: mis a jour d'un mentor
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Mentor"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mentor"
+    
+    delete:
+      summary: suppression d'un mentor
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        '200':
+          description: success
+      
+  /mentor:
+    get:
+      summary: recuperation de masse
+      parameters:
+        - $ref: "#/components/parameters/Letter"
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/Zone"
+        - $ref: "#/components/parameters/Position"
+        - $ref: "#/components/parameters/Min"
+        - $ref: "#/components/parameters/Max"
+        - $ref: "#/components/parameters/Online"
+        - $ref: "#/components/parameters/IsAuthenticated"
+        - $ref: "#/components/parameters/Staff"
+        - $ref: "#/components/parameters/Before"
+        - $ref: "#/components/parameters/After"
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Mentor"
+  
+  /stats/mentor:
+    get:
+      summary: stats mentor
+      parameters:
+        - $ref: "#/components/parameters/Letter"
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/Zone"
+        - $ref: "#/components/parameters/Position"
+        - $ref: "#/components/parameters/Min"
+        - $ref: "#/components/parameters/Max"
+        - $ref: "#/components/parameters/Online"
+        - $ref: "#/components/parameters/IsAuthenticated"
+        - $ref: "#/components/parameters/Staff"
+        - $ref: "#/components/parameters/Before"
+        - $ref: "#/components/parameters/After"
       responses:
         '200':
           description: success

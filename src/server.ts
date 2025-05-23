@@ -18,8 +18,8 @@ const normalizePort = (val: string): number | string | false => {
   return false;
 };
 
-const port = normalizePort(process.env.SERVER_PORT || '3000');
-const host = process.env.SERVER_HOST || 'localhost';
+const port = normalizePort(process.env.PORT || '3000');
+const host = process.env.HOST || 'localhost';
 
 if (typeof port === 'boolean') {
   throw new Error('Invalid port configuration');

@@ -8,7 +8,7 @@ import Lead from '../models/holding/lead.models';
 
 import Device from '../models/shadow/device.models';
 import { lookup as geoipLookup } from 'geoip-lite';
-import UAParser from 'ua-parser-js';
+const UAParser = require('ua-parser-js');
 
 declare global {
     namespace Express {

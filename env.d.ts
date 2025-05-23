@@ -1,8 +1,8 @@
 declare namespace NodeJS {
     interface ProcessEnv {
         JWT_SECRET: string;
-        SERVER_PORT: string;
-        SERVER_HOST: string;
+        PORT: string;
+        HOST: string;
 
         NEO_HOLDING_DB: string;
         NEO_IA_DB: string;

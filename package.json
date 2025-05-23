@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
-  "build": "tsc",
-  "start": "node dist/server.js"
+    "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
+    "build": "tsc && copyfiles -u 1 src/swagger.yaml dist",
+    "start": "node dist/server.js"
   },
   "keywords": [],
   "author": "",
@@ -49,6 +49,7 @@
     "@types/swagger-ui-express": "^4.1.8",
     "@types/ua-parser-js": "^0.7.39",
     "@types/yamljs": "^0.2.34",
+    "copyfiles": "^2.4.1",
     "dotenv": "^16.5.0",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",

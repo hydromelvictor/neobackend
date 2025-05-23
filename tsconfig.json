@@ -7,10 +7,13 @@
     "strict": true,
     "skipLibCheck": true,
     "rootDir": "./src",
-    //"types": [],
-    "outDir": "./dist"
+    "outDir": "./dist",
+    "sourceMap": true,
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true
   },
   "include": ["src/**/*.ts", "env.d.ts", "types/**/*.d.ts"],
-  "types": [],
-  
+  "exclude": ["node_modules", "dist"]
 }

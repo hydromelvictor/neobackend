@@ -1,6 +1,6 @@
 import { PaginateResult } from "mongoose";
 import Product, { IProduct } from "../../models/market/product.models";
-import { RmProduct, RmProductSchema, RsAccountSchema, RsProduct, RsProductSchema, XrProduct, XrProductSchema } from "./market";
+import { RmProduct, RmProductSchema, RsProduct, RsProductSchema, XrProduct, XrProductSchema } from "./market";
 
 
 export default class ProductService {

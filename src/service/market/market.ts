@@ -1,4 +1,4 @@
-import { Types, Schema } from 'mongoose';
+import { Types } from 'mongoose';
 import { z } from 'zod';
 
 // ACCOUNT

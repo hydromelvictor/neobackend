@@ -6,7 +6,6 @@ import authenticated from '../../utils/authenticated.utils';
 
 import { _RsAdmin, _XsAdmin, RsAdmin, XsAdmin } from '../../types/holding';
 import { PaginateResult, Types } from 'mongoose';
-import logout from '../logout.service';
 
 
 

@@ -2,7 +2,6 @@ import { PaginateResult, Types } from "mongoose";
 import Lead, { ILead } from "../../models/holding/lead.models";
 import { _XsLead, XsLead } from "../../types/holding";
 import authenticated from "../../utils/authenticated.utils";
-import logout from "../logout.service";
 
 
 export default class Service {

@@ -2,8 +2,6 @@ import { PaginateResult, Types } from "mongoose";
 import Member, { IMember } from "../../models/holding/member.models";
 import { _XsMember, RsMember, XsMember } from "../../types/holding";
 import authenticated from "../../utils/authenticated.utils";
-import reset from "../reset.service";
-import logout from "../logout.service";
 
 
 export default class Service {

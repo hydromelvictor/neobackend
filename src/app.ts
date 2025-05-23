@@ -25,7 +25,7 @@ const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
 
 
 // database
-mongoose.connect(process.env.MONGO_HOSTNAME)
+mongoose.connect(`${process.env.MONGO_HOSTNAME}`)
     .then(() => console.log('Connexion à MongoDB réussie !'))
     .catch(() => console.error('Connexion à MongoDB échouée !'));
 

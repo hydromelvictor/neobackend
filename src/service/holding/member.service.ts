@@ -89,7 +89,7 @@ export default class Service {
 
     async Find(data: any, options: any): Promise<PaginateResult<IMember>> {
         const filter = this.filters(data);
-        const members = await Member.paginate(data, options);
+        const members = await Member.paginate(filter, options);
         return members;
     }
 

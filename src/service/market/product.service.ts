@@ -68,7 +68,7 @@ export default class ProductService {
         const result = RsProductSchema.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
-        await product.updateOne(data);
+        await product.updateOne(parsed);
 
         return await this.get({ _id: product._id });
     }

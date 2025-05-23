@@ -56,7 +56,8 @@ export default class OrderService {
         const result = RsOrderSchema.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
-        await order.updateOne(data);
+        
+        await order.updateOne(parsed);
 
         return await this.get({ _id: order._id });
     }

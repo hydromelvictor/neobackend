@@ -24,7 +24,7 @@ const gmail = async (
     htmlContent: string
 ): Promise<boolean | null> => {
     try {
-        const info = await transporter.sendMail({
+        await transporter.sendMail({
             from: process.env.NEO_EMAIL,
             to,
             subject,

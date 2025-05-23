@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import View from './view.models';
 
 export interface IMeet extends Document {
     hotes: Types.ObjectId[];

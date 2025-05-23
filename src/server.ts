@@ -71,8 +71,8 @@ serverEvents.on('start', async () => {
   console.log('Daemon started');
 });
 
-server.listen({ port, host }, () => {
-  console.log(`Start Server http://${host}:${port}`);
-  console.log( `documentation: http://localhost:${port}/docs`)
+server.listen(port, () => {
+  console.log(`Start Server on port ${port}`);
+  console.log(`Documentation: http://localhost:${port}/docs`);
   serverEvents.emit('start');
 });

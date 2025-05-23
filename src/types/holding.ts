@@ -126,17 +126,14 @@ export const _XsOrg = z.object({
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
     ),
-    social: z.string(),
+    social: z.enum(['SNC' , 'SCS' , 'SA' , 'SAS' , 'SASU' , 'SARL' , 'EURL' , 'SCOP' , 'SCIC' , 'EI' , 'EIRL' , 'Micro-entreprise' , 'SEP' , 'GIE' , 'SCI/SCP/...']),
     country: z.string(),
     state: z.string(),
     address: z.string(),
     location: GeoJSONPointSchema,
     phone: z.string(),
     email: z.string().email(),
-    sector: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId)
-    ),
+    sector: z.string(),
     service: z.string(),
     area: z.string(),
 })
@@ -148,17 +145,14 @@ export const _RsOrg = z.object({
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
     ),
-    social: z.string().optional(),
+    social: z.enum(['SNC' , 'SCS' , 'SA' , 'SAS' , 'SASU' , 'SARL' , 'EURL' , 'SCOP' , 'SCIC' , 'EI' , 'EIRL' , 'Micro-entreprise' , 'SEP' , 'GIE' , 'SCI/SCP/...']).optional(),
     country: z.string().optional(),
     state: z.string().optional(),
     address: z.string().optional(),
     location: GeoJSONPointSchema.optional(),
     phone: z.string().optional(),
     email: z.string().email().optional(),
-    sector: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
+    sector: z.string().optional(),
     service: z.string().optional(),
     area: z.string().optional(),
     picture: z.string().optional()

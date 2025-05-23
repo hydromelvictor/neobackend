@@ -1,12 +1,11 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import shadow from '../../db/shadow.db';
 
 export interface IDevice extends Document {
     _id: Types.ObjectId;
     hote: Types.ObjectId;
-    sessionId: string;                  // ID de session (cookie, token temporaire)
-    instantId: string;
+    path: string,
+    sessionId: string;
     type: string;                        // Type d'activité ('login', 'logout', 'register', 'view', 'click', etc.)
     method: string;                  // Page précédente (header referer)
     ip: string;                          // Adresse IP
@@ -30,8 +29,8 @@ const DeviceSchema = new Schema<IDevice>({
         type: mongoose.Schema.Types.ObjectId,
         required: true 
     },
+    path: { type: String },
     sessionId: { type: String },
-    instantId: { type: String },
     type: { type: String, required: true },         // e.g., 'auth', 'navigation', 'interaction'
     method: { type: String, required: true },       // HTTP Method
     ip: { type: String, required: true },
@@ -52,5 +51,5 @@ const DeviceSchema = new Schema<IDevice>({
     metadata: { type: Schema.Types.Mixed, default: {} },
 }, { timestamps: true });
 DeviceSchema.plugin(paginate);
-const Device = shadow.model<IDevice, IDeviceModel>('Device', DeviceSchema);
+const Device = mongoose.model<IDevice, IDeviceModel>('Device', DeviceSchema);
 export default Device;

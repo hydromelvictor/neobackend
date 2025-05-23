@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import shadow from '../../db/shadow.db';
 
 export interface IAnnonce extends Document {
     state: 'flottant' | 'avatar' | 'push';
@@ -70,5 +69,5 @@ const AnnonceSchema = new Schema<IAnnonce>({
     }
 }, { timestamps: true });
 AnnonceSchema.plugin(paginate);
-const Annonce = shadow.model<IAnnonce, IAnnonceModel>('Annonce', AnnonceSchema);
+const Annonce = mongoose.model<IAnnonce, IAnnonceModel>('Annonce', AnnonceSchema);
 export default Annonce;

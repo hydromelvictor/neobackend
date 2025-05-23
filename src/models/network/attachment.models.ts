@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 
 export interface IAttach extends Document {
     message: Types.ObjectId;
@@ -27,5 +26,5 @@ const AttachSchema = new Schema<IAttach>({
 }, { timestamps: true })
 
 AttachSchema.plugin(paginate);
-const Attach = network.model<IAttach, IAttachModel>('Attach', AttachSchema);
+const Attach = mongoose.model<IAttach, IAttachModel>('Attach', AttachSchema);
 export default Attach;

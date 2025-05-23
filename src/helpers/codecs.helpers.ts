@@ -12,7 +12,7 @@ export const addToBlacklist = (username: string) => {
   } while (blacklist[code]);
 
   blacklist[code] = username;
-  console.log(`Code ${code} ajouté pour l'utilisateur ${username}`);
+  console.log(`Code ajouté pour l'utilisateur`);
 
   return code;
 };
@@ -25,11 +25,11 @@ export const removeFromBlacklist = (code: string) => {
     const result = blacklist[code];
     delete blacklist[code];
 
-    console.log(`Code ${code} supprimé de la blacklist.`);
+    console.log(`Code supprimé de la blacklist.`);
 
     return result;
   } else {
-    console.log(`Code ${code} introuvable dans la blacklist.`);
+    console.log(`Code introuvable dans la blacklist.`);
   }
 };
 

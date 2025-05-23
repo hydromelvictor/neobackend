@@ -59,11 +59,6 @@ export default class Service {
         return await authenticated(lead);
     }
 
-    async Logout(id: string | Types.ObjectId): Promise<boolean> {
-        const lead = await this.Get(id);
-        return await logout(lead);
-    }
-
     async Get(id: string | Types.ObjectId): Promise<ILead> {
         const lead = await Lead.findById(id);
         if (!lead) throw new Error('lead not found');

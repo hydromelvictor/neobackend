@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import market from '../../db/market.db';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IProduct extends Document {
@@ -64,6 +63,6 @@ const ProductSchema = new Schema<IProduct>({
 }, { timestamps: true })
 
 ProductSchema.plugin(paginate);
-const Product = market.model<IProduct, IPrdModel>('Product', ProductSchema);
+const Product = mongoose.model<IProduct, IPrdModel>('Product', ProductSchema);
 
 export default Product;

@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 
 export interface IDisc extends Document {
     status: 'private' | 'public';
@@ -18,5 +17,5 @@ const Disc = new Schema<IDisc>({
     name: String
 }, { timestamps: true })
 Disc.plugin(paginate);
-const Discussion = network.model<IDisc, IDiscModel>('Discussion', Disc);
+const Discussion = mongoose.model<IDisc, IDiscModel>('Discussion', Disc);
 export default Discussion;

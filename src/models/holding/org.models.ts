@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import holding from '../../db/holding.db';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IOrg extends Document {
@@ -30,7 +29,10 @@ const OrgSchema = new Schema<IOrg>({
         type: Schema.Types.ObjectId,
         ref: 'Mentor'
     },
-    social: { type: String },
+    social: { 
+      type: String,
+      enum: ['SNC' , 'SCS' , 'SA' , 'SAS' , 'SASU' , 'SARL' , 'EURL' , 'SCOP' , 'SCIC' , 'EI' , 'EIRL' , 'Micro-entreprise' , 'SEP' , 'GIE' , 'SCI/SCP/...']
+    },
     country: { type: String },
     state: { type: String },
     address: { type: String },
@@ -55,6 +57,6 @@ const OrgSchema = new Schema<IOrg>({
 
 OrgSchema.plugin(paginate);
 
-const Org = holding.model<IOrg, IOrgModel>('Org', OrgSchema);
+const Org = mongoose.model<IOrg, IOrgModel>('Org', OrgSchema);
 
 export default Org;

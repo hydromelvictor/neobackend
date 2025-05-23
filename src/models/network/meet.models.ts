@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 import View from './view.models';
 
 export interface IMeet extends Document {
@@ -44,5 +43,5 @@ const MeetSchema = new Schema<IMeet>({
     }
 }, { timestamps: true });
 MeetSchema.plugin(paginate);
-const Meet = network.model<IMeet, IMeetModel>('Meet', MeetSchema);
+const Meet = mongoose.model<IMeet, IMeetModel>('Meet', MeetSchema);
 export default Meet;

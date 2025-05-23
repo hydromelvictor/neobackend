@@ -30,7 +30,7 @@ const gmail = async (
             subject,
             html: htmlContent,
         });
-        console.log('Email envoyé :', info.response);
+        console.log('Email envoyé');
         return true;
     } catch (err) {
         console.error("Erreur lors de l'envoi de l'email :", err);

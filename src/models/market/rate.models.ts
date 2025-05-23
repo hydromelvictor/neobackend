@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import market from '../../db/market.db';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IRate extends Document {
@@ -21,5 +20,5 @@ const RateSchema = new Schema<IRate>({
     fetchedAt: Date
 }, { timestamps: true })
 RateSchema.plugin(paginate)
-const Rate = market.model<IRate, IRateModel>('Rate', RateSchema);
+const Rate = mongoose.model<IRate, IRateModel>('Rate', RateSchema);
 export default Rate;

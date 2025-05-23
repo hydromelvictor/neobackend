@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import market from '../../db/market.db';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IAccount extends Document {
@@ -19,5 +18,5 @@ const AccountSchema = new Schema<IAccount>({
 
 AccountSchema.plugin(paginate);
 
-const Account = market.model<IAccount, IAccountModel>('Account', AccountSchema);
+const Account = mongoose.model<IAccount, IAccountModel>('Account', AccountSchema);
 export default Account;

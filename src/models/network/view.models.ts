@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 
 export interface IView extends Document {
     status: Types.ObjectId;
@@ -21,5 +20,5 @@ const ViewSchema = new Schema<IView>({
     }
 }, { timestamps: true })
 ViewSchema.plugin(paginate);
-const View = network.model<IView, IViewModel>('View', ViewSchema);
+const View = mongoose.model<IView, IViewModel>('View', ViewSchema);
 export default View;

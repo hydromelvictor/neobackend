@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import holding from '../../db/holding.db';
 import paginate from 'mongoose-paginate-v2';
 
 // Interfaces
@@ -13,7 +12,7 @@ export interface IAdmin extends Document {
   cni: string;
   position: string;
   authority: boolean;
-  recorvery: string;
+  recovery: string;
   online: boolean;
   isAuthenticated: boolean;
   staff: boolean;
@@ -21,7 +20,7 @@ export interface IAdmin extends Document {
   disconnected: string;
 }
 
-interface IAdminModel extends mongoose.PaginateModel<IAdmin> {};
+interface IAdminModel extends mongoose.PaginateModel<IAdmin> { };
 
 // Schéma utilisateur
 const AdminSchema = new Schema<IAdmin>({
@@ -33,7 +32,7 @@ const AdminSchema = new Schema<IAdmin>({
   cni: { type: String, unique: true },
   position: { type: String },
   authority: { type: Boolean, default: false },
-  recorvery: {
+  recovery: {
     type: String,
     unique: true,
     required: true
@@ -41,7 +40,10 @@ const AdminSchema = new Schema<IAdmin>({
   online: { type: Boolean, default: false },
   isAuthenticated: { type: Boolean, default: false },
   staff: { type: Boolean, default: false },
-  authorization: [String],
+  authorization: {
+    type: [String],
+    default: []
+  },
   disconnected: { type: String }
 }, { timestamps: true });
 
@@ -49,6 +51,6 @@ const AdminSchema = new Schema<IAdmin>({
 AdminSchema.plugin(paginate);
 
 // Modèle
-const Admin = holding.model<IAdmin, IAdminModel>('Admin', AdminSchema);
+const Admin = mongoose.model<IAdmin, IAdminModel>('Admin', AdminSchema);
 
 export default Admin;

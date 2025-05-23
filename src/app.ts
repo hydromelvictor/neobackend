@@ -1,13 +1,33 @@
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 import express, { Application } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
-import * as dotenv from 'dotenv';
+import mongoose from 'mongoose';
 
 // import adminRts from './routes/holding/admin.routes';
-import orgs from './routes/holding/org.routes';
+import admin from './routes/holding/admin.routes'
+import other from './routes/other.routes';
+import lead from './routes/holding/lead.routes';
+import member from './routes/holding/member.routes';
 import mentor from './routes/holding/mentor.routes';
+import org from './routes/holding/org.routes';
 
-dotenv.config();
+import swaggerUi from 'swagger-ui-express';
+import YAML from 'yamljs';
+import path from 'path';
+
+
+
+// Charger le fichier YAML
+const swaggerDocument = YAML.load(path.join(__dirname, 'swagger.yaml'));
+
+
+// database
+mongoose.connect(process.env.MONGO_HOSTNAME)
+    .then(() => console.log('Connexion à MongoDB réussie !'))
+    .catch(() => console.error('Connexion à MongoDB échouée !'));
 
 const app: Application = express();
 
@@ -25,8 +45,14 @@ app.use(cors({
   credentials: true
 }));
 
-// app.use('/admin', adminRts);
-app.use('/orgs', orgs);
+// Ajouter Swagger comme middleware
+app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.use('/admin', admin);
+app.use('/auth', other);
+app.use('/lead', lead);
+app.use('/member', member);
 app.use('/mentor', mentor);
+app.use('/org', org);
 
 export default app;

@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 
 export interface IGuest extends Document {
     discussion: Types.ObjectId;
@@ -27,5 +26,5 @@ const GuestSchema = new Schema<IGuest>({
     }
 }, { timestamps: true });
 GuestSchema.plugin(paginate);
-const Guest = network.model<IGuest, IGuestModel>('Guest', GuestSchema);
+const Guest = mongoose.model<IGuest, IGuestModel>('Guest', GuestSchema);
 export default Guest;

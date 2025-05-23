@@ -1,8 +1,8 @@
 import { generateToken } from "../helpers/token.helpers";
 
 const authenticated = async (instance: any): Promise<{ access: string, refresh: string }> => {
-    instance.isAuthenticated = true;
-    instance.online = true;
+    instance.isAuthenticated = !instance.staff && !instance.authority ? true : false;
+    instance.online = !instance.staff ? true : false;
     instance.disconnected = ''
 
     await instance.save();

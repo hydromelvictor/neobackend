@@ -1,26 +1,20 @@
 import { Router } from 'express';
-import MentorController from '../../controllers/holding/mentor.controllers';
-
+import MemberController from '../../controllers/holding/member.controllers';
 import auth from '../../middleware/auth.middleware';
 import permission from '../../middleware/permission.middleware';
 
 const router = Router();
-const Controller = new MentorController();
-
-
-router.post(
-    '/load', 
-    Controller.LOAD.bind(Controller)
-)
+const Controller = new MemberController();
 
 router.post(
-    '/register',
+    '/',
     Controller.REGISTER.bind(Controller)
 )
 
 router.post(
-    '/add-password/:id',
-    Controller.AddPassword.bind(Controller)
+    '/add-member',
+    auth,
+    Controller.REGISTER.bind(Controller)
 )
 
 router.post(
@@ -28,38 +22,38 @@ router.post(
     Controller.LOGIN.bind(Controller)
 )
 
-router.put(
-    '/update',
-    auth,
-    permission('UPDATE_MENTOR'),
-    Controller.UPDATE.bind(Controller)
-)
-
 router.get(
-    '/:id', 
+    '/:id',
     auth,
-    permission('READ_MENTOR'),
+    permission('READ_MEMBER'),
     Controller.GET.bind(Controller)
 )
 
 router.get(
-    '/', 
+    '/',
     auth,
-    permission('LIST_MENTOR'),
+    permission('LIST_MEMBER'),
     Controller.SEARCH.bind(Controller)
+)
+
+router.put(
+    '/:id',
+    auth,
+    permission('UPDATE_MEMBER'),
+    Controller.UPDATE.bind(Controller)
 )
 
 router.delete(
     '/:id',
     auth,
-    permission('DELETE_MENTOR'),
+    permission('DELETE_MEMBER'),
     Controller.REMOVE.bind(Controller)
 )
 
 router.get(
-    '/stats/mentor',
+    '/stats/member',
     auth,
-    permission('READ_MENTOR'),
+    permission('READ_MEMBER'),
     Controller.SIZE.bind(Controller)
 )
 

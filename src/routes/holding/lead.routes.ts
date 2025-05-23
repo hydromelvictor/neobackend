@@ -1,56 +1,55 @@
 import { Router } from 'express';
-import OrgController from '../../controllers/holding/org.controllers';
+import LeadController from '../../controllers/holding/lead.controllers';
 import auth from '../../middleware/auth.middleware';
 import permission from '../../middleware/permission.middleware';
 import uploads from '../../middleware/upload.middleware';
 
 const router = Router();
-const Controller = new OrgController();
-
+const Controller = new LeadController();
 
 router.post(
-    '/load',
-    Controller.LOAD.bind(Controller)
+    '/',
+    Controller.REGISTER.bind(Controller)
 )
 
 router.post(
-    '/register',
-    Controller.REGISTER.bind(Controller)
+    '/login/:id',
+    Controller.LOGIN.bind(Controller)
 )
 
 router.get(
     '/:id',
     auth,
-    permission('READ_ORG'),
+    permission('READ_LEAD'),
     Controller.GET.bind(Controller)
 )
 
 router.get(
     '/',
     auth,
-    permission('LIST_ORG'),
+    permission('LIST_LEAD'),
     Controller.SEARCH.bind(Controller)
 )
 
 router.put(
     '/:id',
     auth,
-    permission('UPDATE_ORG'),
+    permission('UPDATE_LEAD'),
     uploads.single('picture'),
     Controller.UPDATE.bind(Controller)
 )
 
 router.delete(
-    '/:id',
+    '/remove/:id',
     auth,
-    permission('DELETE_ORG'),
+    permission('DELETE_LEAD'),
     Controller.REMOVE.bind(Controller)
 )
 
 router.get(
-    '/stats/org',
+    '/stats/lead',
     auth,
-    permission('READ_ORG'),
+    permission('READ_LEAD'),
     Controller.SIZE.bind(Controller)
 )
 

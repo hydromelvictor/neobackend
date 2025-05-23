@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import market from '../../db/market.db';
 import paginate from 'mongoose-paginate-v2';
 
 type item = {
@@ -57,6 +56,6 @@ const IOrderSchema = new Schema<IOrders>({
 }, { timestamps: true });
 
 IOrderSchema.plugin(paginate);
-const Order = market.model<IOrders, IOderModel>('Order', IOrderSchema);
+const Order = mongoose.model<IOrders, IOderModel>('Order', IOrderSchema);
 
 export default Order;

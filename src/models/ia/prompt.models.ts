@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import ia from '../../db/ia.db';
 
 export interface IPrompt extends Document {
     _id: Types.ObjectId;
@@ -21,5 +20,5 @@ const PromptSchema = new Schema<IPrompt>({
     text: String
 }, { timestamps: true });
 PromptSchema.plugin(paginate);
-const Prompt = ia.model<IPrompt, IPrompTModel>('Prompt', PromptSchema);
+const Prompt = mongoose.model<IPrompt, IPrompTModel>('Prompt', PromptSchema);
 export default Prompt;

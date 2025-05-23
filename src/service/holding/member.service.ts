@@ -47,6 +47,24 @@ export default class Service {
         if (exist) throw new Error(`${parsed.email} existe deja dans le systeme`);
 
         const member = new Member(parsed);
+        if (member.authority) member.authorization.concat([
+            'DELETE_MEMBER',
+
+            'UPDATE_ORG',
+            'DELETE_ORG',
+
+            'CREATE_AGENT',
+            'UPDATE_AGENT',
+            'DELETE_AGENT',
+
+            'CREATE_PROMPT',
+            'UPDATE_PROMPT',
+            'DELETE_PROMPT',
+
+            'CREATE_PRODUCT',
+            'UPDATE_PRODUCT',
+            'DELETE_PRODUCT',
+        ])
         await member.save();
         return member;
     }
@@ -62,16 +80,6 @@ export default class Service {
         if (!check) throw new Error('password invalide');
 
         return await authenticated(member);
-    }
-
-    async Logout(id: string | Types.ObjectId): Promise<boolean> {
-        const member = await this.Get(id);
-        return await logout(member);
-    }
-
-    async ResetPassword(id: string | Types.ObjectId, password: string): Promise<boolean> {
-        const member = await this.Get(id);
-        return await reset(password, member);
     }
 
     async Get(id: string | Types.ObjectId): Promise<IMember> {
@@ -95,6 +103,11 @@ export default class Service {
         const parsed = result.data;
 
         Object.assign(member, parsed)
+        if ('password' in parsed) {
+            member.online = false;
+            member.isAuthenticated = false;
+            member.disconnected = (new Date()).toDateString();
+        }
         await member.save();
         
         return await this.Get(member._id);

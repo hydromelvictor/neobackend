@@ -8,7 +8,7 @@ import { Server as SocketIOServer } from 'socket.io';
 // modules perso
 import app from './app';
 import socketHandler from './socket';
-//import deamon from './deamon';
+import init, { serverEvents } from './deamon';
 
 // Fonction pour normaliser le port
 const normalizePort = (val: string): number | string | false => {
@@ -66,12 +66,13 @@ server.on('listening', () => {
 });
 
 // Démarrage du serveur avec événement
-// deamon.serverEvents.on('start', async () => {
-//   await deamon.init();
-//   console.log('Daemon started');
-// });
+serverEvents.on('start', async () => {
+  await init();
+  console.log('Daemon started');
+});
 
 server.listen({ port, host }, () => {
   console.log(`Start Server http://${host}:${port}`);
-  // deamon.serverEvents.emit('start');
+  console.log( `documentation: http://localhost:${port}/docs`)
+  serverEvents.emit('start');
 });

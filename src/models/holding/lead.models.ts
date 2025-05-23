@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import holding from '../../db/holding.db';
 import paginate from 'mongoose-paginate-v2';
 
 
@@ -34,6 +33,9 @@ const LeadSchema = new Schema<ILead>({
         'READ_LEAD',
         'UPDATE_LEAD',
 
+        'READ_ORG',
+        'LIST_ORG',
+
         'READ_ACCOUNT',
 
         'CREATE_ORDER',
@@ -67,7 +69,6 @@ const LeadSchema = new Schema<ILead>({
         'UPDATE_DISCUSSION',
         'DELETE_DISCUSSION',
 
-        'CREATE_MEET',
         'READ_MEET',
         'LIST_MEET',
 
@@ -92,7 +93,7 @@ const LeadSchema = new Schema<ILead>({
 
         'READ_ANNONCE',
         'LIST_ANNONCE',
-    ]
+      ]
     },
     disconnected: { type: String }
 }, { timestamps: true });
@@ -101,6 +102,6 @@ const LeadSchema = new Schema<ILead>({
 LeadSchema.plugin(paginate);
 
 // Modèle
-const Lead = holding.model<ILead, ILeadModel>('Lead', LeadSchema);
+const Lead = mongoose.model<ILead, ILeadModel>('Lead', LeadSchema);
 
 export default Lead;

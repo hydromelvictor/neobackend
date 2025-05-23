@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 
 export interface IReact extends Document {
     message: Types.ObjectId;
@@ -29,5 +28,5 @@ const ReactSchema = new Schema<IReact>({
     }
 }, { timestamps: true })
 ReactSchema.plugin(paginate);
-const Reaction = network.model<IReact, IReactModel>('Reaction', ReactSchema);
+const Reaction = mongoose.model<IReact, IReactModel>('Reaction', ReactSchema);
 export default Reaction;

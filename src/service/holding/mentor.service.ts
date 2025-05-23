@@ -6,8 +6,6 @@ import { generateToken, verifyToken } from "../../helpers/token.helpers";
 import Mentor, { IMentor } from "../../models/holding/mentor.models";
 import { _RsMentor, _XsMentor, RsMentor, XsMentor } from "../../types/holding";
 import authenticated from "../../utils/authenticated.utils";
-import logout from "../logout.service";
-import reset from "../reset.service";
 
 export default class Service {
     private filters(q: any): any {
@@ -109,16 +107,6 @@ export default class Service {
         if (!check) throw new Error('password invalid');
 
         return await authenticated(mentor);
-    }
-
-    async Logout(id: string | Types.ObjectId): Promise<boolean> {
-        const mentor = await this.Get(id);
-        return await logout(mentor);
-    }
-
-    async ResetPassword(id: string | Types.ObjectId, password: string): Promise<boolean> {
-        const mentor = await this.Get(id);
-        return await reset(password, mentor);
     }
 
     async Get(id: string | Types.ObjectId): Promise<IMentor> {

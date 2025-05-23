@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import holding from '../../db/holding.db';
 import paginate from 'mongoose-paginate-v2';
 import bcrypt from 'bcrypt';
 
@@ -66,6 +65,6 @@ MentorSchema.methods.comparePassword = async function (password: string) {
     return await bcrypt.compare(password, this.password);
 }
 
-const Mentor = holding.model<IMentor, IMentorModel>('Mentor', MentorSchema);
+const Mentor = mongoose.model<IMentor, IMentorModel>('Mentor', MentorSchema);
 
 export default Mentor;

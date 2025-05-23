@@ -3,7 +3,6 @@ dotenv.config()
 
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import network from '../../db/network.db';
 import crypto from 'crypto';
 
 const algorithm = 'aes-256-cbc'; // Algorithme de chiffrement
@@ -72,5 +71,5 @@ SmSchema.post('init', function (this: Document & { content: string }) {
   }
 });
 
-const Sms = network.model<ISms, ISmsModel>('Sms', SmSchema);
+const Sms = mongoose.model<ISms, ISmsModel>('Sms', SmSchema);
 export default Sms;

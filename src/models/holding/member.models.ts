@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import holding from '../../db/holding.db';
 import paginate from 'mongoose-paginate-v2';
 import bcrypt from 'bcrypt';
 
@@ -40,7 +39,89 @@ const MemberSchema = new Schema<IMember>({
     online: { type: Boolean, default: false },
     isAuthenticated: { type: Boolean, default: false },
     staff: { type: Boolean, default: false },
-    authorization: [String],
+    authorization: [
+        'READ_MEMBER',
+        'LIST_MEMBER',
+        'UPDATE_MEMBER',
+        
+        'READ_ORG',
+        'LIST_ORG',
+        
+        'READ_AGENT',
+        'LIST_AGENT',
+
+        'READ_PROMPT',
+        'LIST_PROMPT',
+
+        'READ_ORDER',
+        'LIST_ORDER',
+
+        'READ_PRODUCT',
+        'LIST_PRODUCT',
+
+        'CREATE_RATE',
+        'READ_RATE',
+        'LIST_RATE',
+
+        'CREATE_REVIEW',
+        'READ_REVIEW',
+        'LIST_REVIEW',
+        'UPDATE_REVIEW',
+        'DELETE_REVIEW',
+
+        'CREATE_TRANSACTION',
+        'READ_TRANSACTION',
+        'LIST_TRANSACTION',
+        'UPDATE_TRANSACTION',
+        'DELETE_TRANSACTION',
+
+        'CREATE_ATTACHMENT',
+        'READ_ATTACHMENT',
+        'LIST_ATTACHMENT',
+        'UPDATE_ATTACHMENT',
+        'DELETE_ATTACHMENT',
+
+        'CREATE_DISCUSSION',
+        'READ_DISCUSSION',
+        'LIST_DISCUSSION',
+        'UPDATE_DISCUSSION',
+        'DELETE_DISCUSSION',
+
+        'CREATE_GUEST',
+        'READ_GUEST',
+        'LIST_GUEST',
+        'UPDATE_GUEST',
+        'DELETE_GUEST',
+
+        'CREATE_MEET',
+        'READ_MEET',
+        'LIST_MEET',
+        'UPDATE_MEET',
+        'DELETE_MEET',
+
+        'CREATE_MESSAGE',
+        'READ_MESSAGE',
+        'LIST_MESSAGE',
+        'UPDATE_MESSAGE',
+        'DELETE_MESSAGE',
+
+        'CREATE_REACTION',
+        'READ_REACTION',
+        'LIST_REACTION',
+        'UPDATE_REACTION',
+        'DELETE_REACTION',
+
+        'CREATE_STATUS',
+        'READ_STATUS',
+        'LIST_STATUS',
+
+        'CREATE_VIEW',
+        'READ_VIEW',
+        'LIST_VIEW',
+
+        'READ_ANNONCE',
+        'LIST_ANNONCE',
+    ],
     disconnected: { type: String }
 }, { timestamps: true });
 
@@ -65,6 +146,6 @@ MemberSchema.methods.comparePassword = async function (password: string) {
     return await bcrypt.compare(password, this.password);
 }
 
-const Member = holding.model<IMember, IMemberModel>('Member', MemberSchema);
+const Member = mongoose.model<IMember, IMemberModel>('Member', MemberSchema);
 
 export default Member;

@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import market from '../../db/market.db';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IReview extends Document {
@@ -31,6 +30,6 @@ const ReviewSchema = new Schema<IReview>({
 }, { timestamps: true })
 
 ReviewSchema.plugin(paginate);
-const Review = market.model<IReview, IReviewModel>('Review', ReviewSchema);
+const Review = mongoose.model<IReview, IReviewModel>('Review', ReviewSchema);
 
 export default Review;

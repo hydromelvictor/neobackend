@@ -80,7 +80,7 @@ export default class Service {
         const token = removeFromBlacklist(code);
         if (!token) throw new Error('code invalide');
 
-        const decoded = verifyToken(token);
+        const decoded = await verifyToken(token);
         if (!decoded) throw new Error('invalide token');
 
         const org = new Org(decoded);

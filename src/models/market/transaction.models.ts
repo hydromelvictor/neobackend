@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
-import market from '../../db/market.db';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IAction extends Document {
@@ -82,6 +81,6 @@ const ActionSchema = new Schema<IAction>({
 
 ActionSchema.plugin(paginate);
 
-const Transaction = market.model<IAction, IActionModel>('Transaction', ActionSchema);
+const Transaction = mongoose.model<IAction, IActionModel>('Transaction', ActionSchema);
 
 export default Transaction;

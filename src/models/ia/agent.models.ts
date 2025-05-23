@@ -1,6 +1,5 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
-import ia from '../../db/ia.db';
 
 export interface IAs extends Document {
     _id: Types.ObjectId;
@@ -42,5 +41,5 @@ const IASchema = new Schema<IAs>({
 }, { timestamps: true })
 
 IASchema.plugin(paginate);
-const Ia = ia.model<IAs, IAsModel>('Ia', IASchema);
+const Ia = mongoose.model<IAs, IAsModel>('Ia', IASchema);
 export default Ia;

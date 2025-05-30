@@ -1,23 +1,12 @@
-import { PaginateResult } from "mongoose";
+import { Types } from "mongoose";
 import Review, { IReview } from "../../models/market/review.models";
-import { RmReview, RmReviewSchema, RsReview, RsReviewSchema, XrAccountSchema, XrReview } from "./market";
+import { _RsReview, _XsReview, RsReview, XsReview } from "../../types/market";
 
 
 
-export default class ReviewService {
-    async filters(q: RmReview): Promise<any> {
-        const filter: any = {};
-
-        if (q.lead) filter.lead = q.lead;
-        if (q.product) filter.product = q.product;
-        if (q.max) filter.rating.$lte = q.max;
-        if (q.min) filter.rating.$gte = q.min;
-
-        return filter;
-    }
-
-    async create(data: XrReview): Promise<IReview> {
-        const result = XrAccountSchema.safeParse(data);
+export default class Service {
+    async Create(data: XsReview): Promise<IReview> {
+        const result = _XsReview.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
 
@@ -27,51 +16,41 @@ export default class ReviewService {
         return review;
     }
 
-    async get(data: RsReview): Promise<IReview> {
-        if (!data._id) throw new Error('data invalid');
-        const result = RsReviewSchema.safeParse(data);
-        if (!result.data) throw new Error('data invalid');
-        const parsed = result.data;
-
-        const review = await Review.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<IReview> {
+        const review = await Review.findById(id);
         if (!review) throw new Error('review not found');
+        
         return review;
     }
 
-    async find(data: RsReview, page: number = 1, limit: number = 10): Promise<PaginateResult<IReview>> {
-        const result = RmReviewSchema.safeParse(data);
-        if (!result.data) throw new Error('data invalid');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const reviews = await Review.paginate(filter, { page, limit });
-        return reviews;
+    async Note(id: string | Types.ObjectId): Promise<number> {
+        const reviews = await Review.find({ product: id });
+        let note = 0;
+        for (const review of reviews) note += review.rating;
+        return note / reviews.length;
     }
 
-    async update(query: RsReview, data: RsReview,): Promise<IReview> {
-        const review = await this.get(query);
-
-        const result = RsReviewSchema.safeParse(data);
+    async Update(id: string | Types.ObjectId, data: RsReview,): Promise<IReview> {
+        const review = await this.Get(id);
+        const result = _RsReview.safeParse(data);
         if (!result.data) throw new Error('data invalid');
         const parsed = result.data;
-        await review.updateOne(parsed);
+        
+        Object.assign(review, parsed);
+        await review.save();
 
-        return await this.get({ _id: review._id });
+        return await this.Get(review._id);
     }
 
-    async delete(data: RsReview): Promise<boolean> {
-        const review = await this.get(data);
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const review = await this.Get(id);
         await review.deleteOne();
 
         return true;
     }
 
-    async size(data: RmReview): Promise<number> {
-        const result = RmReviewSchema.safeParse(data);
-        if (!result.data) throw new Error('data invalid');
-        const parsed = result.data;
-
-        const total = await Review.countDocuments(parsed);
+    async size(id: string | Types.ObjectId): Promise<number> {
+        const total = await Review.countDocuments({ product: id });
         return total;
     }
 }

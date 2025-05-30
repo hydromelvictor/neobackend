@@ -44,27 +44,12 @@ export const _XsAccount = z.object({
 export type XsAccount = z.infer<typeof _XsAccount>
 
 export const _RSAccount = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     owner: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
     ),
     currency: z.string().optional(),
-    balance: z.number().min(0).optional(),
-    // balance
-    max: z.number().min(0).optional(),
-    min: z.number().min(0).optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
+    balance: z.number().min(0).optional()
 })
 export type RsAccount = z.infer<typeof _RSAccount>
 
@@ -83,10 +68,6 @@ export const _XsOrder = z.object({
 export type XsOrder = z.infer<typeof _XsOrder>
 
 export const _RsOrder = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     lead: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
@@ -98,19 +79,8 @@ export const _RsOrder = z.object({
     price: z.number().optional(),
     fees: z.number().optional(),
     total: z.number().optional(),
-    // total
-    min: z.number().optional(),
-    max: z.number().optional(),
     items: z.array(Items).optional(),
-    shipment: Ship.optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
+    shipment: Ship.optional()
 })
 export type RsOrder = z.infer<typeof _RsOrder>
 
@@ -144,10 +114,6 @@ export const _XsProduct = z.object({
 export type XsProduct = z.infer<typeof _XsProduct>
 
 export const _RsProduct = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     assign: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
@@ -159,9 +125,6 @@ export const _RsProduct = z.object({
     name: z.string().optional(),
     description: z.string().optional(),
     price: Price.optional(),
-    // price
-    min: z.number().optional(),
-    max: z.number().optional(),
     stock: z.number().min(0).optional(),
     category: z.string().optional(),
     media: z.array(z.string()).optional(),
@@ -176,14 +139,6 @@ export const _RsProduct = z.object({
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
     ),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
 })
 export type RsProduct = z.infer<typeof _RsProduct>
 
@@ -201,10 +156,6 @@ export const _XsReview = z.object({
 export type XsReview = z.infer<typeof _XsReview>
 
 export const _RsReview = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     lead: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
@@ -230,10 +181,6 @@ export const _XsRate = z.object({
 export type XsRate = z.infer<typeof _XsRate>
 
 export const _RsRate = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     base: z.string().optional(),
     target: z.string().optional(),
     rate: z.number().optional(),
@@ -242,14 +189,6 @@ export const _RsRate = z.object({
         (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
         z.date().optional()
     ),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
 })
 export type RsRate = z.infer<typeof _RsRate>
 
@@ -278,19 +217,12 @@ export const _XsTrans = z.object({
 export type XsTrans = z.infer<typeof _XsTrans>
 
 export const _RsTrans = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     account: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
     ),
     type: z.enum(['deposit', 'withdrawal', 'transfer', 'payment', 'refund']).optional(),
     amount: z.number().optional(),
-    // amount
-    min: z.number().optional(),
-    max: z.number().optional(),
     curreny: z.string().optional(),
     baseCurrency: z.string().optional(),
     exchangerate: z.number().optional(),
@@ -309,13 +241,5 @@ export const _RsTrans = z.object({
         (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
         z.date().optional()
     ),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    )
 })
 export type RsTrans = z.infer<typeof _RsTrans>

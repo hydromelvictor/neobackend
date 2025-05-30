@@ -1,37 +1,40 @@
-import { PaginateResult } from "mongoose";
+import { PaginateResult, Types } from "mongoose";
 import Product, { IProduct } from "../../models/market/product.models";
-import { RmProduct, RmProductSchema, RsProduct, RsProductSchema, XrProduct, XrProductSchema } from "./market";
+import { _RsProduct, _XsProduct, RsProduct, XsProduct } from "../../types/market";
 
 
-export default class ProductService {
-    async filters(q: RmProduct): Promise<any> {
+
+export default class Service {
+    private filters(q: any): any {
         const filter: any = {};
+        
         if (q.assign) filter.assign = q.assign;
         if (q.org) filter.org = q.org;
-        if (q.min) filter.price.$gte = q.min;
-        if (q.max) filter.price.$lte = q.max;
-        if (q.description) filter.description = new RegExp(q.description, 'i');
-        if (q.category) filter.category = new RegExp(q.category, 'i');
-        if (q.size) {
-            const regex = new RegExp(q.size, 'i');
-            filter.sizes = { $in: regex };
+        if (q.min) filter.price.min.$gte = q.min;
+        if (q.max) filter.price.max.$lte = q.max;
+        if (q.description) filter.description = { $regex: q.description, $options: 'i' };
+        if (q.category) filter.category = { $regex: q.category, $options: 'i' };
+        if (q.size) filter.sizes = { $in: { $regex: q.size, $options: 'i' } };
+        if (q.size) filter.colors = { $in: { $regex: q.color, $options: 'i' } };
+        if (q.brand) filter.brand = { $in: { $regex: q.brand, $options: 'i' } };
+        if (q.wbefore) filter.warranty.$lte = q.before;
+        if (q.wversion) filter.warranty.$gte = q.after;
+        if (q.before) {
+            const date = new Date(q.before);
+            date.setHours(23, 59, 59, 999);
+            filter.createdAt = { $lte: date };
         }
-        if (q.color) {
-            const regex = new RegExp(q.color, 'i');
-            filter.colors = { $in: regex };
+        if (q.after) {
+            const date = new Date(q.after);
+            date.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: date };
         }
-        if (q.brand) {
-            const regex = new RegExp(q.brand, 'i');
-            filter.brand = { $in: regex };
-        }
-        if (q.before) filter.warranty.$lte = q.before;
-        if (q.after) filter.warranty.$gte = q.after;
 
         return filter;
     }
 
-    async create(data: XrProduct): Promise<IProduct> {
-        const result = XrProductSchema.safeParse(data);
+    async Create(data: XsProduct): Promise<IProduct> {
+        const result = _XsProduct.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
 
@@ -40,52 +43,42 @@ export default class ProductService {
         return product;
     }
 
-    async get(data: RsProduct): Promise<IProduct> {
-        if (!data._id) throw new Error('_di missing');
-
-        const result = RsProductSchema.safeParse(data);
-        if (!result.success) throw new Error('data invalid');
-        const parsed = result.data;
-        
-        const product = await Product.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<IProduct> {
+        const product = await Product.findById(id);
         if (!product) throw new Error('product not found');
+
         return product;
     }
 
-    async find(data: RmProduct, page: number = 1, limit: number = 10): Promise<PaginateResult<IProduct>> {
-        const result = RmProductSchema.safeParse(data);
-        if (!result.success) throw new Error('data invalid');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const products = await Product.paginate(filter, { page, limit });
+    async Find(data: any, options: any): Promise<PaginateResult<IProduct>> {
+        const filter = this.filters(data);
+        const products = Product.paginate(filter, options);
         return products;
     }
 
-    async update(query: RsProduct, data: RsProduct): Promise<IProduct> {
-        const product = await this.get(query);
-
-        const result = RsProductSchema.safeParse(data);
+    async Update(id: string | Types.ObjectId, data: RsProduct): Promise<IProduct> {
+        const product = await this.Get(id);
+        const result = _RsProduct.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
-        await product.updateOne(parsed);
 
-        return await this.get({ _id: product._id });
+        Object.assign(product, parsed);
+        await product.save();
+
+        return await this.Get(product._id);
     }
 
-    async delete(data: RsProduct): Promise<boolean> {
-        const product = await this.get(data);
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const product = await this.Get(id);
         await product.deleteOne();
 
         return true;
     }
 
-    async size(data: RmProduct): Promise<number> {
-        const result = RmProductSchema.safeParse(data);
-        if (!result.success) throw new Error('data invalid');
-        const parsed = result.data;
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
+        const total = Product.countDocuments(filter);
 
-        const total = await Product.countDocuments(parsed);
         return total;
     }
 }

@@ -1,11 +1,11 @@
-import { PaginateResult } from "mongoose";
+import { PaginateResult, Types } from "mongoose";
 import Transaction, { IAction } from "../../models/market/transaction.models";
-import { RmTrans, RmTranSchema, RsTrans, RsTranSchema, XrTrans, XrTranSchema } from "./market"
+import { _RsTrans, _XsTrans, RsTrans, XsTrans } from "../../types/market";
 
 
 
 export default class TransactionService {
-    async filters(q: RmTrans): Promise<any> {
+    private filters(q: any): any {
         const filter: any = {};
 
         if (q.account) filter.account = q.account;
@@ -20,8 +20,8 @@ export default class TransactionService {
         return filter;
     }
 
-    async create(data: XrTrans): Promise<IAction> {
-        const result = XrTranSchema.safeParse(data);
+    async Create(data: XsTrans): Promise<IAction> {
+        const result = _XsTrans.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
 
@@ -30,52 +30,43 @@ export default class TransactionService {
         return trans;
     }
 
-    async get(data: RsTrans): Promise<IAction> {
-        if (!data._id) throw new Error('_id missing');
-        const result = RsTranSchema.safeParse(data);
-        if (!result.success) throw new Error('data invalid');
-        const parsed = result.data;
-
-        const trans = await Transaction.findOne(parsed);
+    async Get(id: string | Types.ObjectId): Promise<IAction> {
+        const trans = await Transaction.findById(id);
         if (!trans) throw new Error('transaction not found');
 
         return trans;
     }
 
-    async find(data: RmTrans, page: number = 1, limit: number = 10): Promise<PaginateResult<IAction>> {
-        const result = RmTranSchema.safeParse(data);
-        if (!result.success) throw new Error('data invalid');
-        const parsed = result.data;
-
-        const filter = await this.filters(parsed);
-        const trans = await Transaction.paginate(filter, { page, limit });
+    async Find(data: any, options: any): Promise<PaginateResult<IAction>> {
+        const filter = await this.filters(data);
+        const trans = await Transaction.paginate(filter, options);
         return trans;
     }
 
-    async update(query: RsTrans, data: RsTrans): Promise<IAction> {
-        const trans = await this.get(query);
+    async Update(id: string | Types.ObjectId, data: RsTrans): Promise<IAction> {
+        const trans = await this.Get(id);
 
-        const result = RsTranSchema.safeParse(data);
+        const result = _RsTrans.safeParse(data);
         if (!result.success) throw new Error('data invalid');
         const parsed = result.data;
-        await trans.updateOne(parsed);
+        
+        Object.assign(trans, parsed);
+        await trans.save();
 
-        return await this.get({ _id: trans._id });
+        return await this.Get(trans._id);
     }
 
-    async delete(data: RsTrans): Promise<boolean> {
-        const trans = await this.get(data);
+    async Remove(id: string | Types.ObjectId): Promise<boolean> {
+        const trans = await this.Get(id);
         await trans.deleteOne();
 
         return true;
     }
 
-    async size(data: RmTrans): Promise<number> {
-        const result = RmTranSchema.safeParse(data);
-        if (!result.success) throw new Error('data invalid');
-        const parsed = result.data;
+    async Size(data: any): Promise<number> {
+        const filter = this.filters(data);
 
-        const total = await Transaction.countDocuments(parsed);
+        const total = await Transaction.countDocuments(filter);
         return total;
     }
 }

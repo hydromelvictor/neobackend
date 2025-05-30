@@ -14,11 +14,14 @@ interface IRateModel extends mongoose.PaginateModel<IRate> {};
 
 const RateSchema = new Schema<IRate>({
     base: String,
-    target: String,
+    target: {
+        type: String,
+        unique: true
+    },
     rate: Number,
     provider: String,
     fetchedAt: Date
-}, { timestamps: true })
+}, { timestamps: true });
 RateSchema.plugin(paginate)
 const Rate = mongoose.model<IRate, IRateModel>('Rate', RateSchema);
 export default Rate;

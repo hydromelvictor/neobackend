@@ -19,10 +19,6 @@ export const _XsIa = z.object({
 export type XsIa = z.infer<typeof _XsIa>
 
 export const _RsIa = z.object({
-    _id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     org: z.preprocess(
         (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
         z.instanceof(Types.ObjectId).optional()
@@ -37,14 +33,6 @@ export const _RsIa = z.object({
     task: z.string().optional(),
     tools: z.string().optional(),
     version: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
     online: z.boolean().optional()
 })
 export type RsIa = z.infer<typeof _RsIa>
@@ -60,23 +48,7 @@ export const _XsPrompt = z.object({
 export type XsPrompt = z.infer<typeof _XsPrompt>
 
 export const _RsPrompt = z.object({
-    id: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
-    ia: z.preprocess(
-        (val) => (typeof val === 'string' && Types.ObjectId.isValid(val) ? new Types.ObjectId(val) : val),
-        z.instanceof(Types.ObjectId).optional()
-    ),
     subject: z.string().optional(),
-    text: z.string().optional(),
-    before: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
-    after: z.preprocess(
-        (arg) => (typeof arg === 'string' || arg instanceof Date ? new Date(arg) : undefined),
-        z.date().optional()
-    ),
+    text: z.string().optional()
 })
 export type RsPrompt = z.infer<typeof _RsPrompt>

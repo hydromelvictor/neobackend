@@ -13,6 +13,7 @@ import lead from './routes/holding/lead.routes';
 import member from './routes/holding/member.routes';
 import mentor from './routes/holding/mentor.routes';
 import org from './routes/holding/org.routes';
+import ai from './routes/ia/airesp';
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -54,5 +55,6 @@ app.use('/lead', lead);
 app.use('/member', member);
 app.use('/mentor', mentor);
 app.use('/org', org);
+app.use('/ai-response', ai);
 
 export default app;

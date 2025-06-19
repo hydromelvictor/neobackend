@@ -1,4 +1,4 @@
-export function confirm(username: string, code: string): string {
+export function emailToSign(username: string, code: string): string {
   return `
     <!DOCTYPE html>
     <html lang="fr">

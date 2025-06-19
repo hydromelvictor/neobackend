@@ -5,17 +5,14 @@ import bcrypt from 'bcrypt';
 export interface IMember extends Document {
     _id: Types.ObjectId;
     org: Schema.Types.ObjectId;
-    firstname: string,
-    lastname: string,
-    email: string,
-    phone: string,
+    fullname: string;
+    email: string;
+    phone: string;
     position: string;
     picture?: string;
     password: string;
-    authority: boolean;
     online: boolean;
     isAuthenticated: boolean;
-    staff: boolean;
     authorization: string[];
     disconnected: string;
     comparePassword(password: string): Promise<boolean>;
@@ -26,19 +23,17 @@ interface IMemberModel extends mongoose.PaginateModel<IMember> {};
 const MemberSchema = new Schema<IMember>({
     org: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Org'
+        ref: 'Org',
+        required: true
     },
-    firstname: { type: String },
-    lastname: { type: String },
+    fullname: { type: String },
     email: { type: String, unique: true },
     phone: { type: String },
     position: { type: String },
     picture: { type: String },
     password: { type: String },
-    authority: { type: Boolean, default: false },
     online: { type: Boolean, default: false },
     isAuthenticated: { type: Boolean, default: false },
-    staff: { type: Boolean, default: false },
     authorization: [
         'READ_MEMBER',
         'LIST_MEMBER',

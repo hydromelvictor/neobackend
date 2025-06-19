@@ -9,11 +9,11 @@ export interface IAs extends Document {
     picture: string;
     responsability: string;
     sex: string;
-    role: string;
     mission: string;
     context: string;
-    task: string;
-    tools: string;
+    task: string[];
+    tools: string[];
+    resources: Types.ObjectId[],
     version: string;
 }
 
@@ -33,10 +33,14 @@ const IASchema = new Schema<IAs>({
         max: 1,
         min: 1
     },
-    role: { type: String },
     mission: { type: String },
     context: { type: String },
-    task: { type: String },
+    task: [{ type: String }],
+    tools: [{ type: String }],
+    resources: [{
+        type: mongoose.Schema.Types.ObjectId,
+        required: true
+    }],
     version: { type: String },
 }, { timestamps: true })
 

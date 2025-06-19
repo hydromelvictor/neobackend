@@ -14,14 +14,13 @@ export default class Service {
         if (q.action) {
             const action = { $regex: q.role, $options: 'i' };
             filter.$or = [
-                { role: action },
                 { mission: action },
                 { context: action },
-                { task: action },
-                { tools: action }
+                { task: { $in: action } },
+                { tools: { $in: action } }
             ]
         }
-
+        if (q.resource) filter.resources = { $in: q.resource };
         if (q.version) filter.version = { $regex: q.version, $option: 'i' };
         if (q.before) {
             const date = new Date(q.before);

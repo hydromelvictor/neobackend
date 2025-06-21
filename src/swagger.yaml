@@ -60,7 +60,7 @@ components:
           - true
           - false
     IsAuthenticated:
-      name: is_authenticated
+      name: auth
       in: query
       schema:
         type: boolean
@@ -162,6 +162,75 @@ components:
         refresh:
           type: string
           description: token de rafraichissement du token d'access
+
+    JsonResponse:
+      type: object
+      required:
+        - success
+        - message
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+        error:
+          type: string
+        data:
+          type: object
+
+    Manager:
+      type: object
+      required:
+        - firstname
+        - lastname
+        - phone
+        - email
+        - position
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        firstname:
+          type: string
+          description: prenoms
+        lastname:
+          type: string
+          description: nom
+        phone:
+          type: string
+          description: numero telephonique personnel
+        email:
+          type: string
+          description: adresse mail personnel
+        picture:
+          type: string
+          description: lien vers l'image de profil
+        position:
+          type: string
+          description: poste occupé
+        online:
+          type: boolean
+          description: permet d'identifier un utilisateur en ligne
+        isAuthenticated:
+          type: boolean
+          description: permet d'identifierun utilisateur authentifier
+        authorization:
+          type: array
+          items:
+            type: string
+          description: definis les authorisation des utilisateurs
+        disconnected:
+          type: string
+          description: dernier date de deconnexion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
 
     Admin:
       type: object
@@ -520,6 +589,136 @@ components:
 
 
 paths:
+  /manager:
+    post:
+      summary: load data for email verify before register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Manager"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+    
+    get:
+      summary: lister les managers
+      parameters:
+        - $ref: "#/components/parameters/Name"
+        - $ref: "#/components/parameters/Online"
+        - $ref: "#/components/parameters/IsAuthenticated"
+        - $ref: "#/components/parameters/After"
+        - $ref: "#/components/parameters/Before"
+        - $ref: "#/components/parameters/Page"
+        - $ref: "#/components/parameters/Limit"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+
+  /manager/stats/count:
+    get:
+      summary: nombre d'element selon la requete
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+
+  /manager/register:
+    post:
+      summary: save data collect
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+      responses:
+        '201':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+
+  /manager/password/{id}:
+    post:
+      summary: change password
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+      responses:
+        '200':
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+  
+  /manager/{id}:
+    get:
+      summary: recuperation d'un manager
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+
+    put:
+      summary: mis a jour d'un manager
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Manager"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+    
+    delete:
+      summary: suppression d'un manager
+      parameters:
+        - $ref: "#/components/parameters/Id"
+      responses:
+        "200":
+          description: success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/JsonResponse"
+              
+
   /admin/register:
     post:
       summary: >

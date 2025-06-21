@@ -7,7 +7,7 @@ import { Server as SocketIOServer } from 'socket.io';
 
 // modules perso
 import app from './app';
-import socketHandler from './socket';
+import handler from './socket';
 import init, { serverEvents } from './deamon';
 
 // Fonction pour normaliser le port
@@ -35,7 +35,7 @@ const io = new SocketIOServer(server, {
 });
 
 // Initialisation des sockets
-socketHandler(io);
+handler(io);
 
 // Gestion des erreurs
 const errorHandler = (error: NodeJS.ErrnoException): void => {

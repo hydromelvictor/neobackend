@@ -1,15 +1,14 @@
 import { Request, Response } from 'express';
 import Manager from '../../models/users/manager.model';
-import { addToBlacklist, removeFromBlacklist } from '../../helpers/codecs.helpers';
+import { addToBlacklist, validateAndUseCode } from '../../helpers/codecs.helpers';
 import { generateToken, verifyToken } from '../../helpers/token.helpers';
 import gmail from '../../helpers/gmail.helpers';
 import { emailToSign } from '../../helpers/html.helpers';
-import logger from '../../helpers/logger.helpers';
-
+import { JsonResponse } from '../../types/api';
 
 
 export default class ManagerController {
-    private filters = (q: any): any => {
+    static filters = (q: any): any => {
         const filter: any = {};
 
         if (q.name) {
@@ -22,17 +21,22 @@ export default class ManagerController {
 
         if (q.online) filter.online = q.online === 'true';
         if (q.auth) filter.isAuthenticated = q.auth === 'true';
+        if (q.after) {
+            const now = new Date(q.after);
+            now.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: now };
+        }
+        if (q.before) {
+            const now = new Date(q.before);
+            now.setHours(0, 0, 0, 0);
+            filter.createdAt = { $lte: now };
+        }
         
         return filter;
-    
     }
 
-    load = async (req: Request, res: Response): Promise<void> => {
+    static async load(req: Request, res: Response): Promise<void> {
         try {
-            const requiredFields = ['firstname', 'lastname', 'phone', 'email', 'position'];
-            const missingFields = requiredFields.filter(field => !req.body[field]);
-            if (missingFields.length > 0) throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-
             const manager = await Manager.findOne({ 
                 $or: [
                     { email: req.body.email }, 
@@ -41,48 +45,62 @@ export default class ManagerController {
             });
             if (manager) throw new Error('Manager with the same email or phone already exists');
 
-            const token = await generateToken(req.body);
-            if (!token) throw new Error('Failed to generate token');
+            const token = generateToken(req.body);
+            if (!token.success) throw new Error(`${token.error}`);
 
-            const otp = addToBlacklist(token);
+            const otp = addToBlacklist(token.data as string);
             await gmail(req.body.email, 'VERIFICATION DE MAIL', emailToSign(`${req.body.firstname} ${req.body.lastname}`, otp));
 
-            res.status(200).send()
-        } catch (error) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                res.status(400).json({ error: error.message });
-            } else {
-                logger.error('Une erreur inconnue est survenue.');
-                res.status(400).json({ error: 'Une erreur inconnue est survenue.' });
+            const response: JsonResponse = {
+                success: true,
+                message: 'email envoyé avec success'
             }
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
         }
     }
 
-    signup = async (req: Request, res: Response): Promise<void> => {
+    static async signup (req: Request, res: Response): Promise<void> {
         try {
-            const token = removeFromBlacklist(req.body.otp);
-            if (!token) throw new Error('Invalid OTP');
+            const valid = validateAndUseCode(req.body.otp);
+            if (!valid.success) throw new Error('Invalid OTP');
 
-            const decoded = await verifyToken(token);
-            if (!decoded) throw new Error('Invalid token');
+            const result = verifyToken(valid.username as string);
+            if (!result.success) throw new Error(`${result.error}`);
 
-            const manager = new Manager(decoded);
+            const manager = new Manager(result.data);
             await manager.save();
 
-            res.status(201).json(manager);
-        } catch (error) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                res.status(400).json({ error: error.message });
-            } else {
-                logger.error('Une erreur inconnue est survenue.');
-                res.status(400).json({ error: 'Une erreur inconnue est survenue.' });
-            }
+            const response: JsonResponse = {
+                success: true,
+                message: 'Erreur interne du serveur',
+                data: manager
+            };
+
+            res.status(201).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
         }
     }
 
-    password = async (req: Request, res: Response): Promise<void> => {
+    static async password(req: Request, res: Response): Promise<void> {
         try {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
@@ -93,15 +111,148 @@ export default class ManagerController {
             manager.disconnected = `hors ligne depuis le ${new Date().toISOString().split('T')[0]}`;
             await manager.save();
 
-            res.status(200).send();
-        } catch (error) {
-            if (error instanceof Error) {
-                logger.error(error.message);
-                res.status(400).json({ error: error.message });
-            } else {
-                logger.error('Une erreur inconnue est survenue.');
-                res.status(400).json({ error: 'Une erreur inconnue est survenue.' });
+            const response: JsonResponse = {
+                success: true,
+                message: 'password definis avec success'
             }
+
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    static async retrieve(req: Request, res: Response): Promise<void> {
+        try {
+            const manager = await Manager.findById(req.params.id);
+            if (!manager) throw new Error('Manager not found');
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'manager envoyé avec success',
+                data: manager
+            }
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+
+            res.status(500).json(response);
+        }
+    }
+
+    static async list(req: Request, res: Response): Promise<void> {
+        try {
+            const { page = 1, limit = 10 } = req.query;
+            
+            const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
+            const managers = await Manager.paginate(this.filters(req.query), options);
+            
+            const response: JsonResponse = {
+                success: true,
+                message: 'list managers envoyé avec success',
+                data: managers
+            }
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    static async update(req: Request, res: Response): Promise<void> {
+        try {
+            const manager = await Manager.findById(req.params.id);
+            if (!manager) throw new Error('Manager not found');
+
+            Object.assign(manager, req.body);
+            await manager.save();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'mis a jour effectué avec success',
+                data: manager
+            }
+
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    static async delete(req: Request, res: Response): Promise<void> {
+        try {
+            const manager = await Manager.findById(req.params.id);
+            if (!manager) throw new Error('Manager not found');
+
+            await manager.deleteOne();
+            const response: JsonResponse = {
+                success: true,
+                message: 'manager supprimé avec success'
+            }
+
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    static async count(req: Request, res: Response): Promise<void> {
+        try {
+            const count = await Manager.countDocuments(this.filters(req.query));
+            
+            const response: JsonResponse = {
+                success: true,
+                message: 'manager envoyé avec success',
+                data: count
+            }
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+
+            res.status(500).json(response);
         }
     }
 }

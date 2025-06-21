@@ -4,7 +4,7 @@ import { Server, Socket } from 'socket.io';
 // import chatSocket from './websockets/chatSocket';
 // import notificationSocket from './websockets/notificationSocket';
 
-const socketHandler = (io: Server): void => {
+const handler = (io: Server): void => {
   io.on('connection', (socket: Socket) => {
     console.log('Utilisateur connecté :', socket.id);
 
@@ -19,4 +19,4 @@ const socketHandler = (io: Server): void => {
   });
 };
 
-export default socketHandler;
+export default handler;

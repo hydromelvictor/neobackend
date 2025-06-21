@@ -6,6 +6,9 @@ import helmet from 'helmet';
 import cors from 'cors';
 import mongoose from 'mongoose';
 
+// routes
+import manager from './routes/users/manager.routes';
+
 // import adminRts from './routes/holding/admin.routes';
 import admin from './routes/holding/admin.routes'
 import other from './routes/other.routes';
@@ -48,6 +51,9 @@ app.use(cors({
 
 // Ajouter Swagger comme middleware
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+app.use('/uploads', express.static('uploads'));
+
+app.use('/manager', manager);
 
 app.use('/admin', admin);
 app.use('/auth', other);

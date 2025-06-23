@@ -117,16 +117,8 @@ ManSchema.pre('save', async function (next) {
             if (!this.password) {
                 return next(new Error('Password is required'));
             }
-            
-            // Check if password is already hashed (for updates)
-            const isAlreadyHashed = this.password.startsWith('$2b$') || 
-                                   this.password.startsWith('$2a$') || 
-                                   this.password.startsWith('$2y$');
-            
-            if (!isAlreadyHashed) {
-                const salt = await bcrypt.genSalt(12); // Increased from 10 for better security
-                this.password = await bcrypt.hash(this.password, salt);
-            }
+            const salt = await bcrypt.genSalt(12);
+            this.password = await bcrypt.hash(this.password, salt);
         }
 
         next();

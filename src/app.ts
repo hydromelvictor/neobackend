@@ -10,10 +10,10 @@ import mongoose from 'mongoose';
 import manager from './routes/users/manager.routes';
 import health from './routes/stats/codec.routes';
 import org from './routes/associate/org.routes'
+import auth from './routes/users/sign.routes';
 
 // import adminRts from './routes/holding/admin.routes';
 import admin from './routes/holding/admin.routes'
-import other from './routes/other.routes';
 import lead from './routes/holding/lead.routes';
 import member from './routes/holding/member.routes';
 import mentor from './routes/holding/mentor.routes';
@@ -57,9 +57,9 @@ app.use('/uploads', express.static('uploads'));
 app.use('/manager', manager);
 app.use('/health', health);
 app.use('/org', org);
+app.use('/auth', auth);
 
 app.use('/admin', admin);
-app.use('/auth', other);
 app.use('/lead', lead);
 app.use('/member', member);
 app.use('/mentor', mentor);

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, device, permissions, validateInput, uploads, exams } from '../../middleware'; // Middleware personnalisés
+import { authenticate, device, permissions, validateInput, uploads, exams } from '../../middleware';
 import { TmanCreate, TmanUpdate } from '../../types/manager';
 import ManagerController from '../../controllers/users/manager.controllers';
 
@@ -49,7 +49,7 @@ router.put(
     permissions('UPDATE-MANAGER'),
     uploads.single('picture'),
     exams('picture'),
-    validateInput(TmanUpdate, ['firstname', 'lastname', 'email', 'phone', 'picture', 'position']),
+    validateInput(TmanUpdate, []),
     ManagerController.update
 );
 

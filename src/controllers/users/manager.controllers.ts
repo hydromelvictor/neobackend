@@ -159,7 +159,7 @@ export default class ManagerController {
             const { page = 1, limit = 10 } = req.query;
             
             const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
-            const managers = await Manager.paginate(this.filters(req.query), options);
+            const managers = await Manager.paginate(ManagerController.filters(req.query), options);
             
             const response: JsonResponse = {
                 success: true,

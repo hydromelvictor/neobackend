@@ -27,7 +27,8 @@ interface IOrgModel extends mongoose.PaginateModel<IOrg> {};
 const orgSchema = new Schema<IOrg>({
     reason: {
         type: String,
-        required: true
+        required: true,
+        unique: true
     },
     manager: {
         type: Schema.Types.ObjectId,

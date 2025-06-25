@@ -11,11 +11,11 @@ import manager from './routes/users/manager.routes';
 import health from './routes/stats/codec.routes';
 import org from './routes/associate/org.routes'
 import auth from './routes/users/sign.routes';
+import employee from './routes/users/employee.routes';
 
 // import adminRts from './routes/holding/admin.routes';
 import admin from './routes/holding/admin.routes'
 import lead from './routes/holding/lead.routes';
-import member from './routes/holding/member.routes';
 import mentor from './routes/holding/mentor.routes';
 import ai from './routes/ia/airesp';
 
@@ -58,10 +58,10 @@ app.use('/manager', manager);
 app.use('/health', health);
 app.use('/org', org);
 app.use('/auth', auth);
+app.use('/employee', employee);
 
 app.use('/admin', admin);
 app.use('/lead', lead);
-app.use('/member', member);
 app.use('/mentor', mentor);
 app.use('/ai-response', ai);
 

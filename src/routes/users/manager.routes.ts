@@ -16,7 +16,7 @@ router.post(
 router.post(
     '/register',
     device('SAVE DATA'),
-    ManagerController.signup
+    ManagerController.signUp
 );
 
 router.post(
@@ -30,7 +30,7 @@ router.get(
     '/:id',
     authenticate,
     device('GET MANAGER'),
-    permissions('READ-MANAGER'), 
+    permissions('READ-MANAGER'),
     ManagerController.retrieve
 );
 
@@ -38,7 +38,7 @@ router.get(
     '/',
     authenticate,
     device('LIST MANAGER'),
-    permissions('LIST-MANAGER'), 
+    permissions('LIST-MANAGER'),
     ManagerController.list
 );
 
@@ -65,7 +65,7 @@ router.get(
     '/stats/count',
     authenticate,
     device('COUNT MANAGER'),
-    permissions('COUNT-MANAGER'), 
+    permissions('COUNT-MANAGER'),
     ManagerController.count
 );
 

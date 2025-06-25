@@ -31,15 +31,15 @@ export default class ManagerController {
             now.setHours(0, 0, 0, 0);
             filter.createdAt = { $lte: now };
         }
-        
+
         return filter;
     }
 
     static async load(req: Request, res: Response): Promise<void> {
         try {
-            const manager = await Manager.findOne({ 
+            const manager = await Manager.findOne({
                 $or: [
-                    { email: req.body.email }, 
+                    { email: req.body.email },
                     { phone: req.body.phone }
                 ]
             });
@@ -58,18 +58,18 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-      
+
             res.status(500).json(response);
         }
     }
 
-    static async signup (req: Request, res: Response): Promise<void> {
+    static async signUp(req: Request, res: Response): Promise<void> {
         try {
             const valid = validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
@@ -89,13 +89,13 @@ export default class ManagerController {
             res.status(201).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-      
+
             res.status(500).json(response);
         }
     }
@@ -119,13 +119,13 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-      
+
             res.status(500).json(response);
         }
     }
@@ -143,7 +143,7 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
@@ -157,10 +157,10 @@ export default class ManagerController {
     static async list(req: Request, res: Response): Promise<void> {
         try {
             const { page = 1, limit = 10 } = req.query;
-            
+
             const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
             const managers = await Manager.paginate(ManagerController.filters(req.query), options);
-            
+
             const response: JsonResponse = {
                 success: true,
                 message: 'list managers envoyé avec success',
@@ -169,13 +169,13 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-      
+
             res.status(500).json(response);
         }
     }
@@ -197,13 +197,13 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-      
+
             res.status(500).json(response);
         }
     }
@@ -222,13 +222,13 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-      
+
             res.status(500).json(response);
         }
     }
@@ -236,7 +236,7 @@ export default class ManagerController {
     static async count(req: Request, res: Response): Promise<void> {
         try {
             const count = await Manager.countDocuments(this.filters(req.query));
-            
+
             const response: JsonResponse = {
                 success: true,
                 message: 'manager envoyé avec success',
@@ -245,7 +245,7 @@ export default class ManagerController {
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-      
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',

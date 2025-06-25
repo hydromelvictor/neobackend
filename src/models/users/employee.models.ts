@@ -19,7 +19,10 @@ export interface IEm extends Document {
     comparePassword(password: string): Promise<boolean>;
 }
 
-interface IEmModel extends mongoose.PaginateModel<IEm> {};
+interface IEmModel extends mongoose.PaginateModel<IEm> {
+    findByEmail(email: string): Promise<IEm>;
+    // findByPhone(phone: string): Promise<IEm>;
+};
 
 
 const EmSchema = new Schema<IEm>({
@@ -101,14 +104,14 @@ EmSchema.methods.comparePassword = async function (password: string): Promise<bo
 }
 
 // Static method for finding by email
-EmSchema.statics.findByEmail = function(email: string) {
-    return this.findOne({ email: email.toLowerCase().trim() });
+EmSchema.statics.findByEmail = async function(email: string) {
+    return await this.findOne({ email: email.toLowerCase().trim() });
 };
 
-// Static method for finding by phone
-EmSchema.statics.findByPhone = function(phone: string) {
-    return this.findOne({ phone: phone.trim() });
-};
+// // Static method for finding by phone
+// EmSchema.statics.findByPhone = function(phone: string) {
+//     return this.findOne({ phone: phone.trim() });
+// };
 
 const Employee = mongoose.model<IEm, IEmModel>('Em', EmSchema);
 

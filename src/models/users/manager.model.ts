@@ -19,7 +19,10 @@ export interface IMan extends Document {
     comparePassword(password: string): Promise<boolean>;
 }
 
-interface IManModel extends mongoose.PaginateModel<IMan> {};
+interface IManModel extends mongoose.PaginateModel<IMan> {
+    findByEmail(email: string): Promise<IMan>;
+    findByPhone(phone: string): Promise<IMan>;
+};
 
 
 const ManSchema = new Schema<IMan>({

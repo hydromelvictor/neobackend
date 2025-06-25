@@ -52,7 +52,7 @@ export const login = async (req: Request, res: Response) => {
     try {
         let Instance = instanciate(req.params.model);
 
-        const user = await Instance.findOne({ email: req.body.email });
+        const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');
 
         const checked = await user.comparePassword(req.body.password);
@@ -107,7 +107,7 @@ export const forgot = async (req: Request, res: Response) => {
     try {
         let Instance = instanciate(req.params.model);
 
-        const user = await Instance.findOne({ email: req.body.email });
+        const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');
 
         const otp = addToBlacklist(user._id.toISOString());

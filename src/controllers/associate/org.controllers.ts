@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Org from '../../models/associate/org.models';
 import Manager from '../../models/users/manager.model';
 import { JsonResponse } from '../../types/api';
+import accountModels from '../../models/marketing/account.models';
 
 
 export default class OrgController {
@@ -53,6 +54,7 @@ export default class OrgController {
                 message: 'L\'organisation a été enregistré avec succès',
                 data: org
             };
+
             res.status(201).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -178,6 +180,21 @@ export default class OrgController {
                 data: count
             };
             res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la récupération de l\'organisation:', error);
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    public static async validate(req: Request, res: Response) {
+        try {
+
         } catch (error: any) {
             console.error('Erreur lors de la récupération de l\'organisation:', error);
             const response: JsonResponse = {

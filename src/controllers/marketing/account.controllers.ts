@@ -4,6 +4,7 @@ import Xaccount from '../../models/marketing/critical.models';
 import { JsonResponse } from '../../types/api';
 import orgModels from '../../models/associate/org.models';
 import mongoose from 'mongoose';
+import trackingModels from '../../models/marketing/tracking.models';
 
 
 export default class AccountController {
@@ -38,28 +39,6 @@ export default class AccountController {
         // 
         
         return true;
-    }
-
-    static async create(req: Request, res: Response) {
-        try {
-            const account = await Account.create({ owner: req.user._id });
-            const response: JsonResponse = {
-                success: true,
-                message: 'Compte créé avec succès',
-                data: account
-            };
-            res.status(201).json(response);
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
-
-            const response: JsonResponse = {
-                success: false,
-                message: 'Erreur interne du serveur',
-                error: error.message
-            };
-
-            res.status(500).json(response);
-        }
     }
 
     static async balance(req: Request, res: Response) {
@@ -124,8 +103,8 @@ export default class AccountController {
 
             let check = false
             for (const item of account.assign) {
-                if (item.org.toString() === org._id.toString()) {
-                    item.balance += req.body.balance;
+                if (item.org.toString() === org._id.toString() && item.balance) {
+                    item.balance += parseFloat(req.body.balance)
                     check = true;
                     break;
                 }
@@ -134,9 +113,51 @@ export default class AccountController {
             if (check === false) {
                 account.assign.push({
                     org: org._id,
-                    balance: req.body.balance || 0
+                    balance: parseFloat(req.body.balance) || 0
                 });
             }
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+
+            res.status(500).json(response);
+        }
+    }
+
+    static async assign(req: Request, res: Response) {
+        try {
+            const account = await Account.findOwner(req.user._id);
+            if (!account) throw new Error('this account not found');
+
+            let dis = 0;
+            for (const item of account.assign) dis += item.balance || 0;
+            const org = await orgModels.findById(req.params.id);
+            if (!org) throw new Error('this org not found');
+
+            const amount = parseFloat(req.body.balance);
+            dis = account.balance - dis;
+            if (dis < req.body.balance) throw new Error('insufficient balance');
+
+            const check = account.assign.find(item => item.org.toString() === org._id.toString());
+            if (check && check.balance) {
+                check.balance += amount;
+            } else account.assign.push({
+                org: org._id,
+                balance: amount
+            });
+
+            await account.save();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'Compte assigné avec succès'
+            };
+            res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 
@@ -157,18 +178,52 @@ export default class AccountController {
             const client = await Account.findOwner(req.user._id);
             if (!client) throw new Error('Compte non trouvé');
 
-            const balance = req.body.balance;
+            const balance = parseFloat(req.body.balance);
+
+            let org: any;
+            if (req.query.org) {
+                org = await orgModels.findById(req.query.org);
+                if (!org) throw new Error('Organisation non trouvée');
+            }
+
             if (status === 'deposit') {
                 const check = balance > 0 && await AccountController._in_bank(balance);
                 if (check) {
-                    client.balance += req.body.balance;
+                    client.balance += balance;
                     await client.save();
+
+                    await trackingModels.create({
+                        type: 'deposit',
+                        amount: balance + 0.05 * balance,
+                        currency: req.body.currency,
+                        baseCurrency: 'XOF',
+                        status: 'completed',
+                        description: 'deposité avec succès',
+                        to: client._id,
+                        processedAt: new Date()
+                    });
                 }
             } else if (status === 'withdrawal') {
                 const check = client.balance >= balance && await AccountController._in_bank(-balance);
                 if (check) {
                     client.balance -= req.body.balance;
-                    await client.save();
+                    client.assign.forEach(item => {
+                        if (org && item.org.toString() === org._id.toString() && item.balance && item.balance >= req.body.balance) {
+                            item.balance -= req.body.balance;
+                        }
+                    });
+                    await client.save();   
+                    
+                    await trackingModels.create({
+                        type: 'withdrawal',
+                        amount: balance + 0.05 * balance,
+                        currency: req.body.currency,
+                        baseCurrency: 'XOF',
+                        status: 'completed',
+                        description: 'retrait avec succès',
+                        from: client._id,
+                        processedAt: new Date()
+                    });
                 }
             } else {
                 const check = client.balance >= balance && balance > 0;
@@ -179,9 +234,27 @@ export default class AccountController {
                     // atomic
                     session.startTransaction();
                     client.balance -= balance;
+                    client.assign.forEach(item => {
+                        if (org && item.org.toString() === org._id.toString() && item.balance && item.balance >= balance) {
+                            item.balance -= balance;
+                        }
+                    });
                     neo.balance += balance;
                     await client.save({ session });
                     await neo.save({ session });
+
+                    await trackingModels.create({
+                        type: 'payment',
+                        amount: balance + 0.05 * balance,
+                        currency: req.body.currency,
+                        baseCurrency: 'XOF',
+                        status: 'completed',
+                        description: 'paiement effectué avec succès',
+                        from: client._id,
+                        to: neo._id,
+                        processedAt: new Date()
+                    }, { session });
+
                     await session.commitTransaction();
                     session.endSession();
                 }

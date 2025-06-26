@@ -56,4 +56,12 @@ router.get(
     OrgController.count
 );
 
+router.get(
+    '/access/:id',
+    authenticate,
+    device('ACCESS ORG'),
+    permissions('ACCESS-ORG'), 
+    OrgController.validate
+)
+
 export default router;

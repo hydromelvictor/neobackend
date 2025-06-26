@@ -20,6 +20,7 @@ export interface IOrg extends Document {
     service: string;
     area?: string;
     picture?: string;
+    access: boolean;
 }
 
 interface IOrgModel extends mongoose.PaginateModel<IOrg> {};
@@ -88,6 +89,10 @@ const orgSchema = new Schema<IOrg>({
     },
     picture: {
         type: String
+    },
+    access: {
+        type: Boolean,
+        default: false
     }
 }, {
     timestamps: true

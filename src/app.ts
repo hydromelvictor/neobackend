@@ -12,6 +12,10 @@ import health from './routes/stats/codec.routes';
 import org from './routes/associate/org.routes'
 import auth from './routes/users/sign.routes';
 import employee from './routes/users/employee.routes';
+import account from './routes/marketing/account.routes';
+import xaccount from './routes/marketing/xaccount.routes';
+import referer from './routes/users/referer.routes';
+
 
 // import adminRts from './routes/holding/admin.routes';
 import admin from './routes/holding/admin.routes'
@@ -59,6 +63,10 @@ app.use('/health', health);
 app.use('/org', org);
 app.use('/auth', auth);
 app.use('/employee', employee);
+app.use('/account', account);
+app.use('/xaccount', xaccount);
+app.use('/referer', referer);
+
 
 app.use('/admin', admin);
 app.use('/lead', lead);

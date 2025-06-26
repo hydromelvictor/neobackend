@@ -22,7 +22,6 @@ interface IAccModel extends mongoose.PaginateModel<IAcc> {
 const accSchema = new Schema<IAcc>({
     owner: {
         type: Schema.Types.ObjectId,
-        ref: 'Manager',
         required: true
     },
     currency: {
@@ -33,6 +32,7 @@ const accSchema = new Schema<IAcc>({
     balance: {
         type: Number,
         default: 0,
+        min: 0,
         required: true
     },
     assign: [{
@@ -44,6 +44,7 @@ const accSchema = new Schema<IAcc>({
         balance: {
             type: Number,
             default: 0,
+            min: 0,
             required: true
         }
     }]

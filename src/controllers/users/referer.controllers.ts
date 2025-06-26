@@ -1,22 +1,23 @@
 import { Request, Response } from 'express';
-import Manager from '../../models/users/manager.model';
-import { addToBlacklist, validateAndUseCode } from '../../helpers/codecs.helpers';
-import { generateToken, verifyToken } from '../../helpers/token.helpers';
-import gmail from '../../helpers/gmail.helpers';
-import { emailToSign } from '../../helpers/html.helpers';
 import { JsonResponse } from '../../types/api';
-import Account from '../../models/marketing/account.models';
+import Referer from '../../models/users/referer.models';
+import { generateToken, verifyToken } from '../../helpers/token.helpers';
+import { addToBlacklist, OneUseToken, validateAndUseCode } from '../../helpers/codecs.helpers';
+import gmail from '../../helpers/gmail.helpers';
+import accountModels from '../../models/marketing/account.models';
+import { emailToSign } from '../../helpers/html.helpers';
 
 
-export default class ManagerController {
-    static filters = (q: any): any => {
+export default class RefererController {
+    public static filters(q: any): any {
         const filter: any = {};
 
         if (q.name) {
             const regex = { $regex: q.name, $options: 'i' };
             filter.$or = [
-                { firstname: regex },
-                { lastname: regex }
+                { fullname: regex },
+                { country: regex },
+                { city: regex }
             ];
         }
 
@@ -36,17 +37,22 @@ export default class ManagerController {
         return filter;
     }
 
-    static async load(req: Request, res: Response): Promise<void> {
+    public static async load(req: Request, res: Response): Promise<void> {
         try {
-            const manager = await Manager.findOne({
-                $or: [
-                    { email: req.body.email },
-                    { phone: req.body.phone }
-                ]
-            });
-            if (manager) throw new Error('Manager with the same email or phone already exists');
+            const referer = await Referer.findOne({ $or: [
+                { phone: req.params.phone },
+                { email: req.params.phone },
+            ]});
+            if (referer) throw new Error('Manager with the same email or phone already exists');
 
-            const token = generateToken(req.body);
+            let promo = OneUseToken();
+            let ref = await Referer.findOne({ promo: promo });
+            while (ref) {
+                promo = OneUseToken();
+                ref = await Referer.findOne({ promo: promo });
+            }
+
+            const token = generateToken({ ...req.body, promo: promo });
             if (!token.success) throw new Error(`${token.error}`);
 
             const otp = addToBlacklist(token.data as string);
@@ -57,6 +63,7 @@ export default class ManagerController {
                 message: 'email envoyé avec success'
             }
             res.status(200).json(response);
+
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 
@@ -70,7 +77,7 @@ export default class ManagerController {
         }
     }
 
-    static async signUp(req: Request, res: Response): Promise<void> {
+    public static async signUp(req: Request, res: Response): Promise<void> {
         try {
             const valid = validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
@@ -78,16 +85,15 @@ export default class ManagerController {
             const result = verifyToken(valid.username as string);
             if (!result.success) throw new Error(`${result.error}`);
 
-            const manager = new Manager(result.data);
-            await manager.save();
+            const referer = new Referer(result.data);
+            await referer.save();
 
-            // creation de wallet
-            Account.create({ owner: manager._id });
+            accountModels.create({ owner: referer._id });
 
             const response: JsonResponse = {
                 success: true,
                 message: 'Erreur interne du serveur',
-                data: manager
+                data: referer
             };
 
             res.status(201).json(response);
@@ -106,14 +112,14 @@ export default class ManagerController {
 
     static async password(req: Request, res: Response): Promise<void> {
         try {
-            const manager = await Manager.findById(req.params.id);
-            if (!manager) throw new Error('Manager not found');
+            const referer = await Referer.findById(req.params.id);
+            if (!referer) throw new Error('Referer not found');
 
-            manager.password = req.body.password;
-            manager.online = false;
-            manager.isAuthenticated = false;
-            manager.disconnected = `hors ligne depuis le ${new Date().toISOString().split('T')[0]}`;
-            await manager.save();
+            referer.password = req.body.password;
+            referer.online = false;
+            referer.isAuthenticated = false;
+            referer.disconnected = `hors ligne depuis le ${new Date().toISOString().split('T')[0]}`;
+            await referer.save();
 
             const response: JsonResponse = {
                 success: true,
@@ -134,18 +140,22 @@ export default class ManagerController {
         }
     }
 
-    static async retrieve(req: Request, res: Response): Promise<void> {
+    public static async retrieve(req: Request, res: Response): Promise<void> {
         try {
-            const manager = await Manager.findById(req.params.id);
-            if (!manager) throw new Error('Manager not found');
+            const referer = await Referer.findById(req.params.id);
+            if (!referer) throw new Error('Manager not found');
+
+            referer.click = referer.click + 1;
+            await referer.save();
 
             const response: JsonResponse = {
                 success: true,
                 message: 'manager envoyé avec success',
-                data: manager
+                data: referer
             }
             res.status(200).json(response);
-        } catch (error: any) {
+
+        }catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 
             const response: JsonResponse = {
@@ -158,19 +168,20 @@ export default class ManagerController {
         }
     }
 
-    static async list(req: Request, res: Response): Promise<void> {
+    public static async list(req: Request, res: Response): Promise<void> {
         try {
             const { page = 1, limit = 10 } = req.query;
 
             const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
-            const managers = await Manager.paginate(ManagerController.filters(req.query), options);
+            const referers = await Referer.paginate(RefererController.filters(req.query), options);
 
             const response: JsonResponse = {
                 success: true,
                 message: 'list managers envoyé avec success',
-                data: managers
+                data: referers
             }
             res.status(200).json(response);
+
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 
@@ -184,21 +195,22 @@ export default class ManagerController {
         }
     }
 
-    static async update(req: Request, res: Response): Promise<void> {
+    public static async update(req: Request, res: Response): Promise<void> {
         try {
-            const manager = await Manager.findById(req.params.id);
-            if (!manager) throw new Error('Manager not found');
+            const referer = await Referer.findById(req.params.id);
+            if (!referer) throw new Error('Manager not found');
 
-            Object.assign(manager, req.body);
-            await manager.save();
+            Object.assign(referer, req.body);
+            await referer.save();
 
             const response: JsonResponse = {
                 success: true,
-                message: 'mis a jour effectué avec success',
-                data: manager
+                message: 'mis a jour effectué',
+                data: referer
             }
 
             res.status(200).json(response);
+
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 
@@ -212,18 +224,19 @@ export default class ManagerController {
         }
     }
 
-    static async delete(req: Request, res: Response): Promise<void> {
+    public static async delete(req: Request, res: Response): Promise<void> {
         try {
-            const manager = await Manager.findById(req.params.id);
-            if (!manager) throw new Error('Manager not found');
+            const referer = await Referer.findById(req.params.id);
+            if (!referer) throw new Error('Manager not found');
 
-            await manager.deleteOne();
+            await referer.deleteOne();
             const response: JsonResponse = {
                 success: true,
                 message: 'manager supprimé avec success'
             }
 
             res.status(200).json(response);
+
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 
@@ -237,9 +250,9 @@ export default class ManagerController {
         }
     }
 
-    static async count(req: Request, res: Response): Promise<void> {
+    public static async count(req: Request, res: Response): Promise<void> {
         try {
-            const count = await Manager.countDocuments(this.filters(req.query));
+            const count = await Referer.countDocuments(this.filters(req.query));
 
             const response: JsonResponse = {
                 success: true,
@@ -247,6 +260,7 @@ export default class ManagerController {
                 data: count
             }
             res.status(200).json(response);
+
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
 

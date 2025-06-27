@@ -15,6 +15,8 @@ import employee from './routes/users/employee.routes';
 import account from './routes/marketing/account.routes';
 import xaccount from './routes/marketing/xaccount.routes';
 import referer from './routes/users/referer.routes';
+import product from './routes/marketing/product.routes';
+import order from './routes/marketing/order.routes';
 
 
 // import adminRts from './routes/holding/admin.routes';
@@ -66,6 +68,8 @@ app.use('/employee', employee);
 app.use('/account', account);
 app.use('/xaccount', xaccount);
 app.use('/referer', referer);
+app.use('/product', product);
+app.use('/order', order);
 
 
 app.use('/admin', admin);

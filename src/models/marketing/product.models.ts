@@ -1,16 +1,13 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-export interface IProduct extends Document {
+export interface Iprd extends Document {
     _id: Types.ObjectId;
     assign: Schema.Types.ObjectId;
     org: Schema.Types.ObjectId;
     name: string;
     description: string;
-    price: {
-        min: number,
-        max: number
-    };
+    price: number[];
     stock: number;
     category: string;
     media: string[];
@@ -20,27 +17,35 @@ export interface IProduct extends Document {
     sizes: string[];
     colors: string[];
     delivery: {
-        internal: number,
-        external: number,
-        service: string;
-    };
+        in: number,
+        out: number
+    }
+    // service
+    ondemand: string;
     warranty: string;
     bonus: Schema.Types.ObjectId[];
 }
 
-interface IPrdModel extends mongoose.PaginateModel<IProduct> {};
+interface IprdModel extends mongoose.PaginateModel<Iprd> {};
 
-const ProductSchema = new Schema<IProduct>({
+const prdSchema = new Schema<Iprd>({
     assign: Schema.Types.ObjectId,
     org: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Org'
     },
     name: String,
     description: String,
     price: {
-        normal: Number,
-        discount: Number
+        type: [Number],
+        required: true,
+        min: 0,
+        max: 2,
+        validator: function(v: number[]) {
+            if (v[0] >= v[1]) return false;
+            return true;
+        }
     },
     stock: Number,
     category: String,
@@ -51,18 +56,17 @@ const ProductSchema = new Schema<IProduct>({
     sizes: [String],
     colors: [String],
     delivery: {
-        internal: Number,
-        external: Number,
-        service: String
+        in: Number,
+        out: Number
     },
+    ondemand: String,
     warranty: String,
-    bonus: [{
+     bonus: [{
         type: Schema.Types.ObjectId,
         ref: 'Product'
     }]
-}, { timestamps: true })
+});
 
-ProductSchema.plugin(paginate);
-const Product = mongoose.model<IProduct, IPrdModel>('Product', ProductSchema);
-
+prdSchema.plugin(paginate);
+const Product = mongoose.model<Iprd, IprdModel>('Product', prdSchema);
 export default Product;

@@ -189,6 +189,16 @@ export default class ManagerController {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
 
+            const email = req.body.email;
+            const phone = req.body.phone;
+            const exist = await Manager.findOne({
+                $or: [
+                    email ? { email } : {},
+                    phone ? { phone } : {}
+                ]
+            })
+            if (exist?._id.toString() !== manager._id.toString()) throw new Error('email or phone exist');
+                        
             Object.assign(manager, req.body);
             await manager.save();
 

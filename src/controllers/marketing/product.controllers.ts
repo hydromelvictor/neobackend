@@ -1,15 +1,28 @@
-import { Request, Response } from 'express';
-import Employee from '../../models/users/employee.models';
-import { JsonResponse } from '../../types/api';
+import { Request, Response } from "express";
+import { JsonResponse } from "../../types/api";
+import Product from "../../models/marketing/product.models";
 
-
-export default class EmployeeContorller {
-    static filters = (q: any): any => {
+export default class ProductController {
+    public static filters(q: any): any {
         const filter: any = {};
 
-        if (q.name) filter.fullname = { $regex: q.name, $options: 'i' };
-        if (q.online) filter.online = q.online === 'true';
-        if (q.auth) filter.isAuthenticated = q.auth === 'true';
+        filter.$or = []
+        if (q.idx) {
+            filter.$or.concat(
+                { assign: q.idx },
+                { org: q.idx }
+            )
+        }
+        if (q.name) {
+            const regex = { regex: q.name, options: 'i' };
+            filter.$or.concat(
+                { name: regex },
+                { description: regex },
+                { brand: regex },
+                { category: regex },
+                { warranty: regex }
+            )
+        }
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);
@@ -24,42 +37,17 @@ export default class EmployeeContorller {
         return filter;
     }
 
-    static async signUp(req: Request, res: Response) {
+    public static async register(req: Request, res: Response) {
         try {
-            const employee = new Employee(req.body);
-            await employee.save();
-
-            const response: JsonResponse = {
-                success: true,
-                message: 'Utilisateur enregistré avec succès',
-                data: employee
-            };
-
-            res.status(201).json(response);
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
+            const org = req.params.id;
+            const product = new Product({ ...req.body, org });
+            await product.save();
 
             const response: JsonResponse = {
                 success: false,
-                message: 'Erreur interne du serveur',
-                error: error.message
-            };
-
-            res.status(500).json(response);
-        }
-    }
-
-    static async retrieve(req: Request, res: Response) {
-        try {
-            const employee = await Employee.findById(req.params.id);
-            if (!employee) throw new Error('Utilisateur non trouvé');
-
-            const response: JsonResponse = {
-                success: true,
-                message: 'Utilisateur trouvé avec succès',
-                data: employee
-            };
-
+                message: 'product created',
+                data: product
+            }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -74,18 +62,16 @@ export default class EmployeeContorller {
         }
     }
 
-    static async list(req: Request, res: Response) {
+    public static async retrieve(req: Request, res: Response) {
         try {
-            const { page = 1, limit = 10 } = req.query;
-            const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
-            const employees = await Employee.paginate(EmployeeContorller.filters(req.query), options);
+            const product = await Product.findById(req.params.id);
+            if (!product) throw new Error('product not found');
 
             const response: JsonResponse = {
                 success: true,
-                message: 'Utilisateurs trouvés avec succès',
-                data: employees
-            };
-
+                message: 'product retrieved',
+                data: product
+            }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -100,30 +86,21 @@ export default class EmployeeContorller {
         }
     }
 
-    static async update(req: Request, res: Response) {
+    public static async list(req: Request, res: Response) {
         try {
-            const employee = await Employee.findById(req.params.id);
-            if (!employee) throw new Error('Utilisateur non trouvé');
+            const filter = ProductController.filters(req.query);
+            const options = {
+                page: parseInt(req.query.page as string) || 1,
+                limit: parseInt(req.query.limit as string) || 10,
+                sort: { createdAt: -1 }
+            };
 
-            const email = req.body.email;
-            const phone = req.body.phone;
-            const exist = await Employee.findOne({
-                $or: [
-                    email ? { email } : {},
-                    phone ? { phone } : {}
-                ]
-            })
-            if (exist?._id.toString() !== employee._id.toString()) throw new Error('email or phone exist');
-            
-            Object.assign(employee, req.body);
-            await employee.save();
-
+            const products = await Product.paginate(filter, options);
             const response: JsonResponse = {
                 success: true,
-                message: 'Utilisateur mis à jour avec succès',
-                data: employee
-            };
-      
+                message: 'products retrieved',
+                data: products
+            }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -138,18 +115,19 @@ export default class EmployeeContorller {
         }
     }
 
-    static async delete(req: Request, res: Response) {
+    public static async update(req: Request, res: Response) {
         try {
-            const employee = await Employee.findById(req.params.id);
-            if (!employee) throw new Error('Utilisateur non trouvé');
+            const product = await Product.findById(req.params.id);
+            if (!product) throw new Error('product not found');
 
-            await employee.deleteOne();
+            product.set(req.body);
+            await product.save();
+
             const response: JsonResponse = {
                 success: true,
-                message: 'Utilisateur supprimé avec succès',
-                data: employee
-            };
-
+                message: 'product updated',
+                data: product
+                }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -158,21 +136,44 @@ export default class EmployeeContorller {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
-            };
-
+            }
             res.status(500).json(response);
         }
     }
 
-    static async count(req: Request, res: Response) {
+    public static async delete(req: Request, res: Response) {
         try {
-            const count = await Employee.countDocuments(EmployeeContorller.filters(req.query));
+            const product = await Product.findById(req.params.id);
+            if (!product) throw new Error('product not found');
+
+            await product.deleteOne();
             const response: JsonResponse = {
                 success: true,
-                message: 'Nombre d\'utilisateurs trouvés avec succès',
+                message: 'product deleted'
+            }
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            }
+            res.status(500).json(response);
+        }
+    }
+
+    public static async count(req: Request, res: Response) {
+        try {
+            const filter = ProductController.filters(req.query);
+            const count = await Product.countDocuments(filter);
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'product count retrieved',
                 data: count
-            };
-
+            }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -181,8 +182,7 @@ export default class EmployeeContorller {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
-            };
-
+            }
             res.status(500).json(response);
         }
     }

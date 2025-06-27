@@ -2,8 +2,6 @@ import { Request, Response } from 'express';
 import Org from '../../models/associate/org.models';
 import Manager from '../../models/users/manager.model';
 import { JsonResponse } from '../../types/api';
-import accountModels from '../../models/marketing/account.models';
-
 
 export default class OrgController {
     static filters = (q: any) => {
@@ -125,6 +123,10 @@ export default class OrgController {
                 const manager = await Manager.findById(req.body.manager);
                 if (manager && manager._id.toString() !== org.manager.toString()) throw new Error('Le manager n\'existe pas');
             }
+
+            const reason = req.body.reason;
+            const exist = reason ? await Org.findOne({ reason }) : null;
+            if (exist && exist._id.toString() !== org._id.toString()) throw new Error(`${reason} already exist`);
             
             Object.assign(org, req.body);
             await org.save();

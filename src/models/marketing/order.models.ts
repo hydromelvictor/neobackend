@@ -7,35 +7,38 @@ type item = {
     price: number
 }
 
-export interface IOrders extends Document {
-    _id: Types.ObjectId;
-    lead: Schema.Types.ObjectId;
-    sellor: Schema.Types.ObjectId;
-    price: number;
-    fees: number;
-    total: number;
-    items: item[];
-    shipment: {
-        when: Date,
-        where: string,
-        fee: number
-    };
+type ship = {
+    when: Date,
+    where: string,
+    fee: number
 }
 
-interface IOderModel extends mongoose.PaginateModel<IOrders> {};
 
-const IOrderSchema = new Schema<IOrders>({
+export interface IOrd extends Document {
+    _id: Types.ObjectId;
+    lead: Schema.Types.ObjectId;
+    org: Schema.Types.ObjectId;
+    total: number;
+    fee: number;
+    items: item[];
+    shipment?: ship;
+}
+
+interface IOrdModel extends mongoose.PaginateModel<IOrd> {};
+
+const OrdSchema = new Schema<IOrd>({
     lead: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Lead'
     },
-    sellor: {
+    org: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Org'
     },
-    price: Number,
-    fees: Number,
     total: Number,
+    fee: Number,
     items: [{
         product: {
             type: Schema.Types.ObjectId,
@@ -55,7 +58,5 @@ const IOrderSchema = new Schema<IOrders>({
     }
 }, { timestamps: true });
 
-IOrderSchema.plugin(paginate);
-const Order = mongoose.model<IOrders, IOderModel>('Order', IOrderSchema);
-
-export default Order;
+OrdSchema.plugin(paginate);
+export default mongoose.model<IOrd, IOrdModel>('Order', OrdSchema);

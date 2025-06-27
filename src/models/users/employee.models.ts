@@ -108,10 +108,6 @@ EmSchema.statics.findByEmail = async function(email: string) {
     return await this.findOne({ email: email.toLowerCase().trim() });
 };
 
-// // Static method for finding by phone
-// EmSchema.statics.findByPhone = function(phone: string) {
-//     return this.findOne({ phone: phone.trim() });
-// };
 
 const Employee = mongoose.model<IEm, IEmModel>('Em', EmSchema);
 

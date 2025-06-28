@@ -1,4 +1,4 @@
-import Ia, { IAs } from "../../models/ia/agent.models";
+import Ia, { IAs } from "../../models/users/neo.models";
 import { _RsIa, _XsIa, RsIa, XsIa } from "../../types/ia";
 import { PaginateResult, Types } from "mongoose";
 

@@ -5,7 +5,7 @@ dotenv.config();
 import EventEmitter from "events";
 import { OneUseToken } from './helpers/codecs.helpers';
 import Admin from './models/holding/admin.models';
-import Rate from './models/market/rate.models';
+import Rate from './models/automation/rate.models';
 import { Authorization } from './utils/authorize.utils';
 import axios from 'axios';
 

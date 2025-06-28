@@ -16,9 +16,12 @@ const ViewSchema = new Schema<IView>({
     },
     viewer: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Lead'
     }
 }, { timestamps: true })
+
 ViewSchema.plugin(paginate);
+
 const View = mongoose.model<IView, IViewModel>('View', ViewSchema);
 export default View;

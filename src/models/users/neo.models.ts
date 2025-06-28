@@ -1,49 +1,41 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-export interface IAs extends Document {
+export interface IAgent extends Document {
     _id: Types.ObjectId;
     org: Types.ObjectId;
-    online: boolean;
     fullname: string;
-    picture: string;
+    picture?: string;
+    online: boolean;
     responsability: string;
     sex: string;
     mission: string;
     context: string;
     task: string[];
-    tools: string[];
-    resources: Types.ObjectId[],
     version: string;
 }
 
-interface IAsModel extends mongoose.PaginateModel<IAs> {};
+interface IAsModel extends mongoose.PaginateModel<IAgent> { };
 
-const IASchema = new Schema<IAs>({
-    org: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    },
-    online: { type: Boolean, default: true },
+const IASchema = new Schema<IAgent>({
+    org: { type: Schema.Types.ObjectId, ref: 'Org', required: true },
     fullname: { type: String },
     picture: { type: String },
+    online: { type: Boolean, default: true },
     responsability: { type: String },
-    sex: { 
+    sex: {
         type: String,
-        max: 1,
-        min: 1
+        enum: ['M', 'F'],
+        required: true
     },
     mission: { type: String },
     context: { type: String },
     task: [{ type: String }],
-    tools: [{ type: String }],
-    resources: [{
-        type: mongoose.Schema.Types.ObjectId,
-        required: true
-    }],
     version: { type: String },
 }, { timestamps: true })
 
 IASchema.plugin(paginate);
-const Ia = mongoose.model<IAs, IAsModel>('Ia', IASchema);
-export default Ia;
+
+const Neo = mongoose.model<IAgent, IAsModel>('Neo', IASchema);
+
+export default Neo;

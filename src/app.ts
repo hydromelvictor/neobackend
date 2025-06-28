@@ -18,11 +18,12 @@ import referer from './routes/users/referer.routes';
 import product from './routes/marketing/product.routes';
 import order from './routes/marketing/order.routes';
 import lead from './routes/users/lead.routes';
+import rating from './routes/marketing/rating.routes';
+import neo from './routes/users/neo.routes';
 
 
 // import adminRts from './routes/holding/admin.routes';
 import admin from './routes/holding/admin.routes'
-import ai from './routes/ia/airesp';
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -70,9 +71,11 @@ app.use('/referer', referer);
 app.use('/product', product);
 app.use('/order', order);
 app.use('/lead', lead);
+app.use('/rating', rating);
+app.use('/neo', neo);
+
 
 
 app.use('/admin', admin);
-app.use('/ai-response', ai);
 
 export default app;

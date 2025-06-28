@@ -21,8 +21,8 @@ const GuestSchema = new Schema<IGuest>({
     },
     role: {
         type: String,
-        enum: ['member', 'admin', 'owner'],
-        default: 'member'
+        enum: ['lead', 'admin', 'manager', 'employee', 'neo'],
+        default: 'neo'
     }
 }, { timestamps: true });
 GuestSchema.plugin(paginate);

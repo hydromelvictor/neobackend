@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-export interface IReview extends Document {
+export interface IRev extends Document {
     _id: Types.ObjectId;
     lead: Schema.Types.ObjectId;
     product: Schema.Types.ObjectId;
@@ -9,12 +9,13 @@ export interface IReview extends Document {
     avis: string;
 }
 
-interface IReviewModel extends mongoose.PaginateModel<IReview> {};
+interface IReviewModel extends mongoose.PaginateModel<IRev> {};
 
-const ReviewSchema = new Schema<IReview>({
+const ReviewSchema = new Schema<IRev>({
     lead: {
         type: Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: 'Lead'
     },
     product: {
         type: Schema.Types.ObjectId,
@@ -30,6 +31,6 @@ const ReviewSchema = new Schema<IReview>({
 }, { timestamps: true })
 
 ReviewSchema.plugin(paginate);
-const Review = mongoose.model<IReview, IReviewModel>('Review', ReviewSchema);
+const Review = mongoose.model<IRev, IReviewModel>('Review', ReviewSchema);
 
 export default Review;

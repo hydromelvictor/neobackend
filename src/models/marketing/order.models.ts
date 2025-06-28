@@ -22,6 +22,7 @@ export interface IOrd extends Document {
     fee: number;
     items: item[];
     shipment?: ship;
+    status: string;
 }
 
 interface IOrdModel extends mongoose.PaginateModel<IOrd> {};
@@ -55,6 +56,11 @@ const OrdSchema = new Schema<IOrd>({
         when: Date,
         where: String,
         fee: Number
+    },
+    status: {
+        type: String,
+        enum: ['init', 'doing', 'done'],
+        default: 'init'
     }
 }, { timestamps: true });
 

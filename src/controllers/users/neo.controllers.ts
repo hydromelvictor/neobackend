@@ -1,17 +1,17 @@
-import { Request, Response } from "express";
-import { JsonResponse } from "../../types/api";
-import Order from '../../models/marketing/order.models';
+import { Request, Response } from 'express';
+import { JsonResponse } from '../../types/api';
+import Neo from '../../models/users/neo.models';
 
-
-export default class OrderController {
-    public static filter(q: any): any {
+export default class NeoController  {
+    public static filters(q: any): any {
         const filter: any = {};
+        
+        if (q.name) filter.fullname = { $regex: q.name, $options: 'i' };
+        if (q.sex) filter.sex = q.sex;
+        if (q.version) filter.version = q.version;
+        if (q.org) filter.org = q.org;
+        if (q.online) filter.online = q.online === 'true';
 
-        if (q.idx) filter.$or = [
-            { lead: q.idx },
-            { assign: q.idx },
-        ];
-        if (q.status) filter.status = q.status;
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);
@@ -28,91 +28,91 @@ export default class OrderController {
 
     public static async register(req: Request, res: Response) {
         try {
-            const order = new Order({ ...req.body, lead: req.user._id, assign: req.params.id });
-            await order.save();
+            const neo = new Neo(req.body);
+            await neo.save();
 
             const response: JsonResponse = {
                 success: true,
-                message: 'order register suyccess',
-                data: order
-            }
-            res.status(200).json(response);
+                message: 'Utilisateur enregistré avec succès',
+                data: neo
+            };
+
+            res.status(201).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-        
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-        
+
             res.status(500).json(response);
         }
     }
-
+    
     public static async retrieve(req: Request, res: Response) {
         try {
-            const order = await Order.findById(req.params.id);
-            if (!order) throw new Error('order not found');
+            const neo = await Neo.findById(req.params.id);
+            if (!neo) throw new Error('Utilisateur non trouvé');
 
             const response: JsonResponse = {
                 success: true,
-                message: 'order retrieved',
-                data: order
-            }
+                message: 'Utilisateur trouvé avec succès',
+                data: neo
+            };
+
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
+
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-        
+
             res.status(500).json(response);
         }
     }
 
     public static async list(req: Request, res: Response) {
         try {
-            const filter = OrderController.filter(req.query);
-            const options = {
-                page: parseInt(req.query.page as string) || 1,
-                limit: parseInt(req.query.limit as string) || 10,
-                sort: { createdAt: -1 }
-            };
-
-            const orders = await Order.paginate(filter, options);
+            const { page = 1, limit = 10 } = req.query;
+            const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
+            const neos = await Neo.paginate(NeoController.filters(req.query), options);
             const response: JsonResponse = {
                 success: true,
-                message: 'orders retrieved',
-                data: orders
-            }
+                message: 'Utilisateurs trouvés avec succès',
+                data: neos
+            };
+
             res.status(200).json(response);
         } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-        
+
             res.status(500).json(response);
         }
     }
 
     public static async update(req: Request, res: Response) {
         try {
-            const order = await Order.findById(req.params.id);
-            if (!order) throw new Error('order not found');
+            const neo = await Neo.findById(req.params.id);
+            if (!neo) throw new Error('Utilisateur non trouvé');
 
-            order.set(req.body);
-            await order.save();
+            Object.assign(neo, req.body);
+            await neo.save();
+
             const response: JsonResponse = {
                 success: true,
-                message: 'order updated',
-                data: order
-            }
+                message: 'Utilisateur mis à jour avec succès',
+                data: neo
+            };
+
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -121,21 +121,23 @@ export default class OrderController {
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-        
+
             res.status(500).json(response);
         }
     }
 
     public static async delete(req: Request, res: Response) {
         try {
-            const order = await Order.findById(req.params.id);
-            if (!order) throw new Error('order not found');
+            const neo = await Neo.findById(req.params.id);
+            if (!neo) throw new Error('Utilisateur non trouvé');
 
-            await order.deleteOne();
+            await neo.deleteOne();
             const response: JsonResponse = {
                 success: true,
-                message: 'order deleted'
-            }
+                message: 'Utilisateur supprimé avec succès',
+                data: neo
+            };
+
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -144,29 +146,28 @@ export default class OrderController {
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-        
+
             res.status(500).json(response);
         }
     }
 
     public static async count(req: Request, res: Response) {
         try {
-            const filter = OrderController.filter(req.query);
-            const count = await Order.countDocuments(filter);
+            const count = await Neo.countDocuments(NeoController.filters(req.query));
             const response: JsonResponse = {
                 success: true,
-                message: 'order count retrieved',
+                message: 'Nombre d\'utilisateurs trouvés avec succès',
                 data: count
-            }
+            };
+
             res.status(200).json(response);
         } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
                 error: error.message
             };
-        
+
             res.status(500).json(response);
         }
     }

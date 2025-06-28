@@ -22,6 +22,8 @@ const RateSchema = new Schema<IRate>({
     provider: String,
     fetchedAt: Date
 }, { timestamps: true });
-RateSchema.plugin(paginate)
+
+RateSchema.plugin(paginate);
+
 const Rate = mongoose.model<IRate, IRateModel>('Rate', RateSchema);
 export default Rate;

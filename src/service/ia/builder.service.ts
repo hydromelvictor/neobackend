@@ -1,5 +1,5 @@
 import { Types } from 'mongoose';
-import Agent from '../../models/ia/agent.models';
+import Neo from '../../models/users/neo.models';
 import Product from '../../models/market/product.models';
 import Sms from '../../models/network/message.models';
 import Attach from '../../models/network/attachment.models';
@@ -20,7 +20,7 @@ interface MemoryMessage {
 }
 
 export async function buildPrompt({ agentId, message, discussion }: BuildPromptOptions): Promise<string> {
-    const agent = await Agent.findById(agentId).populate('resources');
+    const agent = await Neo.findById(agentId).populate('resources');
     if (!agent) return 'Agent introuvable.';
 
     const products = await Product.find({ assign: agentId }).populate('bonus');
@@ -44,7 +44,7 @@ export async function buildPrompt({ agentId, message, discussion }: BuildPromptO
 
     const productDescriptions = products.map(product => {
         const bonusList = product.bonus.map((b: any) => `- ${b.name} (${b.price?.min}–${b.price?.max} F)`);
-        
+
         return `
             Nom: ${product.name}
             Description: ${product.description}
@@ -64,13 +64,10 @@ export async function buildPrompt({ agentId, message, discussion }: BuildPromptO
     }).join('\n\n');
 
     const memoryMessages = memory.map(m => {
-        return `[${
-            m.role === 'assistant' ? agent.fullname : 'Client'
-        }]: ${m.content}${
-            m.attachments?.length ? `\nPièces jointes: ${m.attachments.join(', ')}` : ''
-        }${
-            m.reactions?.length ? `\nRéactions: ${m.reactions.join(', ')}` : ''
-        }`;
+        return `[${m.role === 'assistant' ? agent.fullname : 'Client'
+            }]: ${m.content}${m.attachments?.length ? `\nPièces jointes: ${m.attachments.join(', ')}` : ''
+            }${m.reactions?.length ? `\nRéactions: ${m.reactions.join(', ')}` : ''
+            }`;
     }).join('\n');
 
     const prompt = `

@@ -1,17 +1,16 @@
 import { Request, Response } from "express";
 import { JsonResponse } from "../../types/api";
-import Order from '../../models/marketing/order.models';
+import Rating from "../../models/marketing/rating.models";
 
-
-export default class OrderController {
-    public static filter(q: any): any {
+export default class RatingController {
+    public static filters(q: any): any {
         const filter: any = {};
-
-        if (q.idx) filter.$or = [
-            { lead: q.idx },
-            { assign: q.idx },
-        ];
-        if (q.status) filter.status = q.status;
+        if (q.idx) {
+            filter.$or = [
+                { lead: q.idx },
+                { product: q.idx },
+            ];
+        }
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);
@@ -28,18 +27,17 @@ export default class OrderController {
 
     public static async register(req: Request, res: Response) {
         try {
-            const order = new Order({ ...req.body, lead: req.user._id, assign: req.params.id });
-            await order.save();
+            const rating = new Rating({ ...req.body, lead: req.user._id });
+            await rating.save();
 
             const response: JsonResponse = {
                 success: true,
-                message: 'order register suyccess',
-                data: order
+                message: 'rating registered',
+                data: rating
             }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
-        
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
@@ -52,13 +50,37 @@ export default class OrderController {
 
     public static async retrieve(req: Request, res: Response) {
         try {
-            const order = await Order.findById(req.params.id);
-            if (!order) throw new Error('order not found');
+            const rating = await Rating.findById(req.params.id);
+            if (!rating) throw new Error('rating not found');
 
             const response: JsonResponse = {
                 success: true,
-                message: 'order retrieved',
-                data: order
+                message: 'rating retrieved',
+                data: rating
+            }
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+        
+            res.status(500).json(response);
+        }
+    }
+
+    public static async retrieveProduct(req: Request, res: Response) {
+        try {
+            const rating = await Rating.find({ product: req.params.id });
+            if (!rating) throw new Error('rating not found');
+
+            const rate = rating.reduce((acc, cur) => acc + cur.rating, 0) / rating.length;
+            const response: JsonResponse = {
+                success: true,
+                message: 'rating retrieved',
+                data: rate
             }
             res.status(200).json(response);
         } catch (error: any) {
@@ -75,74 +97,26 @@ export default class OrderController {
 
     public static async list(req: Request, res: Response) {
         try {
-            const filter = OrderController.filter(req.query);
+            const filter = RatingController.filters(req.query);
             const options = {
                 page: parseInt(req.query.page as string) || 1,
                 limit: parseInt(req.query.limit as string) || 10,
                 sort: { createdAt: -1 }
             };
 
-            const orders = await Order.paginate(filter, options);
+            const ratings = await Rating.paginate(filter, options);
             const response: JsonResponse = {
                 success: true,
-                message: 'orders retrieved',
-                data: orders
+                message: 'ratings retrieved',
+                data: ratings
             }
             res.status(200).json(response);
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
+        } catch (err: any) {
+            console.error('Erreur lors de la validation du code:', err);
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
-                error: error.message
-            };
-        
-            res.status(500).json(response);
-        }
-    }
-
-    public static async update(req: Request, res: Response) {
-        try {
-            const order = await Order.findById(req.params.id);
-            if (!order) throw new Error('order not found');
-
-            order.set(req.body);
-            await order.save();
-            const response: JsonResponse = {
-                success: true,
-                message: 'order updated',
-                data: order
-            }
-            res.status(200).json(response);
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
-            const response: JsonResponse = {
-                success: false,
-                message: 'Erreur interne du serveur',
-                error: error.message
-            };
-        
-            res.status(500).json(response);
-        }
-    }
-
-    public static async delete(req: Request, res: Response) {
-        try {
-            const order = await Order.findById(req.params.id);
-            if (!order) throw new Error('order not found');
-
-            await order.deleteOne();
-            const response: JsonResponse = {
-                success: true,
-                message: 'order deleted'
-            }
-            res.status(200).json(response);
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
-            const response: JsonResponse = {
-                success: false,
-                message: 'Erreur interne du serveur',
-                error: error.message
+                error: err.message
             };
         
             res.status(500).json(response);
@@ -151,20 +125,20 @@ export default class OrderController {
 
     public static async count(req: Request, res: Response) {
         try {
-            const filter = OrderController.filter(req.query);
-            const count = await Order.countDocuments(filter);
+            const filter = RatingController.filters(req.query);
+            const count = await Rating.countDocuments(filter);
             const response: JsonResponse = {
                 success: true,
-                message: 'order count retrieved',
+                message: 'rating count retrieved',
                 data: count
             }
             res.status(200).json(response);
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
+        } catch (err: any) {
+            console.error('Erreur lors de la validation du code:', err);
             const response: JsonResponse = {
                 success: false,
                 message: 'Erreur interne du serveur',
-                error: error.message
+                error: err.message
             };
         
             res.status(500).json(response);

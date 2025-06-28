@@ -17,7 +17,7 @@ type ship = {
 export interface IOrd extends Document {
     _id: Types.ObjectId;
     lead: Schema.Types.ObjectId;
-    org: Schema.Types.ObjectId;
+    assign: Schema.Types.ObjectId;
     total: number;
     fee: number;
     items: item[];
@@ -32,10 +32,10 @@ const OrdSchema = new Schema<IOrd>({
         required: true,
         ref: 'Lead'
     },
-    org: {
+    assign: {
         type: Schema.Types.ObjectId,
         required: true,
-        ref: 'Org'
+        ref: 'Neo'
     },
     total: Number,
     fee: Number,

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Tracking from '../../models/marketing/tracking.models';
+import Tracking from '../../models/marketing/invoice.models';
 import { JsonResponse } from '../../types/api';
 
 
@@ -14,6 +14,16 @@ export default class TrackingController {
         if (q.effect) query.status = q.effect;
         if (q.from) query.from = q.from;
         if (q.to) query.to = q.to;
+        if (q.after) {
+            const now = new Date(q.after);
+            now.setHours(0, 0, 0, 0);
+            query.createdAt = { $gte: now };
+        }
+        if (q.before) {
+            const now = new Date(q.before);
+            now.setHours(0, 0, 0, 0);
+            query.createdAt = { $lte: now };
+        }
 
         return query;
     }
@@ -22,7 +32,7 @@ export default class TrackingController {
         try {
             const tracking = await Tracking.findById(req.params.id);
             if (!tracking) throw new Error('Tracking not found');
-            
+
             const response: JsonResponse = {
                 success: true,
                 message: 'Tracking retrieved successfully',

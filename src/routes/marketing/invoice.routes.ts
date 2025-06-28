@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate, device, permissions } from '../../middleware';
-import TrackingController from '../../controllers/marketing/tracking.controllers';
+import TrackingController from '../../controllers/marketing/invoice.controllers';
 
 const router = Router();
 

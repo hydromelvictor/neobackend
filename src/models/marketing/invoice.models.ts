@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-export interface Itrac extends Document {
+export interface Inv extends Document {
     _id: Types.ObjectId;
     type: 'deposit' | 'withdrawal' | 'payment';
     amount: number;
@@ -15,9 +15,9 @@ export interface Itrac extends Document {
     processedAt: Date;
 }
 
-interface ItraModel extends mongoose.PaginateModel<Itrac> {};
+interface InvModel extends mongoose.PaginateModel<Inv> {};
 
-const TraSchema = new Schema<Itrac>({
+const TraSchema = new Schema<Inv>({
     type: {
         type: String,
         enum: ['deposit', 'withdrawal', 'payment'],
@@ -56,4 +56,4 @@ const TraSchema = new Schema<Itrac>({
 
 TraSchema.plugin(paginate);
 
-export default mongoose.model<Itrac, ItraModel>('Tracking', TraSchema);
+export default mongoose.model<Inv, InvModel>('Invoice', TraSchema);

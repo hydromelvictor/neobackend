@@ -4,7 +4,7 @@ import Xaccount from '../../models/marketing/critical.models';
 import { JsonResponse } from '../../types/api';
 import orgModels from '../../models/associate/org.models';
 import mongoose from 'mongoose';
-import trackingModels from '../../models/marketing/tracking.models';
+import trackingModels from '../../models/marketing/invoice.models';
 
 
 export default class AccountController {
@@ -13,8 +13,6 @@ export default class AccountController {
 
         if (q.min) filter.balance.$gte = parseFloat(q.min);
         if (q.max) filter.balance.$lte = parseFloat(q.max);
-        if (q.online) filter.online = q.online === 'true';
-        if (q.auth) filter.isAuthenticated = q.auth === 'true';
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);
@@ -32,12 +30,12 @@ export default class AccountController {
     static async _in_bank(balance: number): Promise<boolean> {
         const system = await Xaccount.findByName('system');
         if (!system) throw new Error('Système non trouvé');
-        
+
         system.balance += balance;
         await system.save();
 
         // 
-        
+
         return true;
     }
 
@@ -212,8 +210,8 @@ export default class AccountController {
                             item.balance -= req.body.balance;
                         }
                     });
-                    await client.save();   
-                    
+                    await client.save();
+
                     await trackingModels.create({
                         type: 'withdrawal',
                         amount: balance + 0.05 * balance,
@@ -229,7 +227,7 @@ export default class AccountController {
                 const check = client.balance >= balance && balance > 0;
                 const neo = await Xaccount.findByName('neo');
                 if (!neo) throw new Error('Système non trouvé');
-                
+
                 if (check) {
                     // atomic
                     session.startTransaction();

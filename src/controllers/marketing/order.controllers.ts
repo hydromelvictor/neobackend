@@ -9,15 +9,25 @@ export default class OrderController {
 
         if (q.idx) filter.$or = [
             { lead: q.idx },
-            { org: q.idx }
-        ]
+            { assign: q.idx },
+        ];
+        if (q.after) {
+            const now = new Date(q.after);
+            now.setHours(0, 0, 0, 0);
+            filter.createdAt = { $gte: now };
+        }
+        if (q.before) {
+            const now = new Date(q.before);
+            now.setHours(0, 0, 0, 0);
+            filter.createdAt = { $lte: now };
+        }
 
         return filter;
     }
 
     public static async register(req: Request, res: Response) {
         try {
-            const order = new Order({ ...req.body, lead: req.user._id, org: req.params.id });
+            const order = new Order({ ...req.body, lead: req.user._id, assign: req.params.id });
             await order.save();
 
             const response: JsonResponse = {

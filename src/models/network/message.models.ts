@@ -26,20 +26,20 @@ const decrypt = (encryptedText: string) => {
 };
 
 export interface ISms extends Document {
-    discussion: Types.ObjectId;
+    room: Types.ObjectId;
     hote: Types.ObjectId;
     content: string;
-    state: 'text' | 'image' | 'video' | 'audio' | 'file' | 'sticker';
+    state: 'text' | 'external';
     read: boolean;
 }
 
 interface ISmsModel extends mongoose.PaginateModel<ISms> {};
 
 const SmSchema = new Schema<ISms>({
-    discussion: {
+    room: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'Discussion'
+        ref: 'Room'
     },
     hote: {
         type: mongoose.Schema.Types.ObjectId,
@@ -49,7 +49,7 @@ const SmSchema = new Schema<ISms>({
     content: String,
     state: {
         type: String,
-        enum: ['text', 'image', 'video', 'audio', 'file'],
+        enum: ['text', 'external'],
         default: 'text'
     },
     read: {
@@ -60,7 +60,7 @@ const SmSchema = new Schema<ISms>({
 SmSchema.plugin(paginate);
 
 SmSchema.pre('save', function (next) {
-    if (this.isModified('content') || this.isNew) {
+    if ((this.content && this.isModified('content')) || this.isNew) {
         this.content = encrypt(this.content);
     }
     next();

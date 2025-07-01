@@ -5,6 +5,7 @@ export interface Iprd extends Document {
     _id: Types.ObjectId;
     assign: Schema.Types.ObjectId;
     org: Schema.Types.ObjectId;
+    online: boolean;
     name: string;
     description: string;
     price: number[];
@@ -46,6 +47,10 @@ const prdSchema = new Schema<Iprd>({
             if (v[0] >= v[1]) return false;
             return true;
         }
+    },
+    online: {
+        type: Boolean,
+        default: true
     },
     stock: Number,
     category: String,

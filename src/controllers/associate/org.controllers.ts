@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Org from '../../models/associate/org.models';
 import Manager from '../../models/users/manager.model';
+import Settings from '../../models/associate/settings.models';
 import { JsonResponse } from '../../types/api';
 
 export default class OrgController {
@@ -16,12 +17,14 @@ export default class OrgController {
                 { address: regex },
                 { sector: regex },
                 { service: regex },
-                { area: regex }
+                { area: regex },
+                { employee: regex }
             ]
         }
 
         if (q.manager) filter.manager = q.manager;
         if (q.referer) filter.referer = q.referer;
+
         if (q.lat && q.lon && q.radius) {
             filter.location = {
                 $near: {
@@ -52,6 +55,8 @@ export default class OrgController {
                 message: 'L\'organisation a été enregistré avec succès',
                 data: org
             };
+
+            await Settings.create({ org: org._id });
 
             res.status(201).json(response);
         } catch (error: any) {

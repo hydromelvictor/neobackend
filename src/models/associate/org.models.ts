@@ -16,10 +16,12 @@ export interface IOrg extends Document {
     };
     phone: string[];
     email: string;
+    employees?: string;
     sector: string;
     service: string;
     area?: string;
     picture?: string;
+    client?: string;
     access: boolean;
 }
 
@@ -84,10 +86,17 @@ const orgSchema = new Schema<IOrg>({
         type: String,
         required: true
     },
+    employees: {
+        type: String,
+        default: '1 - 5'
+    },
     area: {
         type: String
     },
     picture: {
+        type: String
+    },
+    client: {
         type: String
     },
     access: {

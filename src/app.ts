@@ -20,6 +20,7 @@ import order from './routes/marketing/order.routes';
 import lead from './routes/users/lead.routes';
 import rating from './routes/marketing/rating.routes';
 import neo from './routes/users/neo.routes';
+import settings from './routes/associate/settings.routes';
 
 
 // import adminRts from './routes/holding/admin.routes';
@@ -73,7 +74,7 @@ app.use('/order', order);
 app.use('/lead', lead);
 app.use('/rating', rating);
 app.use('/neo', neo);
-
+app.use('/settings', settings);
 
 
 app.use('/admin', admin);

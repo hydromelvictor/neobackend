@@ -1,14 +1,14 @@
 import mongoose, { Schema, Document } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-export interface IDisc extends Document {
+export interface IRo extends Document {
     status: 'private' | 'public';
     name?: string;
 }
 
-interface IDiscModel extends mongoose.PaginateModel<IDisc> {};
+interface IRoModel extends mongoose.PaginateModel<IRo> {};
 
-const Disc = new Schema<IDisc>({
+const Roo = new Schema<IRo>({
     status: {
         type: String,
         enum: ['private', 'public'],
@@ -16,6 +16,6 @@ const Disc = new Schema<IDisc>({
     },
     name: String
 }, { timestamps: true })
-Disc.plugin(paginate);
-const Discussion = mongoose.model<IDisc, IDiscModel>('Discussion', Disc);
-export default Discussion;
+Roo.plugin(paginate);
+const Room = mongoose.model<IRo, IRoModel>('Room', Roo);
+export default Room;

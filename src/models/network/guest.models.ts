@@ -2,7 +2,7 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
 export interface IGuest extends Document {
-    discussion: Types.ObjectId;
+    room: Types.ObjectId;
     hote: Types.ObjectId;
     role: string;
 }
@@ -10,9 +10,9 @@ export interface IGuest extends Document {
 interface IGuestModel extends mongoose.PaginateModel<IGuest> {};
 
 const GuestSchema = new Schema<IGuest>({
-    discussion: {
+    room: {
         type: Schema.Types.ObjectId,
-        ref: 'Discussion',
+        ref: 'Room',
         required: true
     },
     hote: {
@@ -21,8 +21,7 @@ const GuestSchema = new Schema<IGuest>({
     },
     role: {
         type: String,
-        enum: ['lead', 'admin', 'manager', 'employee', 'neo'],
-        default: 'neo'
+        enum: ['lead', 'org']
     }
 }, { timestamps: true });
 GuestSchema.plugin(paginate);

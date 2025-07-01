@@ -13,6 +13,7 @@ export default class ProductController {
                 { org: q.idx }
             )
         }
+        if (q.online) filter.online = q.online === 'true';
         if (q.name) {
             const regex = { regex: q.name, options: 'i' };
             filter.$or.concat(

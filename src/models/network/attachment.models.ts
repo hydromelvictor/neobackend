@@ -23,7 +23,7 @@ const AttachSchema = new Schema<IAttach>({
         required: true
     },
     size: Number
-}, { timestamps: true })
+}, { timestamps: true });
 
 AttachSchema.plugin(paginate);
 const Attach = mongoose.model<IAttach, IAttachModel>('Attach', AttachSchema);

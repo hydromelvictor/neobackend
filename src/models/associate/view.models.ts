@@ -4,6 +4,7 @@ import paginate from 'mongoose-paginate-v2';
 export interface IView extends Document {
     status: Types.ObjectId;
     viewer: Types.ObjectId;
+    who: string;
 }
 
 interface IViewModel extends mongoose.PaginateModel<IView> {};
@@ -17,9 +18,8 @@ const ViewSchema = new Schema<IView>({
     viewer: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
-        ref: 'Lead'
     }
-}, { timestamps: true })
+}, { timestamps: true });
 
 ViewSchema.plugin(paginate);
 

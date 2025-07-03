@@ -6,6 +6,8 @@ import Sms from "../models/network/message.models"
 import Attach from "../models/network/attachment.models"
 import Reaction from "../models/network/reaction.models"
 import Org from "../models/associate/org.models"
+import { JsonResponse } from "../types/api"
+
 
 const rooms = (socket: Socket, io: any) => {
     socket.on('findOrCreateRoom', async (params) => {
@@ -51,9 +53,21 @@ const rooms = (socket: Socket, io: any) => {
                 // ajouter les guests au rooms
                 socket.join(data.room.toString());
             }
-            io.to(data.room).emit('findOrCreateRoom', data);
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'read in the room',
+                data: data
+            }
+            io.to(data.room).emit('findOrCreateRoom', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'read failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('findOrCreateRoom', response);
         }
     })
 
@@ -66,9 +80,21 @@ const rooms = (socket: Socket, io: any) => {
             }
             const rooms = await Room.paginate({}, options);
             const count = await Room.countDocuments();
-            io.to(socket.id).emit('findAllRooms', { rooms, count });
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'list rooms',
+                data: { rooms, count }
+            }
+            io.to(socket.id).emit('findAllRooms', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'list failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('findAllRooms', response);
         }
     })
 
@@ -78,9 +104,21 @@ const rooms = (socket: Socket, io: any) => {
             if (!room) throw new Error('room not found');
 
             socket.join(data.room);
-            io.to(socket.id).emit('joinRoom', room);
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'join in the room',
+                data: data
+            }
+            io.to(socket.id).emit('joinRoom', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'join failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('joinRoom', response);
         }
     })
 
@@ -97,18 +135,41 @@ const rooms = (socket: Socket, io: any) => {
             await Guest.deleteMany({ room: data.room });
             await Room.deleteOne({ _id: data.room });
 
-            io.to(socket.id).emit('leaveRoom', room);
+            const response: JsonResponse = {
+                success: true,
+                message: 'leave room',
+                data: room
+            }
+            io.to(socket.id).emit('leaveRoom', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'leave failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('leaveRoom', response);
         }
     })
 
     socket.on('myAllRooms', async () => {
         try {
             const rooms = await Guest.find({ hote: { $in: [socket.data.user._id, socket.data.user.org || ''] } });
-            io.to(socket.id).emit('myAllRooms', rooms);
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'list my all rooms',
+                data: rooms
+            }
+            io.to(socket.id).emit('myAllRooms', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'list failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('myAllRooms', response);
         }
     })
 
@@ -126,13 +187,24 @@ const rooms = (socket: Socket, io: any) => {
 
             if (sms.state !== 'external' && !sms.content) return;
             else {
-                if (data.attachments.length <= 0) return;
-                result.attachments = await Attach.insertMany(data.attachments);
+                result.attachments = (await Attach.find({ message: sms._id })).map(attach => attach._id);
             }
 
-            io.to(data.room).emit('sendSms', result);
+            const response: JsonResponse = {
+                success: true,
+                message: 'send sms in the room',
+                data: result
+            }
+
+            io.to(data.room).emit('sendSms', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'send sms failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('sendSms', response);
         }
     })
 
@@ -143,9 +215,24 @@ const rooms = (socket: Socket, io: any) => {
 
             sms.read = true;
             await sms.save();
-            io.to(data.room).emit('readSms', sms);
+
+            const attachments = await Attach.find({ message: sms._id });
+            const reactions = await Reaction.find({ message: sms._id });
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'read sms in the room',
+                data: { ...sms, attachments, reactions }
+            }
+            io.to(data.room).emit('readSms', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'read sms failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('readSms', response);
         }
     })
 
@@ -157,14 +244,94 @@ const rooms = (socket: Socket, io: any) => {
                 sort: { createdAt: -1 }
             }
             const sms = await Sms.paginate({ room: data.room }, options);
-            const count = await Sms.countDocuments({ room: data.room });
-            io.to(socket.id).emit('listSms', { sms, count });
+            const result = sms.docs.map(async (sms: any) => {
+                const attachments = await Attach.find({ message: sms._id });
+                const reactions = await Reaction.find({ message: sms._id });
+
+                return { ...sms, attachments, reactions };
+            })
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'read in the room',
+                data: result
+            }
+            io.to(data.room).emit('listSms', response);
         } catch (err: any) {
             console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'list sms failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('listSms', response);
         }
     })
 
-    
-}
+    socket.on('deleteSms', async (data) => {
+        try {
+            const sms = await Sms.findById(data.id);
+            if (!sms) throw new Error('sms not found');
+
+            await Attach.deleteMany({ message: sms._id });
+            await Reaction.deleteMany({ message: sms._id });
+            await sms.deleteOne();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'read in the room'
+            }
+            io.to(data.room).emit('deleteSms', response)
+        } catch (err: any) {
+            console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'delete sms failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('deleteSms', response);
+        }
+    })
+
+    socket.on('addReaction', async (data) => {
+        try {
+            await Reaction.create({ message: data.message, hote: socket.data.user._id, emoji: data.emoji });
+            const response: JsonResponse = {
+                success: true,
+                message: 'read in the room'
+            }
+
+            io.to(data.room).emit('addReaction', response);
+        } catch (err: any) {
+            console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'add reaction failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('addReaction', response);
+        }
+    })
+
+    socket.on('deleteReaction', async (data) => {
+        try {
+            await Reaction.deleteOne({ message: data.message, hote: socket.data.user._id });
+            const response: JsonResponse = {
+                success: true,
+                message: 'read in the room'
+            }
+            io.to(data.room).emit('deleteReaction', response);
+        } catch (err: any) {
+            console.log(err.message)
+            const response: JsonResponse = {
+                success: true,
+                message: 'add reaction failed',
+                error: err.message
+            }
+            io.to(socket.id).emit('addReaction', response);
+        }
+    })
+
+}  
 
 export default rooms;

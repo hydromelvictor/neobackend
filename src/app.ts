@@ -22,11 +22,9 @@ import rating from './routes/marketing/rating.routes';
 import neo from './routes/users/neo.routes';
 import settings from './routes/associate/settings.routes';
 import status from './routes/associate/status.routes';
+import admin from './routes/users/admin.routes';
 
 
-
-// import adminRts from './routes/holding/admin.routes';
-import admin from './routes/holding/admin.routes'
 
 import swaggerUi from 'swagger-ui-express';
 import YAML from 'yamljs';
@@ -78,8 +76,6 @@ app.use('/rating', rating);
 app.use('/neo', neo);
 app.use('/settings', settings);
 app.use('/status', status);
-
-
 app.use('/admin', admin);
 
 export default app;

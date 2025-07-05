@@ -7,10 +7,16 @@ import Attach from "../models/network/attachment.models"
 import Reaction from "../models/network/reaction.models"
 import Org from "../models/associate/org.models"
 import { JsonResponse } from "../types/api"
+import device from "./device.websocket"
+import permission from "./permissions.websockets"
+
 
 
 const rooms = (socket: Socket, io: any) => {
     socket.on('findOrCreateRoom', async (params) => {
+        io.use(device('INIT CHAT'));
+        io.use(permission('INIT-CHAT'));
+
         try {
             const room = await Room.findById(params.id);
             let data: any = {};
@@ -72,6 +78,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('findAllRooms', async (data) => {
+        io.use(device('LIST CHAT'));
+        io.use(permission('LIST-CHAT'));
+
         try {
             const options = {
                 page: parseInt(data.page),
@@ -99,6 +108,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('joinRoom', async (data) => {
+        io.use(device('JOIN ROOM CHAT'));
+        io.use(device('JOIN-CHAT'));
+
         try {
             const room = await Room.findById(data.room);
             if (!room) throw new Error('room not found');
@@ -123,6 +135,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('leaveRoom', async (data) => {
+        io.use(device('LEAVE ROOM CHAT'));
+        io.use(device('LEAVE-CHAT'));
+
         try {
             const room = await Room.findById(data.room);
             if (!room) throw new Error('room not found');
@@ -153,6 +168,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('myAllRooms', async () => {
+        io.use(device('PERSONAL LIST CHAT'));
+        io.use(device('PERSONAL-CHAT'));
+
         try {
             const rooms = await Guest.find({ hote: { $in: [socket.data.user._id, socket.data.user.org || ''] } });
 
@@ -174,6 +192,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('sendSms', async (data) => {
+        io.use(device('SEND CHAT'));
+        io.use(device('SEND-CHAT'));
+
         try {
             const sms = await Sms.create({ room: data.room, hote: socket.data.user._id, content: data.content, state: data.state });
             
@@ -209,6 +230,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('readSms', async (data) => {
+        io.use(device('READ CHAT'));
+        io.use(device('READ-CHAT'));
+
         try {
             const sms = await Sms.findById(data.id);
             if (!sms) throw new Error('sms not found');
@@ -237,6 +261,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('listSms', async (data) => {
+        io.use(device('LIST CHAT'));
+        io.use(device('LIST-CHAT'));
+    
         try {
             const options = {
                 page: parseInt(data.page),
@@ -269,6 +296,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('deleteSms', async (data) => {
+        io.use(device('DELETE CHAT'));
+        io.use(device('DELETE-CHAT'));
+
         try {
             const sms = await Sms.findById(data.id);
             if (!sms) throw new Error('sms not found');
@@ -294,6 +324,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('addReaction', async (data) => {
+        io.use(device('ADD REACT'));
+        io.use(device('ADD-REACT'));
+
         try {
             await Reaction.create({ message: data.message, hote: socket.data.user._id, emoji: data.emoji });
             const response: JsonResponse = {
@@ -314,6 +347,9 @@ const rooms = (socket: Socket, io: any) => {
     })
 
     socket.on('deleteReaction', async (data) => {
+        io.use(device('DELETE REACT'));
+        io.use(device('DELETE-REACT'));
+        
         try {
             await Reaction.deleteOne({ message: data.message, hote: socket.data.user._id });
             const response: JsonResponse = {

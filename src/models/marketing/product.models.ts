@@ -66,7 +66,7 @@ const prdSchema = new Schema<Iprd>({
     },
     ondemand: String,
     warranty: String,
-     bonus: [{
+    bonus: [{
         type: Schema.Types.ObjectId,
         ref: 'Product'
     }]

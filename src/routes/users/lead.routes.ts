@@ -4,6 +4,12 @@ import LeadController from '../../controllers/users/lead.controllers';
 
 const router = Router();
 
+router.post(
+    '/',
+    device('SAVE LEAD'),
+    LeadController.register
+);
+
 router.get(
     '/:id',
     authenticate,

@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import Admin from '../../models/holding/admin.models';
+import Admin from '../../models/users/admin.models';
 import { JsonResponse } from '../../types/api';
 import { addToBlacklist, OneUseToken, validateAndUseCode } from '../../helpers/codecs.helpers';
 import gmail from '../../helpers/gmail.helpers';

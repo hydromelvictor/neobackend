@@ -198,19 +198,4 @@ export default class OrgController {
             res.status(500).json(response);
         }
     }
-
-    public static async validate(req: Request, res: Response) {
-        try {
-
-        } catch (error: any) {
-            console.error('Erreur lors de la récupération de l\'organisation:', error);
-            const response: JsonResponse = {
-                success: false,
-                message: 'Erreur interne du serveur',
-                error: error.message
-            };
-      
-            res.status(500).json(response);
-        }
-    }
 }

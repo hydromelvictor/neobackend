@@ -177,176 +177,106 @@ components:
           type: string
         data:
           type: object
+    
+    Referer:
+      type: object
+      properties:
+        fullname:
+          type: string
+        country:
+          type: string
+        city:
+          type: string
+        position:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+        picture:
+          type: string
+          format: url
+          description: lien vers l'avatar du referant
+        password:
+          type: string
+        click:
+          type: number
+        online:
+          type: boolean
+          description: permet d'identifier un utilisateur en ligne
+        isAuthenticated:
+          type: boolean
+          description: permet d'identifier un utilisateur authentifier
+        authorization:
+          type: array
+          items:
+            type: string
+        disconnected:
+          type: string
+          description: dernier date de deconnexion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Neo:
+      type: object
+      required:
+        - org
+        - sex
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant
+        org: 
+          type: string
+          format: ObjectId
+          description: identifiant de l'organisation proprietaire
+        fullname:
+          type: string
+        picture:
+          type: string
+          format: url
+          description: lien vers l'avatar du lead
+        online:
+          type: boolean
+          description: definis si neo est actif ou non
+        responsability: 
+          type: string
+          description: role de l'agent ia
+        sex:
+          type: string
+          enum:
+            - F
+            - M
+        mission:
+          type: string
+          description: que devrais faire neo
+        context:
+          type: string
+          description: en tant que ?
+        task:
+          type: string
+          description: comment accomplir la mission
+        version:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
 
     Manager:
       type: object
       required:
-        - firstname
-        - lastname
-        - phone
-        - email
-        - position
-      properties:
-        _id:
-          type: string
-          format: ObjectId
-          description: identifiant unique
-        firstname:
-          type: string
-          description: prenoms
-        lastname:
-          type: string
-          description: nom
-        phone:
-          type: string
-          description: numero telephonique personnel
-        email:
-          type: string
-          description: adresse mail personnel
-        picture:
-          type: string
-          description: lien vers l'image de profil
-        position:
-          type: string
-          description: poste occupé
-        online:
-          type: boolean
-          description: permet d'identifier un utilisateur en ligne
-        isAuthenticated:
-          type: boolean
-          description: permet d'identifierun utilisateur authentifier
-        authorization:
-          type: array
-          items:
-            type: string
-          description: definis les authorisation des utilisateurs
-        disconnected:
-          type: string
-          description: dernier date de deconnexion
-        createdAt:
-          type: string
-          format: date-time
-          description: date de creation de l'utilisateur
-        updatedAt:
-          type: string
-          format: date-time
-          description: derniere mis a jour de l'utilisateur
-
-    Admin:
-      type: object
-      required:
-        - firstname
-        - lastname
-        - phone
-        - email
-        - cni
-      properties:
-        _id:
-          type: string
-          format: ObjectId
-          description: identifiant unique
-        firstname:
-          type: string
-          description: prenoms
-        lastname:
-          type: string
-          description: nom
-        picture:
-          type: string
-          description: lien vers l'image de profil
-        phone:
-          type: string
-          description: numero telephonique personnel
-        email:
-          type: string
-          description: adresse mail personnel
-        cni:
-          type: string
-          description: numero de piece identité national
-        position:
-          type: string
-          description: fonction
-        authority:
-          type: boolean
-          description: defini le superadmin l'utilisateur ayant absolument tout les droit
-        online:
-          type: boolean
-          description: permet d'identifier un utilisateur en ligne
-        isAuthenticated:
-          type: boolean
-          description: permet d'identifierun utilisateur authentifier
-        staff:
-          type: boolean
-          description: permet d'identifier les admins
-        authorization:
-          type: array
-          items:
-            type: string
-          description: definis les authorisation des utilisateurs
-        disconnected:
-          type: string
-          description: dernier date de deconnexion
-        createdAt:
-          type: string
-          format: date-time
-          description: date de creation de l'utilisateur
-        updatedAt:
-          type: string
-          format: date-time
-          description: derniere mis a jour de l'utilisateur
-
-    Lead:
-      type: object
-      properties:
-        _id:
-          type: string
-          format: ObjectId
-          description: identifiant unique
-        firstname:
-          type: string
-          description: prenoms
-        lastname:
-          type: string
-          description: nom
-        picture:
-          type: string
-          description: lien vers l'image de profil
-        phone:
-          type: string
-          description: numero telephonique personnel
-        address:
-          type: string
-          description: lieu d'habitation
-        online:
-          type: boolean
-          description: permet d'identifier un utilisateur en ligne
-        isAuthenticated:
-          type: boolean
-          description: permet d'identifierun utilisateur authentifier
-        staff:
-          type: boolean
-          description: permet d'identifier les admins
-        authorization:
-          type: array
-          items:
-            type: string
-          description: definis les authorisation des utilisateurs
-        disconnected:
-          type: string
-          description: dernier date de deconnexion
-        createdAt:
-          type: string
-          format: date-time
-          description: date de creation de l'utilisateur
-        updatedAt:
-          type: string
-          format: date-time
-          description: derniere mis a jour de l'utilisateur
-
-    Member:
-      type: object
-      required:
-        - org
         - firstname
         - lastname
         - email
@@ -358,54 +288,69 @@ components:
           type: string
           format: ObjectId
           description: identifiant unique
-        org:
-          type: string
-          format: ObjectId
-          description: identifiant de l'organisation proprietaire
         firstname:
           type: string
-          description: prenoms
         lastname:
           type: string
-          description: nom
-        phone:
-          type: string
-          description: numero telephonique personnel
         email:
           type: string
-          description: adresse mail personnel
+        phone:
+          type: string
         picture:
           type: string
-          description: photo de profil
+          format: url
+          description: lien vers l'avatar du manager
         position:
           type: string
-          description: fonction
         password:
           type: string
-          description: >
-            mot de pass fort
-            - 8 caracteres
-            - une lettre majuscule minimum
-            - une lettre minuscule minimum
-            - un chiffre minimum
-            - un caractere special minimum
-        authority:
-          type: boolean
-          description: defini le membre ayant droit de modification des donnees de l'entreprise
         online:
           type: boolean
           description: permet d'identifier un utilisateur en ligne
         isAuthenticated:
           type: boolean
-          description: permet d'identifierun utilisateur authentifier
-        staff:
-          type: boolean
-          description: permet d'identifier les admins
+          description: permet d'identifier un utilisateur authentifier
         authorization:
           type: array
           items:
             type: string
-          description: definis les authorisation des utilisateurs
+        disconnected:
+          type: string
+          description: dernier date de deconnexion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+    
+    Lead:
+      type: object
+      properties:
+        firstname:
+          type: string
+        lastname:
+          type: string
+        picture:
+          type: string
+          format: url
+          description: lien vers l'avatar du lead
+        phone:
+          type: string
+        address:
+          type: string
+        online:
+          type: boolean
+          description: permet d'identifier un utilisateur en ligne
+        isAuthenticated:
+          type: boolean
+          description: permet d'identifier un utilisateur authentifier
+        authorization:
+          type: array
+          items:
+            type: string
         disconnected:
           type: string
           description: dernier date de deconnexion
@@ -418,16 +363,63 @@ components:
           format: date-time
           description: derniere mis a jour de l'utilisateur
 
-    Mentor:
+    Employee:
       type: object
       required:
-        - firstname
-        - lastname
-        - country
-        - city
-        - position
+        - org
+        - fullname
+        - email
+        - phone
+        - password
+      properties:
+        org:
+          type: string
+          format: ObjectId
+          description: identifiant de l'organisation proprietaire
+        fullname:
+          type: string
+          description: nom complet de l'employer
+        email:
+          type: string
+        phone:
+          type: string
+        picture:
+          type: string
+          format: url
+          description: lien vers l'avatar de l'employer
+        password:
+          type: string
+        online:
+          type: boolean
+          description: permet d'identifier un utilisateur en ligne
+        isAuthenticated:
+          type: boolean
+          description: permet d'identifier un utilisateur authentifier
+        isVerified:
+          type: boolean
+          description: permet d'identifier un utilisateur verifie
+        authorization:
+          type: array
+          items:
+            type: string
+        disconnected:
+          type: string
+          description: dernier date de deconnexion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+    
+    Admin:
+      type: object
+      required:
         - phone
         - email
+        - cni
       properties:
         _id:
           type: string
@@ -435,60 +427,774 @@ components:
           description: identifiant unique
         firstname:
           type: string
-          description: prenoms
         lastname:
           type: string
-          description: nom
-        country:
+        picture:
           type: string
-          description: pays d'habitation
-        city:
-          type: string
-          description: ville d'habitation
-        position:
-          type: string
-          description: fonction
+          format: url
         phone:
           type: string
           description: numero telephonique personnel
         email:
           type: string
-          description: adresse mail personnel
-        picture:
+        cni:
           type: string
-          description: lien vers l'image de profil
-        password:
+          description: Carte National d'Identité
+        position:
           type: string
-          description: >
-            mot de pass fort
-            - 8 caracteres
-            - une lettre majuscule minimum
-            - une lettre minuscule minimum
-            - un chiffre minimum
-            - un caractere special minimum
-        codecs:
+        recovery:
           type: string
-          description: code de parainage
-        referClick:
-          type: number
-          description: nombre de fois le lien est cliquer
         online:
           type: boolean
           description: permet d'identifier un utilisateur en ligne
         isAuthenticated:
           type: boolean
-          description: permet d'identifierun utilisateur authentifier
-        staff:
-          type: boolean
-          description: permet d'identifier les admins
+          description: permet d'identifier un utilisateur authentifier
         authorization:
           type: array
           items:
             type: string
-          description: definis les authorisation des utilisateurs
         disconnected:
           type: string
           description: dernier date de deconnexion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+    
+    Notify:
+      type: object
+      description: >
+        toute type de notification
+      required:
+        - name
+        - path
+        - expired
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        state:
+          type: string
+          enum:
+            - flottant
+            - avatar
+            - push
+        image:
+          type: string
+          format: url
+          description: lien vers l'image
+        avatar:
+          type: string
+          format: url
+          description: lien vers l'avatar
+        name:
+          type: string
+          description: nom du chemin demander
+        path:
+          type: string
+          format: url
+          description: lien du chemin demander
+        target:
+          type: string
+          description: zone cible
+        message:
+          type: string
+          description: message associer
+        expired:
+          type: string
+          format: date-time
+          description: date d'expiration du chemin
+        status:
+          type: string
+          enum:
+            - pending
+            - running
+            - pass
+          description: status
+        view:
+          type: object
+          properties:
+            size: 
+              type: number
+            interested:
+              type: number
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Device:
+      type: object
+      description: >
+        historique des action sur la plateforme
+      properties:
+        hote:
+          type: string
+          format: ObjectId
+          description: identifiant du hote
+        path:
+          type: string
+          format: url
+          description: lien du chemin demander
+        type: 
+          type: string
+          description: nommer l'action
+        method:
+          type: string
+          description: method lie au chemin demander
+        ip:
+          type: string
+          description: addresse ip
+        agent: 
+          type: string
+          description: user agent
+        browser:
+          type: string
+          description: navigateur utiliser
+        os: 
+          type: string
+          description: systeme d'exploitation utiliser
+        location:
+          type: object
+          properties:
+            country:
+              type: string
+            city:
+              type: string
+            region:
+              type: string
+            lat:
+              type: number
+            lon:
+              type: number
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Reaction:
+      type: object
+      description: >
+        reaction a un message envoyer
+      required:
+        - message
+        - hote
+        - emoji
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant
+        message:
+          type: string
+          format: ObjectId
+          description: identifiant du message
+        hote:
+          type: string
+          format: ObjectId
+          description: identifiant du hote
+        emoji:
+          type: string
+          description: emoji du message
+    
+    Sms:
+      type: object
+      description: >
+        message dans la disccussion
+      required:
+        - room
+        - hote
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        room:
+          type: string
+          format: ObjectId
+          description: identifiant de la disccussion
+        hote:
+          type: string
+          format: ObjectId
+          description: identifiant du hote
+        content:
+          type: string
+          description: contenu du message
+        state:
+          type: string
+          enum:
+            - text
+            - external
+          description: etat du message
+        read:
+          type: boolean
+          description: message lu ou non
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Guest:
+      type: object
+      description: >
+        les intervenant dans la disccussion
+      required:
+        - room
+        - hote
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        room:
+          type: string
+          format: ObjectId
+          description: identifiant de la disccussion
+        hote:
+          type: string
+          format: ObjectId
+          description: identifiant du hote
+        role:
+          type: string
+          description: role du hote dans la disccussion
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Room:
+      type: object
+      description: >
+        disccussion
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        name:
+          type: string
+          description: nom de la room
+        status:
+          type: string
+          enum:
+            - private
+            - public
+          description: status de la room
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Attach:
+      type: object
+      description: >
+        fichier associer au message envoyer
+      required:
+        - message
+        - type
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        message:
+          type: string
+          format: ObjectId
+          description: identifiant du message
+        path:
+          type: string
+          format: url
+          description: lien vers le fichier uploader
+        type:
+          type: string
+          enum:
+            - image
+            - video
+            - audio
+            - file
+          description: type de fichier
+
+    Rating:
+      type: object
+      description: >
+        note d'un lead
+      required:
+        - lead
+        - product
+      properties:
+        lead:
+          type: string
+          format: ObjectId
+          description: identifiant du lead
+        product:
+          type: string
+          format: ObjectId
+          description: identifiant du product
+        rating:
+          type: number
+          maximum: 5
+          minimum: 0
+          description: note du lead
+        avis:
+          type: string
+          description: avis du lead
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Product:
+      type: object
+      description: >
+        produit a vendre
+      required:
+        - org
+      properties:
+        assign:
+          type: string
+          format: ObjectId
+          description: identifiant de l'agent ia
+        org:
+          type: string
+          format: ObjectId
+          description: identifiant de l'organisation proprietaire
+        name:
+          type: string
+          description: nom du produit
+        description:
+          type: string
+          description: description du produit
+        price:
+          type: number
+          description: prix de vente du produit
+        online:
+          type: boolean
+          description: permet d'identifier le produit mis en vente
+        stock:
+          type: number
+          description: stock du produit
+        category:
+          type: string
+          description: categorie du produit
+        media:
+          type: array
+          items:
+            type: string
+            format: url
+          description: images/videos du produit
+        brand:
+          type: string
+          description: marque du produit
+        features:
+          type: array
+          items:
+            type: string
+          description: caracteristiques du produit
+        address:
+          type: string
+          description: lieu de vente du produit
+        sizes:
+          type: array
+          items:
+            type: string
+          description: taille du produit
+        colors:
+          type: array
+          items:
+            type: string
+          description: couleur du produit
+        delivery:
+          type: object
+          properties:
+            in:
+              type: number
+              description: prix de livraison dans la zone de vente
+            out: 
+              type: number
+              description: prix de livraison en dehors de la zone de vente
+        ondemand:
+          type: string
+          description: definis le type de service livraison/...
+        warranty:
+          type: string
+          description: definis la garantie du produit
+        bonus:
+          type: array
+          items:
+            type: object
+            format: Product
+    
+    Order:
+      type: object
+      description: >
+        commande de vente de produit
+      required:
+        - lead
+        - assign
+        - items
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        lead:
+          type: string
+          format: ObjectId
+          description: identifiant du lead
+        assign:
+          type: string
+          format: ObjectId
+          description: identifiant de l'agent ia 
+        total:
+          type: number
+          description: montant total de la commande
+        fee:
+          type: number
+          description: impots
+        items:
+          type: array
+          items:
+            type: object
+            required:
+              - product
+              - quantity
+              - price
+            properties:
+              product:
+                type: string
+                format: ObjectId
+              quantity:
+                type: number
+              price:
+                type: number
+        shipment:
+          type: object
+          properties:
+            when:
+              type: string
+              format: date-time
+            where:
+              type: string
+            fee:
+              type: number
+        status:
+          type: string
+          enum:
+            - init
+            - doing
+            - done
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Invoice:
+      type: object
+      description: >
+        facture de vente de produit
+      required:
+        - type
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        type:
+          type: string
+          description: type de facture
+        amount:
+          type: number
+          description: montant de la facture
+        currency:
+          type: string
+          description: devise de la facture
+        exchangeRate:
+          type: number
+          description: taux de conversion
+        status:
+          type: string
+          enum:
+            - pending
+            - completed
+            - failed
+            - cancelled
+          description: statut de la facture
+        description:
+          type: string
+          description: description de la facture
+        from:
+          type: string
+          format: ObjectId
+          description: expediteur de la facture
+        to:
+          type: string
+          format: ObjectId
+          description: destinataire de la facture
+        processedAt:
+          type: string
+          format: date-time
+          description: date de traitement de la facture
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Xaccount:
+      type: object
+      description: >
+        compte des admins
+      required:
+        - name
+        - balance
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        name:
+          type: string
+          description: nom du compte
+        balance:
+          type: number
+          description: solde de l'utilisateur
+
+    Account:
+      type: object
+      description: >
+        compte du manager
+      required:
+        - owner
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        owner:
+          type: string
+          format: ObjectId
+          description: identifiant de l'utilisateur proprietaire
+        currency:
+          type: string
+          description: devise de l'application
+        balance:
+          type: number
+          description: solde de l'utilisateur
+        assign:
+          type: array
+          items:
+            type: object
+            properties:
+              org:
+                type: string
+                format: ObjectId
+              balance:
+                type: number
+          description: assigner des fonds au organisation du manager
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Relance:
+      type: object
+      description: >
+        rendez-vous de relancement du lead
+      required:
+        - assign
+        - lead
+        - relance
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        assign:
+          type: string
+          format: ObjectId
+          description: identifiant de l'agent ia a la charge du relancement
+        lead:
+          type: string
+          format: ObjectId
+          description: identifiant du lead
+        relance:
+          type: string
+          format: date-time
+          description: date de relancement du lead
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Rate:
+      type: object
+      description: >
+        taux de conversion
+      properties:
+        base:
+          type: number
+          description: monnaie de base
+        target:
+          type: number
+          description: monnaie de conversion
+        rate:
+          type: number
+          description: taux de conversion
+        provider:
+          type: string
+          description: fournisseur de conversion
+        fetchedAt:
+          type: string
+          format: date-time
+          description: date de recuperation des donnees
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+    
+    Status:
+      type: object
+      description: >
+        status d'une organisation
+      required:
+        - org
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        org:
+          type: string
+          format: ObjectId
+          description: identifiant de l'organisation proprietaire
+        media:
+          type: string
+          format: url
+          description: lien vers le fichier uploader
+        text:
+          type: string
+          description: message associer au status
+        link: 
+          type: string
+          format: url
+          description: lien associer au status
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    View:
+      type: object
+      description: >
+        vue d'un status
+      required:
+        - status
+        - viewer
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        status:
+          type: string
+          format: ObjectId
+          description: identifiant du status
+        viewer:
+          type: string
+          format: ObjectId
+          description: identifiant du viewer
+        createdAt:
+          type: string
+          format: date-time
+          description: date de creation de l'utilisateur
+        updatedAt:
+          type: string
+          format: date-time
+          description: derniere mis a jour de l'utilisateur
+
+    Settings:
+      type: object
+      description: >
+        settings d'un organisation
+      required:
+        - org
+      properties:
+        _id:
+          type: string
+          format: ObjectId
+          description: identifiant unique
+        org:
+          type: string
+          format: ObjectId
+          description: identifiant de l'organisation proprietaire
+        relance:
+          type: boolean
+          description: definis si les relance sont automatique ou non
+        status:
+          type: boolean
+          description: publiction en status ou non
+        lang:
+          type: string
+          description: langue de l'application
+        currency:
+          type: string
+          description: devise de l'application
+        country:
+          type: string
+          description: pays de l'application
         createdAt:
           type: string
           format: date-time
@@ -500,8 +1206,13 @@ components:
 
     Org:
       type: object
+      description: >
+        organisation ayant des produit a vendre et gerer par un manager
+        elle possede:
+        - un settings pour la gestion de ces parametre personnel
       required:
         - reason
+        - manager
         - social
         - country
         - state
@@ -510,13 +1221,15 @@ components:
         - phone
         - email
         - sector
-        - service
-        - area
       properties:
         reason:
           type: string
           description: nom de l'organisation
-        mentor:
+        manager:
+          type: string
+          format: ObjectId
+          description: identifiant du manager de l'organisation
+        referer:
           type: string
           format: ObjectId
           description: identifiant du referant
@@ -569,12 +1282,21 @@ components:
         service:
           type: string
           description: service fournis
+        employees:
+          type: string
+          description: interval du nombre d'employes
         area:
           type: string
           description: zone d'action
         picture:
           type: string
           description: photo de profil de l'organisation
+        client:
+          type: string
+          description: type de client
+        access:
+          type: boolean
+          description: definis si l'organisation est operationnel ou non
 
     Credentials:
       type: object

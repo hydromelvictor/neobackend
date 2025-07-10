@@ -1,10 +1,10 @@
 import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
-export interface IAnnonce extends Document {
+export interface Inot extends Document {
     state: 'flottant' | 'avatar' | 'push';
     image: string;
-    avatar: Types.ObjectId;
+    avatar: string;
     name: string;
     path: string;
     target: {
@@ -20,18 +20,15 @@ export interface IAnnonce extends Document {
     }
 }
 
-interface IAnnonceModel extends mongoose.PaginateModel<IAnnonce> {};
+interface INModel extends mongoose.PaginateModel<Inot> {};
 
-const AnnonceSchema = new Schema<IAnnonce>({
+const NotSchema = new Schema<Inot>({
     state: {
         type: String,
         enum: ['flottant', 'avatar', 'push']
     },
     image: String,
-    avatar: { 
-        type: mongoose.Schema.Types.ObjectId,
-        required: true 
-    },
+    avatar: String,
     name: {
         type: String,
         required: true
@@ -68,6 +65,7 @@ const AnnonceSchema = new Schema<IAnnonce>({
         }
     }
 }, { timestamps: true });
-AnnonceSchema.plugin(paginate);
-const Annonce = mongoose.model<IAnnonce, IAnnonceModel>('Annonce', AnnonceSchema);
-export default Annonce;
+
+NotSchema.plugin(paginate);
+const Notify = mongoose.model<Inot, INModel>('Annonce', NotSchema);
+export default Notify;

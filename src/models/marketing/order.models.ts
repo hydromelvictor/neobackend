@@ -50,7 +50,10 @@ const OrdSchema = new Schema<IOrd>({
             type: Number,
             default: 1
         },
-        price: Number
+        price: {
+            type: Number,
+            required: true
+        }
     }],
     shipment: {
         when: Date,

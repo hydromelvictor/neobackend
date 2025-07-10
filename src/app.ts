@@ -23,6 +23,7 @@ import neo from './routes/users/neo.routes';
 import settings from './routes/associate/settings.routes';
 import status from './routes/associate/status.routes';
 import admin from './routes/users/admin.routes';
+import automate from './routes/automation.routes';
 
 
 
@@ -77,5 +78,7 @@ app.use('/neo', neo);
 app.use('/settings', settings);
 app.use('/status', status);
 app.use('/admin', admin);
+app.use('/automate', automate);
+
 
 export default app;

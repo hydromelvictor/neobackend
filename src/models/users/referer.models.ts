@@ -44,7 +44,6 @@ const RefSchema = new Schema<Iref>({
     password: String,
     online: Boolean,
     isAuthenticated: Boolean,
-    staff: Boolean,
     disconnected: String,
     promo: {
         type: String,

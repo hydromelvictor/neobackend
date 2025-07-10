@@ -2,6 +2,7 @@ import { Socket } from "socket.io";
 import { verifyToken } from "../helpers/token.helpers";
 import { JsonResponse } from "../types/api";
 import rooms from './rooms.websocket';
+import notify from "./notify.websocket";
 import mongoose from "mongoose";
 
 
@@ -41,6 +42,7 @@ const handler = (io: any) => {
         console.log('a user connected');
 
         rooms(socket, io);
+        notify(socket, io);
 
         socket.on('disconnect', () => {
             console.log('user disconnected');

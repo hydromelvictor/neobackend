@@ -30,6 +30,30 @@ export default class LeadController {
         return filter;
     }
 
+    public static async register(req: Request, res: Response) {
+        try {
+            const lead = new Lead();
+            lead.online = true;
+            lead.isAuthenticated = true;
+            lead.disconnected = '';
+            
+            await lead.save();
+            const response: JsonResponse = {
+                success: true,
+                message: 'lead registered',
+                data: lead
+            }
+            res.status(201).json(response);
+        } catch (err: any) {
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du server',
+                error: err.message
+            }
+            res.status(500).json(response);
+        }
+    }
+
     public static async retrieve(req: Request, res: Response) {
         try {
             const lead = await Lead.findByPhone(req.params.id);

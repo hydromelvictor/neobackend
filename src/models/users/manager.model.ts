@@ -104,12 +104,6 @@ const ManSchema = new Schema<IMan>({
     }
 });
 
-// Add indexes for better performance
-ManSchema.index({ email: 1 });
-ManSchema.index({ phone: 1 });
-ManSchema.index({ online: 1 });
-ManSchema.index({ isAuthenticated: 1 });
-
 ManSchema.plugin(paginate);
 
 // Improved pre-save hook

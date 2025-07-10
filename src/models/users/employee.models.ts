@@ -78,12 +78,6 @@ const EmSchema = new Schema<IEm>({
     timestamps: true
 });
 
-EmSchema.index({ email: 1 });
-EmSchema.index({ phone: 1 });
-EmSchema.index({ isVerified: 1 });
-EmSchema.index({ isAuthenticated: 1 });
-EmSchema.index({ online: 1 });
-
 EmSchema.plugin(paginate);
 
 EmSchema.pre('save', async function (next) {

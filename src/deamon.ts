@@ -4,9 +4,8 @@ dotenv.config();
 
 import EventEmitter from "events";
 import { OneUseToken } from './helpers/codecs.helpers';
-import Admin from './models/holding/admin.models';
+import Admin from './models/users/admin.models'
 import Rate from './models/automation/rate.models';
-import { Authorization } from './utils/authorize.utils';
 import axios from 'axios';
 
 
@@ -22,9 +21,8 @@ const admin = {
     email: 'support@neo.com',
     cni: 'neo-cni',
     position: 'System',
-    authority: true,
     recovery: OneUseToken(),
-    authorization: Authorization
+    authorization: []
 }
 
 

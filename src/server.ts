@@ -7,7 +7,8 @@ import { Server as SocketIOServer } from 'socket.io';
 
 // modules perso
 import app from './app';
-import handler from './socket';
+import handler from './websocket';
+import automate from './automate';
 import init, { serverEvents } from './deamon';
 
 // Fonction pour normaliser le port
@@ -69,6 +70,8 @@ serverEvents.on('start', async () => {
   await init();
   console.log('Daemon started');
 });
+
+automate.startAll();
 
 server.listen(port, () => {
   console.log(`Start Server on port ${port}`);

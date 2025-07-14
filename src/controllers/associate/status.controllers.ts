@@ -35,10 +35,11 @@ export default class StatusController {
                 view = await View.create({ status: req.params.id, viewer: req.user._id });
 
             const views = await View.find({ status: req.params.id });
+            const count = await View.countDocuments({ status: req.params.id });
             const response: JsonResponse = {
                 success: true,
                 message: 'retrieve status',
-                data: { ...status, views }
+                data: { ...status, views, count }
             }
             res.status(200).json(response)
         } catch (err: any) {

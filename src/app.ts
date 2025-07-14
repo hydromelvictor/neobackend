@@ -13,6 +13,7 @@ import org from './routes/associate/org.routes'
 import auth from './routes/users/sign.routes';
 import employee from './routes/users/employee.routes';
 import account from './routes/marketing/account.routes';
+import invoice from './routes/marketing/invoice.routes';
 import xaccount from './routes/marketing/xaccount.routes';
 import referer from './routes/users/referer.routes';
 import product from './routes/marketing/product.routes';
@@ -24,7 +25,7 @@ import settings from './routes/associate/settings.routes';
 import status from './routes/associate/status.routes';
 import admin from './routes/users/admin.routes';
 import automate from './routes/automation.routes';
-
+import rooms from './routes/network/room.routes';
 
 
 import swaggerUi from 'swagger-ui-express';
@@ -68,6 +69,7 @@ app.use('/org', org);
 app.use('/auth', auth);
 app.use('/employee', employee);
 app.use('/account', account);
+app.use('/invoice', invoice);
 app.use('/xaccount', xaccount);
 app.use('/referer', referer);
 app.use('/product', product);
@@ -79,6 +81,6 @@ app.use('/settings', settings);
 app.use('/status', status);
 app.use('/admin', admin);
 app.use('/automate', automate);
-
+app.use('/rooms', rooms);
 
 export default app;

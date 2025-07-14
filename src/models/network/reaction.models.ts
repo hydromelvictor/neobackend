@@ -25,8 +25,7 @@ const ReactSchema = new Schema<IReact>({
     },
     emoji: {
         name: String,
-        symbole: String,
-        required: true
+        symbole: String
     }
 }, { timestamps: true })
 ReactSchema.plugin(paginate);

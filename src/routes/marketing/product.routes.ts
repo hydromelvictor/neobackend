@@ -7,11 +7,11 @@ import { TprdCreate, TprdUpdate } from '../../types/product';
 const router = Router();
 
 router.post(
-    '/',
+    '/:id',
     authenticate,
     device('CREATE PRODUCT'),
     permissions('CREATE-PRODUCT'),
-    validateInput(TprdCreate, ['assign', 'org', 'name', 'description', 'price', 'stock', 'category', 'media', 'brand', 'features', 'address', 'sizes', 'colors', 'delivery', 'ondemand', 'warranty']),
+    validateInput(TprdCreate, ['org', 'name', 'description', 'price', 'stock', 'category', 'media', 'brand', 'features', 'address', 'sizes', 'colors', 'delivery', 'ondemand', 'warranty']),
     uploads.array('media', 10),
     exams('media'),
     ProductController.register
@@ -53,7 +53,7 @@ router.delete(
 )
 
 router.get(
-    '/count',
+    '/stats/count',
     authenticate,
     device('COUNT PRODUCT'),
     permissions('COUNT-PRODUCT'),

@@ -6,7 +6,7 @@ const router = Router();
 
 
 router.get(
-    '/:owner',
+    '/me',
     authenticate,
     device('GET ACCOUNT'),
     permissions('READ-ACCOUNT'),
@@ -22,7 +22,7 @@ router.get(
 );
 
 router.put(
-    '/:id',
+    '/',
     authenticate,
     device('UPDATE ACCOUNT'),
     permissions('UPDATE-ACCOUNT'),

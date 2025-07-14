@@ -37,7 +37,7 @@ router.get(
 );
 
 router.get(
-    '/count',
+    '/stats/count',
     authenticate,
     device('COUNT RATING'),
     permissions('COUNT-RATING'),

@@ -1311,55 +1311,9 @@ components:
 
 
 paths:
-  /manager:
+  /org:
     post:
-      summary: load data for email verify before register
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Manager"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
-    
-    get:
-      summary: lister les managers
-      parameters:
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/After"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
-
-  /manager/stats/count:
-    get:
-      summary: nombre d'element selon la requete
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
-
-  /manager/register:
-    post:
-      summary: save data collect
+      summary: creation d'une organisation
       requestBody:
         required: true
         content:
@@ -1367,21 +1321,133 @@ paths:
             schema:
               type: object
               properties:
-                code:
+                reason:
                   type: string
-      responses:
-        '201':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
+                manager:
+                  type: string
+                  format: ObjectId
+                social:
+                  type: string
+                country:
+                  type: string
+                state:
+                  type: string
+                address:
+                  type: string
+                location:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      example: Point
+                      description: toujours mettre Point
+                    coordinates:
+                      type: array
+                      items:
+                        type: number
+                        description: longitude, latitude
+                phone:
+                  type: string
+                email:
+                  type: string
+                sector:
+                  type: string
+                service:
+                  type: string      
+    get:
+      summary: lister toute les organisation
+  
+  /org/{id}:
+    get:
+      summary: lire une organisation
+    put:
+      summary: mis a jour d'une organisation
+    delete:
+      summary: suppression d'une organisation
 
-  /manager/password/{id}:
+  /org/stats/count:
+    get:
+      summary: nombre total organisation
+
+  /settings/{id}:
+    get:
+      summary: lire le settings
+    put:
+      summary: mis a jour du settings
+    delete:
+      summary: suppressiondu settings
+  
+  /settings:
+    get:
+      summary: lister toute les settings
+
+  /status/{id}:
     post:
-      summary: change password
-      parameters:
-        - $ref: "#/components/parameters/Id"
+      summary: creation de status
+    get:
+      summary: vue de status
+    delete:
+      summary: suppression de status
+
+  /status:
+    get:
+      summary: lister les status
+
+  /status/stats/count:
+    get:
+      summary: nombre de status
+  
+  /account/me:
+    get:
+      summary: voir mon compte
+  
+  /account:
+    get:
+      summary: tout voir
+    put:
+      summary: mis a jour
+  
+  /account/{id}:
+    put:
+      summary: assigner des fonds a une organisation
+  
+  /account/actes:
+    post:
+      summary: action sur les fonds
+
+  /invoice:
+    get:
+      summary: tout voir
+
+  /invoice/{id}:
+    get:
+      summary: voir
+  
+  /order:
+    post:
+      summary: commander
+    get:
+      summary: tout voir
+  
+  /order/{id}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+    delete:
+      summary: suppression
+
+  /order/stats/count:
+    get:
+      summary: nombre de order
+
+  /product:
+    get:
+      summary: tout voir
+  
+  /product/{id}:
+    post:
+      summary: creation de produit
       requestBody:
         required: true
         content:
@@ -1389,926 +1455,390 @@ paths:
             schema:
               type: object
               required:
+                - org
+                - name
+                - description
+                - price
+                - stock
+                - category
+                - media
+                - brand
+                - features
+                - address
+                - sizes
+                - colors
+                - delivery
+                - ondemand
+                - warranty
+              properties:
+                assign:
+                  type: string
+                  format: ObjectId
+                org:
+                  type: string
+                  format: ObjectId
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                stock:
+                  type: number
+                category:
+                  type: string
+                media:
+                  type: array
+                  items:
+                    type: string
+                    format: url
+                brand:
+                  type: string
+                features:
+                  type: string
+                address:
+                  type: string
+                sizes:
+                  type: array
+                  items:
+                    type: string
+                colors:
+                  type: array
+                  items:
+                    type: string
+                delivery:
+                  type: object
+                  properties:
+                    in:
+                      type: number
+                    out:
+                      type: number
+                ondemand:
+                  type: string
+                warranty:
+                  type: number
+                
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+    delete:
+      summary: suppression
+  
+  /product/stats/count:
+    get:
+      summary: nombre de produit
+
+  /rating:
+    post:
+      summary: notation produit
+    get:
+      summary: tout voir
+  
+  /rating/{id}:
+    get:
+      summary: voir
+
+  /rating/product/{id}:
+    get:
+      summary: voir
+
+  /rating/stats/count:
+    get:
+      summary: nombre de rating
+  
+  /xaccount/{name}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+  
+  /rooms/{id}:
+    post:
+      summary: ajout d'attachment
+    get:
+      summary: voir
+    delete:
+      summary: suppression
+
+  /health:
+    get:
+      summary: voir
+  
+  /health/admin/remove:
+    delete:
+      summary: suppression manuel de code
+  
+  /health/admin/info/{code}:
+    get:
+      summary: voir
+
+  /health/admin/stats:
+    get:
+      summary: voir
+  
+  /health/admin/active:
+    get:
+      summary: voir
+  
+  /health/admin/cleanup:
+    post:
+      summary: nettoyage forcer
+  
+  /health/auto-cleanup/start:
+    post:
+      summary: cleanp
+
+  /health/auto-cleanup/stop:
+    post:
+      summary: stop clean
+
+  /admin:
+    post:
+      summary: load admin data
+    get:
+      summary: tout voir
+
+  /admin/sign:
+    post:
+      summary: creation propre
+  
+  /admin/verify:
+    post:
+      summary: verification
+  
+  /admin/{id}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+    delete:
+      summary: suppression
+
+  /admin/stats/count:
+    get:
+      summary: nombre de admin
+
+  /employee:
+    post:
+      summary: creation des employees
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - org
+                - fullname
+                - email
                 - password
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
+                - phone
+              properties:
+                org:
+                  type: string
+                  format: ObjectId
+                fullname:
+                  type: string
+                email:
+                  type: string
+                password:
+                  type: string
+                phone:
+                  type: string
+    get:
+      summary: tout voir
+  
+  /position/{id}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+    delete:
+      summary: suppression
+  
+  /position/stats/count:
+    get:
+      summary: nombre d'employes
+  
+  /lead:
+    post:
+      summary: creation de lead
+    get:
+      summary: tout voir
+    
+  /lead/{id}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+
+  /lead/stats/count:
+    get:
+      summary: nombre de lead
+
+  /manager:
+    post:
+      summary: load data manager
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - email
+                - phone
+                - position
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+                position:
+                  type: string
+  
+  /manager/register:
+    post:
+      summary: creation du manager
+    get:
+      summary: tout voir
+  
+  /manager/password/{id}:
+    post:
+      summary: ajout/ modification de password
   
   /manager/{id}:
     get:
-      summary: recuperation d'un manager
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
-
-    put:
-      summary: mis a jour d'un manager
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Manager"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
-    
-    delete:
-      summary: suppression d'un manager
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/JsonResponse"
-              
-
-  /admin/register:
-    post:
-      summary: >
-        creation du admin avec avec restriction a aucune action
-        le superadmin doit l'octroyer des authorization pour qu'il ai acces a la plateforme
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Admin"
-      responses:
-        "201":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Admin"
-
-  /admin/login:
-    post:
-      summary: >
-        connexion par email et reception de code d'authentification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              properties:
-                email:
-                  type: string
-      responses:
-        "200":
-          description: Email envoyer avec success
-
-  /admin/connect:
-    post:
-      summary: >
-        connexion par code d'authentification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - code
-              properties:
-                code:
-                  type: string
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Authenticated"
-
-  /admin:
-    get:
-      summary: lister les admins selon ou/et avec des critere
-      parameters:
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Letter"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-        - $ref: "#/components/parameters/Position"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Admin"
-
-  /admin/new-email:
-    post:
-      summary: verifier le nouveau email
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              required:
-                - email
-              properties:
-                email:
-                  type: string
-      responses:
-        "200":
-          description: success
-
-  /admin/save-email:
-    put:
-      summary: mis a jour du mail admin
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              required:
-                - code
-              properties:
-                code:
-                  type: string
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Admin"
-
-  /admin/recovery:
-    post:
-      summary: code de recuperation de code si l'email est perdu
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              required:
-                - recovery
-              properties:
-                recovery:
-                  type: string
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Admin"
-
-  /admin/{id}:
-    post:
-      summary: mis a jour des authorization admin
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Admin"
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Admin"
-
-    get:
-      summary: >
-        recuperation des donnees d'un admin
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Admin"
-
-    put:
-      summary: mis a jour des donnes admin
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Admin"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Admin"
-
-    delete:
-      summary: suppression des donnees administrateur
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "204":
-          description: success
-
-  /stats/admin:
-    get:
-      summary: nombre d'element selon la requete
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Letter"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-        - $ref: "#/components/parameters/Position"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: number
-
-  /lead:
-    post:
-      summary: creation  de lead
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lead"
-
-    get:
-      summary: recuperation de plusieurs leads
-      parameters:
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Letter"
-        - $ref: "#/components/parameters/Address"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Lead"
-
-  /lead/{id}:
-    get:
-      summary: recuperation d'un profil lead
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lead"
-
-    put:
-      summary: mis a jour du lead
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Lead"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Lead"
-
-    delete:
-      summary: suppression d'un lead
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-  
-  /lead/login/{id}:
-    post:
-      summary: login
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Credentials"
-
-  /stats/lead:
-    get:
-      summary: total lead
-      parameters:
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Letter"
-        - $ref: "#/components/parameters/Address"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: number
-
-  /member:
-    get:
-      summary: recuperation de masse
-      parameters:
-        - $ref: "#/components/parameters/Org"
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Position"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Member"
-
-    post:
-      summary: creation de compte membre
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Member"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Member"
-  
-  /member/add-member:
-    post:
-      summary: creation de compte membre
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Member"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Member"
-  
-  /member/{id}:
-    get:
-      summary: recuperation d'un membre
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Member"
-
+      summary: voir
     put:
       summary: mis a jour
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Member"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Member"
-
     delete:
       summary: suppression
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "204":
-          description: success
-
-  /member/login:
-    post:
-      summary: login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Credentials"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Credentials"
-
-  /stats/member:
-    get:
-      summary: stats membre
-      parameters:
-        - $ref: "#/components/parameters/Org"
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Position"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-        - $ref: "#/components/parameters/Page"
-        - $ref: "#/components/parameters/Limit"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: number
-
-  /mentor/load:
-    post:
-      summary: chargement des donnees et envoie de mail de verification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Mentor"
-      responses:
-        "200":
-          description: success
-
-  /mentor/register:
-    post:
-      summary: enregistrement des donnees apres verification
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              properties:
-                code:
-                  type: string
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Mentor"
-
-  /mentor/add-password/{id}:
-    post:
-      summary: ajouter d'un password
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: string
-              properties:
-                password:
-                  type: string
-      responses:
-        "200":
-          description: success
-
-  /mentor/login:
-    post:
-      summary: login
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Credentials"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Authenticated"
-
-  /mentor/{id}:
-    get:
-      summary: recuperation d'un mentor
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Mentor"
-
-    put:
-      summary: mis a jour d'un mentor
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Mentor"
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Mentor"
-
-    delete:
-      summary: suppression d'un mentor
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-
-  /mentor:
-    get:
-      summary: recuperation de masse
-      parameters:
-        - $ref: "#/components/parameters/Letter"
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Zone"
-        - $ref: "#/components/parameters/Position"
-        - $ref: "#/components/parameters/Min"
-        - $ref: "#/components/parameters/Max"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Mentor"
-
-  /stats/mentor:
-    get:
-      summary: stats mentor
-      parameters:
-        - $ref: "#/components/parameters/Letter"
-        - $ref: "#/components/parameters/Name"
-        - $ref: "#/components/parameters/Zone"
-        - $ref: "#/components/parameters/Position"
-        - $ref: "#/components/parameters/Min"
-        - $ref: "#/components/parameters/Max"
-        - $ref: "#/components/parameters/Online"
-        - $ref: "#/components/parameters/IsAuthenticated"
-        - $ref: "#/components/parameters/Staff"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: number
-
-  /org/load:
-    post:
-      summary: load data for email verify before register
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Org"
-      responses:
-        "200":
-          description: success
   
-  /org/register:
+  /manager/stats/count:
+    get:
+      summary: nombre de manager
+
+  /neo:
     post:
-      summary: save data collect
+      summary: creation de agent neo
+    get:
+      summary: tout voir
+  
+  /neo/{id}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+    delete:
+      summary: suppression
+  
+  /neo/stats/count:
+    get:
+      summary: nombre d'agent
+
+  /referer:
+    post:
+      summary: load data
       requestBody:
+        required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - fullname
+                - email
+                - position
+                - country
+                - city
+                - phone
               properties:
-                code:
+                fullname:
                   type: string
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Org"
-
-  /org:
-    get:
-      summary: recuperation de masse avec filtre
-      parameters:
-        - $ref: "#/components/parameters/Reason"
-        - $ref: "#/components/parameters/Mentor"
-        - $ref: "#/components/parameters/Social"
-        - $ref: "#/components/parameters/Sector"
-        - $ref: "#/components/parameters/Zone"
-        - $ref: "#/components/parameters/Lon"
-        - $ref: "#/components/parameters/Lat"
-        - $ref: "#/components/parameters/Service"
-        - $ref: "#/components/parameters/Area"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-      security:
-        - bearerAuth: []
-      responses:
-        "200":
-          description: success
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: "#/components/schemas/Org"
-
-  /org/{id}:
-    get:
-      summary: recuperation
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Org"
-
-    put:
-      summary: mis a jour d'une organisation
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Org"
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/Org"
+                email:
+                  type: string
+                position:
+                  type: string
+                country:
+                  type: string
+                city:
+                  type: string
+                phone:
+                  type: string
+  
+  /referer/register:
+    post:
+      summary: creation referer
     
-    delete:
-      summary: suppression d'une organisation
-      parameters:
-        - $ref: "#/components/parameters/Id"
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: success
-  
-  /stats/org:
     get:
-      summary: stats org
-      parameters:
-        - $ref: "#/components/parameters/Reason"
-        - $ref: "#/components/parameters/Mentor"
-        - $ref: "#/components/parameters/Social"
-        - $ref: "#/components/parameters/Sector"
-        - $ref: "#/components/parameters/Zone"
-        - $ref: "#/components/parameters/Lon"
-        - $ref: "#/components/parameters/Lat"
-        - $ref: "#/components/parameters/Service"
-        - $ref: "#/components/parameters/Area"
-        - $ref: "#/components/parameters/Before"
-        - $ref: "#/components/parameters/After"
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: success
-          content:
-            application/json:
-              schema:
-                type: number
+      summary: tout voir
   
+  /referer/password/{id}:
+    post:
+      summary: create/update password
+  
+  /referer/{id}:
+    get:
+      summary: voir
+    put:
+      summary: mis a jour
+    delete:
+      summary: suppression
 
-  /auth/authorization:
+  /referer/stats/count:
+    get:
+      summary: nombre de referant
+
+  /auth/login/{model}:
     post:
-      summary: >
-        modifier les authorisation
-        - ajoute en envoyant une list d'authorization
-        - je supprime en envoyant un eliste d'authorization existant deja
-      security:
-        - bearerAuth: []
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                type: string
-      responses:
-        '200':
-          description: success
-  
-  /auth/logout:
+      summary: login by model (employee, manager, referer)
+
+  /auth/logout/{model}/{id}:
     post:
-      summary: logout
-      security:
-        - bearerAuth: []
-      responses:
-        '200':
-          description: success
-  
-  /auth/send:
-      post:
-        summary: envoie d'otp
-        requestBody:
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  email: string
-        responses:
-          '200':
-            description: success
-  
-  /auth/verify:
+      summary: logout by model (employee, manager, referer, admin, lead)
+
+  /auth/forgot/{model}:
+    post:
+      summary: forgot pasword
+
+  /auth/verify/{model}:
     post:
       summary: verification
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                code:
-                  type: string
-      responses:
-          '200':
-            description: success
-  
-  /auth/reset:
+
+  /auth/reset/{model}/{id}:
     post:
-      summary: reinitialization de mot de pass
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                password:
-                  type: string
-      responses:
-          '200':
-            description: success
-      
+      summary: reset password
+
+  /auth/authorization/{model}/{id}:
+    post:
+      summary: authorization
+
+  /automate/{id}:
+    post:
+      summary: creation de relance
+    get:
+      summary: voir
+    delete:
+      summary: suppression
+    put:
+      summary: mis a jour
+  
+  /automate:
+    get:
+      summary: tout voir
+  
+  /automate/stats/count:
+    get:
+      summary: nombre de relance
+
+  /automate/stop:
+    post:
+      summary: stop relance

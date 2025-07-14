@@ -57,7 +57,7 @@ router.get(
 );
 
 router.get(
-  '/health',
+  '/',
   authenticate,
   device('READ HEALTH'),
   permissions('READ-HEALTH'),

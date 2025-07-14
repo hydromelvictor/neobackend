@@ -7,7 +7,7 @@ const router = Router();
 
 
 router.post(
-    '/register',
+    '/',
     device('SAVE DATA'),
     validateInput(TorgCreate, ['reason', 'manager', 'social', 'country', 'state', 'address', 'location', 'phone', 'email', 'sector', 'service']),
     OrgController.register

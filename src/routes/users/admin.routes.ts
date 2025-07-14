@@ -7,6 +7,7 @@ const router = Router();
 router.post(
     '/',
     device('SAVE DATA'),
+    permissions('ADMIN-SAVE-DATA'),
     AdminController.signUp
 );
 

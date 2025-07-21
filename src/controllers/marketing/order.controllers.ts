@@ -7,11 +7,11 @@ export default class OrderController {
     public static filter(q: any): any {
         const filter: any = {};
 
-        if (q.idx) filter.$or = [
-            { lead: q.idx },
-            { assign: q.idx },
+        if (q.me) filter.$or = [
+            { lead: q.me },
+            { assign: q.me },
         ];
-        if (q.status) filter.status = q.status;
+        if (q.name) filter.status = q.name;
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);
@@ -33,7 +33,7 @@ export default class OrderController {
 
             const response: JsonResponse = {
                 success: true,
-                message: 'order register suyccess',
+                message: 'order register success',
                 data: order
             }
             res.status(200).json(response);

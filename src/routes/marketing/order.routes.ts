@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticate, device, permissions, validateInput, uploads, exams } from '../../middleware';
+import { authenticate, device, permissions, validateInput } from '../../middleware';
 import { TordCreate, TordUpdate } from '../../types/order';
 import OrderController from '../../controllers/marketing/order.controllers';
 

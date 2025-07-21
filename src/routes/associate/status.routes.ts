@@ -12,36 +12,4 @@ router.post(
     StatusController.create
 );
 
-router.get(
-    '/:id',
-    authenticate,
-    device('READ STATUS'),
-    permissions('READ-STATUS'),
-    StatusController.retrieve
-);
-
-router.get(
-    '/',
-    authenticate,
-    device('LIST STATUS'),
-    permissions('LIST-STATUS'),
-    StatusController.list
-);
-
-router.delete(
-    '/:id',
-    authenticate,
-    device('DELETE STATUS'),
-    permissions('DELETE-STATUS'),
-    StatusController.delete
-);
-
-router.get(
-    '/stats/count',
-    authenticate,
-    device('COUNT STATUS'),
-    permissions('COUNT-STATUS'),
-    StatusController.count
-);
-
 export default router;

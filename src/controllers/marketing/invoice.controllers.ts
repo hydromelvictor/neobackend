@@ -7,13 +7,26 @@ export default class TrackingController {
     public static filters = (q: any): any => {
         const query: any = {};
 
-        if (q.status) query.type = q.status;
+        if (q.name) {
+            const regex = { regex: q.name, options: 'i' };
+
+            (query.or || []).concat([
+                { type: regex },
+                { currency: regex },
+                { status: regex },
+            ])
+        }
+
         if (q.min) query.amount.$gte = parseFloat(q.min);
         if (q.max) query.amount.$lte = parseFloat(q.max);
-        if (q.currency) query.currency = q.currency;
-        if (q.effect) query.status = q.effect;
-        if (q.from) query.from = q.from;
-        if (q.to) query.to = q.to;
+        
+        if (q.me) {
+            const regex = q.me;
+            (query.or || []).concat([
+                { from: regex },
+                { to: regex }
+            ])
+        }
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);

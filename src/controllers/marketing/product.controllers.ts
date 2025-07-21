@@ -7,10 +7,10 @@ export default class ProductController {
         const filter: any = {};
 
         filter.$or = []
-        if (q.idx) {
+        if (q.me) {
             filter.$or.concat(
-                { assign: q.idx },
-                { org: q.idx }
+                { assign: q.me },
+                { org: q.me }
             )
         }
         if (q.online) filter.online = q.online === 'true';

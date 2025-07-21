@@ -21,20 +21,12 @@ router.get(
     AccountController.list
 );
 
-router.put(
-    '/',
-    authenticate,
-    device('UPDATE ACCOUNT'),
-    permissions('UPDATE-ACCOUNT'),
-    AccountController.update
-);
-
 router.post(
     '/assign/:id',
     authenticate,
     device('ASSIGN ACCOUNT'),
     permissions('ASSIGN-ACCOUNT'),
-    AccountController.assign
+    AccountController.assignate
 );
 
 router.post(

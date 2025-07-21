@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import Org from '../../models/associate/org.models';
 import Manager from '../../models/users/manager.model';
 import Settings from '../../models/associate/settings.models';
+import Account from '../../models/marketing/account.models';
 import { JsonResponse } from '../../types/api';
 
 export default class OrgController {
@@ -57,6 +58,11 @@ export default class OrgController {
             };
 
             await Settings.create({ org: org._id });
+            const account = await Account.findOwner(manager._id);
+            if (!account) throw new Error('account not found');
+
+            account.assign.push({ org: org._id, balance: 0 });
+            account.save();
 
             res.status(201).json(response);
         } catch (error: any) {
@@ -162,8 +168,7 @@ export default class OrgController {
             await org.deleteOne();
             const response: JsonResponse = {
                 success: true,
-                message: 'L\'organisation a été supprimée avec succès',
-                data: org
+                message: 'L\'organisation a été supprimée avec succès'
             };
             res.status(200).json(response);
         } catch (error: any) {

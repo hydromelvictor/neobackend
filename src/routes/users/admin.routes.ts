@@ -20,7 +20,7 @@ router.post(
 router.post(
     '/verify',
     device('EXAM DATA'),
-    AdminController.load
+    AdminController.loadin
 );
 
 router.get(

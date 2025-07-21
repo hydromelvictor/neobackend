@@ -17,137 +17,105 @@ components:
       bearerFormat: JWT
   
   parameters:
-    Id:
+    _name:
+      name: name
+      in: query
+      schema:
+        type: string
+    _manager:
+      name: manager
+      in: query
+      schema:
+        type: string
+        format: ObjectId
+    _referer:
+      name: referer
+      in: query
+      schema:
+        type: string
+        format: ObjectId
+    _lat:
+      name: lat
+      in: query
+      schema:
+        type: number
+    _lon:
+      name: lon
+      in: query
+      schema:
+        type: number
+    _radius:
+      name: radius
+      in: query
+      schema:
+        type: number
+    _id:
       name: id
       in: path
       required: true
       schema:
         type: string
         format: ObjectId
-    Name:
+    _cname:
       name: name
+      in: path
+      required: true
+      schema:
+        type: string
+    _limit:
+      name: limit
+      in: query
+      schema:
+        type: number
+    _page:
+      name: page
+      in: query
+      schema:
+        type: number
+    _lang:
+      name: lang
       in: query
       schema:
         type: string
-    Letter:
-      name: letter
+    _currency:
+      name: currency
       in: query
       schema:
         type: string
-    Before:
-      name: before
+    _min:
+      name: min
       in: query
       schema:
-        type: string
-        format: date-time
-    After:
+        type: number
+    _max:
+      name: max
+      in: query
+      schema:
+        type: number
+    _after:
       name: after
       in: query
       schema:
         type: string
         format: date-time
-    Position:
-      name: position
+    _before:
+      name: before
       in: query
       schema:
         type: string
-    Online:
+        format: date-time
+    _me:
+      name: me
+      in: query
+      schema:
+        type: string
+    _online:
       name: online
       in: query
       schema:
-        type: boolean
-        enum:
-          - true
-          - false
-    IsAuthenticated:
+        type: string
+    _auth:
       name: auth
-      in: query
-      schema:
-        type: boolean
-        enum:
-          - true
-          - false
-    Staff:
-      name: staff
-      in: query
-      schema:
-        type: boolean
-        enum:
-          - true
-          - false
-    Page:
-      name: page
-      in: query
-      schema:
-        type: number
-    Limit:
-      name: limit
-      in: query
-      schema:
-        type: number
-    Address:
-      name: address
-      in: query
-      schema:
-        type: string
-    Org:
-      name: org
-      in: query
-      schema:
-        type: string
-        format: ObjectId
-    Min:
-      name: min
-      in: query
-      schema:
-        type: number
-    Max:
-      name: max
-      in: query
-      schema:
-        type: number
-    Zone:
-      name: zone
-      in: query
-      schema:
-        type: string
-    Reason:
-      name: reason
-      in: query
-      schema:
-        type: string
-    Mentor:
-      name: mentor
-      in: query
-      schema:
-        type: string
-    Social:
-      name: social
-      in: query
-      schema:
-        type: string
-    Lon:
-      name: lon
-      in: query
-      schema:
-        type: number
-    Lat:
-      name: lat
-      in: query
-      schema:
-        type: number
-    Service:
-      name: service
-      in: query
-      schema:
-        type: string
-    Area:
-      name: area
-      in: query
-      schema:
-        type: string
-    Sector:
-      name: sector
       in: query
       schema:
         type: string
@@ -156,10 +124,10 @@ components:
     Authenticated:
       type: object
       properties:
-        access:
+        accessToken:
           type: string
           description: token d'access uniquement a la route nones
-        refresh:
+        refreshToken:
           type: string
           description: token de rafraichissement du token d'access
 
@@ -1290,6 +1258,7 @@ components:
           description: zone d'action
         picture:
           type: string
+          format: url
           description: photo de profil de l'organisation
         client:
           type: string
@@ -1353,101 +1322,555 @@ paths:
                 sector:
                   type: string
                 service:
-                  type: string      
+                  type: string
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Org'
     get:
       summary: lister toute les organisation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_limit'
+        - $ref: '#/components/parameters/_page'
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_manager'
+        - $ref: '#/components/parameters/_referer'
+        - $ref: '#/components/parameters/_lat'
+        - $ref: '#/components/parameters/_lon'
+        - $ref: '#/components/parameters/_radius'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Org'
   
   /org/{id}:
     get:
       summary: lire une organisation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Org'
     put:
       summary: mis a jour d'une organisation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Org'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Org'
     delete:
       summary: suppression d'une organisation
-
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+                
   /org/stats/count:
     get:
       summary: nombre total organisation
-
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_manager'
+        - $ref: '#/components/parameters/_referer'
+        - $ref: '#/components/parameters/_lat'
+        - $ref: '#/components/parameters/_lon'
+        - $ref: '#/components/parameters/_radius'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
+      
   /settings/{id}:
     get:
       summary: lire le settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Settings'
     put:
       summary: mis a jour du settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Settings'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Settings'
     delete:
       summary: suppressiondu settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
   
   /settings:
     get:
       summary: lister toute les settings
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_currency'
+        - $ref: '#/components/parameters/_lang'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Settings'
 
   /status/{id}:
     post:
       summary: creation de status
-    get:
-      summary: vue de status
-    delete:
-      summary: suppression de status
-
-  /status:
-    get:
-      summary: lister les status
-
-  /status/stats/count:
-    get:
-      summary: nombre de status
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                media:
+                  type: string
+                  format: binary
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Status'
   
   /account/me:
     get:
       summary: voir mon compte
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Account'
   
   /account:
     get:
       summary: tout voir
-    put:
-      summary: mis a jour
-  
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_min'
+        - $ref: '#/components/parameters/_max'
+        - $ref: '#/components/parameters/_after'
+        - $ref: '#/components/parameters/_before'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Account'
   /account/{id}:
     put:
       summary: assigner des fonds a une organisation
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                balance:
+                  type: number
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Account'
   
-  /account/actes:
-    post:
-      summary: action sur les fonds
+  # /account/actes:
+  #   post:
+  #     summary: action sur les fonds
+  #     security:
+  #       - bearerAuth: []
 
   /invoice:
     get:
       summary: tout voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_min'
+        - $ref: '#/components/parameters/_max'
+        - $ref: '#/components/parameters/_me'
+        - $ref: '#/components/parameters/_after'
+        - $ref: '#/components/parameters/_before'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Invoice'
 
   /invoice/{id}:
     get:
       summary: voir
-  
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Invoice'
+
   /order:
     post:
       summary: commander
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - items
+              properties:
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product:
+                        type: string
+                        format: ObjectId
+                      quantity:
+                        type: number
+                      price:
+                        type: number
+                shipment:
+                  type: object
+                  properties:
+                    when:
+                      type: string
+                      format: date-time
+                    where:
+                      type: string
+                    fee:
+                      type: number
+                status:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Order"
     get:
       summary: tout voir
-  
+      parameters:
+        - $ref: "#/components/parameters/_me"
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Order"
+
   /order/{id}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Order"
     put:
       summary: mis a jour
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Order"
     delete:
       summary: suppression
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
 
   /order/stats/count:
     get:
       summary: nombre de order
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_me"
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
 
   /product:
     get:
       summary: tout voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_me"
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+        - $ref: "#/components/parameters/_online"
+      responses:
+        '200':
+          description: OK
+          content:
+            multipart/form-data:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Product"
   
   /product/{id}:
     post:
       summary: creation de produit
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
       requestBody:
         required: true
         content:
@@ -1517,107 +1940,702 @@ paths:
                   type: string
                 warranty:
                   type: number
-                
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Product"
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Product"
     put:
       summary: mis a jour
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Product"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Product"
     delete:
       summary: suppression
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
   
   /product/stats/count:
     get:
       summary: nombre de produit
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
 
   /rating:
     post:
       summary: notation produit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                rating:
+                  type: number
+                  minimum: 0
+                  maximum: 5
+                avis:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Rating"
     get:
       summary: tout voir
+      parameters:
+        - $ref: "#/components/parameters/_me"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Rating"
   
   /rating/{id}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Rating"
 
   /rating/product/{id}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
 
   /rating/stats/count:
     get:
       summary: nombre de rating
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_me"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
   
   /xaccount/{name}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_cname"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Xaccount"
     put:
       summary: mis a jour
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_cname"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Xaccount"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Xaccount"
   
   /rooms/{id}:
     post:
       summary: ajout d'attachment
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                attachs:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Room"
     get:
       summary: voir
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Room"
     delete:
       summary: suppression
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
 
   /health:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          code:
+                            type: string
+                          username:
+                            type: string
   
   /health/admin/remove:
     delete:
       summary: suppression manuel de code
-  
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+
   /health/admin/info/{code}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: code
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          username:
+                            type: string
+                          createdAt:
+                            type: string
+                            format: date-time
+                          expiredAt:
+                            type: string
+                            format: date-time
+                          attempts:
+                            type: number
+                          maxAttempts:
+                            type: number
 
   /health/admin/stats:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          totalGenerated:
+                            type: number
+                          totalExpired:
+                            type: number
+                          totalUsed:
+                            type: number
+                          totalInvalidAttempts:
+                            type: number
+                          currentActive:
+                            type: number
+                          uptine:
+                            type: number
   
   /health/admin/active:
     get:
       summary: voir
-  
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          code:
+                            type: string
+                          username:
+                            type: string
+                          expiredAt:
+                            type: string
+                            format: date-time
+                          attempts:
+                            type: string
+                            format: date-time
+
   /health/admin/cleanup:
     post:
       summary: nettoyage forcer
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
   
   /health/auto-cleanup/start:
     post:
       summary: cleanp
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
 
   /health/auto-cleanup/stop:
     post:
       summary: stop clean
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
 
   /admin:
     post:
       summary: load admin data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - email
+                - cni
+                - position
+              properties:
+                firstname:
+                  type: string
+                lastname:
+                  type: string
+                email:
+                  type: string
+                cni:
+                  type: string
+                position:
+                  type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Admin"
     get:
       summary: tout voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_online"
+        - $ref: "#/components/parameters/_auth"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+        - $ref: "#/components/parameters/_limit"
+        - $ref: "#/components/parameters/_page"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Admin"
 
   /admin/sign:
     post:
-      summary: creation propre
-  
+      summary:  login par email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+                  
   /admin/verify:
     post:
-      summary: verification
+      summary: login verify
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        allOf:
+                          - $ref: "#/components/schemas/Admin"
+                          - type: object
+                            properties:
+                              accessToken:
+                                type: string
+                              refreshToken:
+                                type: string
   
   /admin/{id}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Admin"
     put:
       summary: mis a jour
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Employee"
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Admin"
     delete:
       summary: suppression
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
 
   /admin/stats/count:
     get:
       summary: nombre de admin
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_online"
+        - $ref: "#/components/parameters/_auth"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_before"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
 
   /employee:
     post:
@@ -1646,199 +2664,348 @@ paths:
                   type: string
                 phone:
                   type: string
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Employee"
     get:
       summary: tout voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_online"
+        - $ref: "#/components/parameters/_auth"
+        - $ref: "#/components/parameters/_before"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_page"
+        - $ref: "#/components/parameters/_limit"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Employee"
   
   /position/{id}:
     get:
       summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Employee"
     put:
       summary: mis a jour
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Employee"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Employee"
     delete:
       summary: suppression
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
   
   /position/stats/count:
     get:
       summary: nombre d'employes
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_online"
+        - $ref: "#/components/parameters/_auth"
+        - $ref: "#/components/parameters/_before"
+        - $ref: "#/components/parameters/_after"
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
   
-  /lead:
-    post:
-      summary: creation de lead
-    get:
-      summary: tout voir
+  # /lead:
+  #   post:
+  #     summary: creation de lead
+  #   get:
+  #     summary: tout voir
+  #     security:
+  #       - bearerAuth: []
     
-  /lead/{id}:
-    get:
-      summary: voir
-    put:
-      summary: mis a jour
+  # /lead/{id}:
+  #   get:
+  #     summary: voir
+  #     security:
+  #       - bearerAuth: []
+  #   put:
+  #     summary: mis a jour
+  #     security:
+  #       - bearerAuth: []
 
-  /lead/stats/count:
-    get:
-      summary: nombre de lead
+  # /lead/stats/count:
+  #   get:
+  #     summary: nombre de lead
+  #     security:
+  #       - bearerAuth: []
 
-  /manager:
-    post:
-      summary: load data manager
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - firstname
-                - lastname
-                - email
-                - phone
-                - position
-              properties:
-                firstname:
-                  type: string
-                lastname:
-                  type: string
-                email:
-                  type: string
-                phone:
-                  type: string
-                position:
-                  type: string
+  # /manager:
+  #   post:
+  #     summary: load data manager
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             required:
+  #               - firstname
+  #               - lastname
+  #               - email
+  #               - phone
+  #               - position
+  #             properties:
+  #               firstname:
+  #                 type: string
+  #               lastname:
+  #                 type: string
+  #               email:
+  #                 type: string
+  #               phone:
+  #                 type: string
+  #               position:
+  #                 type: string
   
-  /manager/register:
-    post:
-      summary: creation du manager
-    get:
-      summary: tout voir
+  # /manager/register:
+  #   post:
+  #     summary: creation du manager
+  #   get:
+  #     summary: tout voir
+  #     security:
+  #       - bearerAuth: []
   
-  /manager/password/{id}:
-    post:
-      summary: ajout/ modification de password
+  # /manager/password/{id}:
+  #   post:
+  #     summary: ajout/ modification de password
   
-  /manager/{id}:
-    get:
-      summary: voir
-    put:
-      summary: mis a jour
-    delete:
-      summary: suppression
+  # /manager/{id}:
+  #   get:
+  #     summary: voir
+  #     security:
+  #       - bearerAuth: []
+  #   put:
+  #     summary: mis a jour
+  #     security:
+  #       - bearerAuth: []
+  #   delete:
+  #     summary: suppression
+  #     security:
+  #       - bearerAuth: []
   
-  /manager/stats/count:
-    get:
-      summary: nombre de manager
+  # /manager/stats/count:
+  #   get:
+  #     summary: nombre de manager
+  #     security:
+  #       - bearerAuth: []
 
-  /neo:
-    post:
-      summary: creation de agent neo
-    get:
-      summary: tout voir
+  # /neo:
+  #   post:
+  #     summary: creation de agent neo
+  #     security:
+  #       - bearerAuth: []
+  #   get:
+  #     summary: tout voir
+  #     security:
+  #       - bearerAuth: []
   
-  /neo/{id}:
-    get:
-      summary: voir
-    put:
-      summary: mis a jour
-    delete:
-      summary: suppression
+  # /neo/{id}:
+  #   get:
+  #     summary: voir
+  #     security:
+  #       - bearerAuth: []
+  #   put:
+  #     summary: mis a jour
+  #     security:
+  #       - bearerAuth: []
+  #   delete:
+  #     summary: suppression
+  #     security:
+  #       - bearerAuth: []
   
-  /neo/stats/count:
-    get:
-      summary: nombre d'agent
+  # /neo/stats/count:
+  #   get:
+  #     summary: nombre d'agent
+  #     security:
+  #       - bearerAuth: []
 
-  /referer:
-    post:
-      summary: load data
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - fullname
-                - email
-                - position
-                - country
-                - city
-                - phone
-              properties:
-                fullname:
-                  type: string
-                email:
-                  type: string
-                position:
-                  type: string
-                country:
-                  type: string
-                city:
-                  type: string
-                phone:
-                  type: string
+  # /referer:
+  #   post:
+  #     summary: load data
+  #     requestBody:
+  #       required: true
+  #       content:
+  #         application/json:
+  #           schema:
+  #             type: object
+  #             required:
+  #               - fullname
+  #               - email
+  #               - position
+  #               - country
+  #               - city
+  #               - phone
+  #             properties:
+  #               fullname:
+  #                 type: string
+  #               email:
+  #                 type: string
+  #               position:
+  #                 type: string
+  #               country:
+  #                 type: string
+  #               city:
+  #                 type: string
+  #               phone:
+  #                 type: string
   
-  /referer/register:
-    post:
-      summary: creation referer
+  # /referer/register:
+  #   post:
+  #     summary: creation referer
     
-    get:
-      summary: tout voir
+  #   get:
+  #     summary: tout voir
+  #     security:
+  #       - bearerAuth: []
   
-  /referer/password/{id}:
-    post:
-      summary: create/update password
+  # /referer/password/{id}:
+  #   post:
+  #     summary: create/update password
   
-  /referer/{id}:
-    get:
-      summary: voir
-    put:
-      summary: mis a jour
-    delete:
-      summary: suppression
+  # /referer/{id}:
+  #   get:
+  #     summary: voir
+  #     security:
+  #       - bearerAuth: []
+  #   put:
+  #     summary: mis a jour
+  #     security:
+  #       - bearerAuth: []
+  #   delete:
+  #     summary: suppression
+  #     security:
+  #       - bearerAuth: []
 
-  /referer/stats/count:
-    get:
-      summary: nombre de referant
+  # /referer/stats/count:
+  #   get:
+  #     summary: nombre de referant
+  #     security:
+  #       - bearerAuth: []
 
-  /auth/login/{model}:
-    post:
-      summary: login by model (employee, manager, referer)
+  # /auth/login/{model}:
+  #   post:
+  #     summary: login by model (employee, manager, referer)
 
-  /auth/logout/{model}/{id}:
-    post:
-      summary: logout by model (employee, manager, referer, admin, lead)
+  # /auth/logout/{model}/{id}:
+  #   post:
+  #     summary: logout by model (employee, manager, referer, admin, lead)
+  #     security:
+  #       - bearerAuth: []
 
-  /auth/forgot/{model}:
-    post:
-      summary: forgot pasword
+  # /auth/forgot/{model}:
+  #   post:
+  #     summary: forgot pasword
 
-  /auth/verify/{model}:
-    post:
-      summary: verification
+  # /auth/verify/{model}:
+  #   post:
+  #     summary: verification
 
-  /auth/reset/{model}/{id}:
-    post:
-      summary: reset password
+  # /auth/reset/{model}/{id}:
+  #   post:
+  #     summary: reset password
 
-  /auth/authorization/{model}/{id}:
-    post:
-      summary: authorization
+  # /auth/authorization/{model}/{id}:
+  #   post:
+  #     summary: authorization
+  #     security:
+  #       - bearerAuth: []
 
-  /automate/{id}:
-    post:
-      summary: creation de relance
-    get:
-      summary: voir
-    delete:
-      summary: suppression
-    put:
-      summary: mis a jour
+  # /automate/{id}:
+  #   post:
+  #     summary: creation de relance
+  #   get:
+  #     summary: voir
+  #   delete:
+  #     summary: suppression
+  #   put:
+  #     summary: mis a jour
   
-  /automate:
-    get:
-      summary: tout voir
+  # /automate:
+  #   get:
+  #     summary: tout voir
   
-  /automate/stats/count:
-    get:
-      summary: nombre de relance
+  # /automate/stats/count:
+  #   get:
+  #     summary: nombre de relance
 
-  /automate/stop:
-    post:
-      summary: stop relance
+  # /automate/stop:
+  #   post:
+  #     summary: stop relance

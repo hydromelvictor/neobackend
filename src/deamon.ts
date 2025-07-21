@@ -6,6 +6,7 @@ import EventEmitter from "events";
 import { OneUseToken } from './helpers/codecs.helpers';
 import Admin from './models/users/admin.models'
 import Rate from './models/automation/rate.models';
+import Xaccount from './models/marketing/critical.models';
 import axios from 'axios';
 
 
@@ -25,6 +26,10 @@ const admin = {
     authorization: []
 }
 
+const xcc = {
+    name: 'system'
+}
+
 
 const init = async () => {
     try {
@@ -34,6 +39,12 @@ const init = async () => {
             await d.save();
 
             console.log('super admin created successfull')
+        }
+
+        const x = await Xaccount.findOne({ name: xcc.name });
+        if (!x) {
+            await Xaccount.create({ name: 'system' });
+            console.log('systm account create');
         }
 
         const rates = await Rate.find({ base: 'XOF' });

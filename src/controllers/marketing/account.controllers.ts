@@ -90,71 +90,38 @@ export default class AccountController {
         }
     }
 
-    static async update(req: Request, res: Response) {
+    // assigner un montant
+    public static async assignate(req: Request, res: Response) {
         try {
+            const amount = parseFloat(req.body.balance);
             const account = await Account.findOwner(req.user._id);
             if (!account) throw new Error('Compte non trouvé');
+            // amount doit etre positif et inferieur ou egal a account.balance
+            if (amount <= 0 || amount > account.balance) throw new Error('over');
 
             const org = await orgModels.findById(req.params.id);
             if (!org) throw new Error('Organisation non trouvée');
-
-
-            let check = false
+            
+            let discount = 0
+            let total = 0;
             for (const item of account.assign) {
-                if (item.org.toString() === org._id.toString() && item.balance) {
-                    item.balance += parseFloat(req.body.balance)
-                    check = true;
-                    break;
-                }
+                total += item.balance;
+                discount = account.balance - total
+                if (amount > discount) throw new Error('over');
+
+                if (item.org.toString() !== org._id.toString()) continue;
+
+                item.balance += amount;
+                break;
             }
 
-            if (check === false) {
-                account.assign.push({
-                    org: org._id,
-                    balance: parseFloat(req.body.balance) || 0
-                });
-            }
-        } catch (error: any) {
-            console.error('Erreur lors de la validation du code:', error);
-
-            const response: JsonResponse = {
-                success: false,
-                message: 'Erreur interne du serveur',
-                error: error.message
-            };
-
-            res.status(500).json(response);
-        }
-    }
-
-    static async assign(req: Request, res: Response) {
-        try {
-            const account = await Account.findOwner(req.user._id);
-            if (!account) throw new Error('this account not found');
-
-            let dis = 0;
-            for (const item of account.assign) dis += item.balance || 0;
-            const org = await orgModels.findById(req.params.id);
-            if (!org) throw new Error('this org not found');
-
-            const amount = parseFloat(req.body.balance);
-            dis = account.balance - dis;
-            if (dis < req.body.balance) throw new Error('insufficient balance');
-
-            const check = account.assign.find(item => item.org.toString() === org._id.toString());
-            if (check && check.balance) {
-                check.balance += amount;
-            } else account.assign.push({
-                org: org._id,
-                balance: amount
-            });
-
-            await account.save();
+            account.save();
 
             const response: JsonResponse = {
                 success: true,
-                message: 'Compte assigné avec succès'
-            };
+                message: 'assign',
+                data: account
+            }
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);

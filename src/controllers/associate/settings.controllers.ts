@@ -9,7 +9,7 @@ export default class SettingsController {
 
         if (q.lang) filter.lang = q.lang;
         if (q.currency) filter.currency = q.currency;
-        if (q.country) filter.country = q.country;
+        if (q.name) filter.country = q.name;
 
         return filter;
     }

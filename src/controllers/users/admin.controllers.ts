@@ -4,6 +4,7 @@ import { JsonResponse } from '../../types/api';
 import { addToBlacklist, OneUseToken, validateAndUseCode } from '../../helpers/codecs.helpers';
 import gmail from '../../helpers/gmail.helpers';
 import { emailToSign } from '../../helpers/html.helpers';
+import { authenticate } from './sign.controllers';
 
 
 export default class AdminController {
@@ -18,7 +19,7 @@ export default class AdminController {
             ];
         }
         if (q.online) filter.online = q.online === 'true';
-        if (q.auth) filter.isAuthenticated = q.auth === 'true';
+        if (q.auth) filter.isAuthenticated = q.auth === 'true' || q.auth === true;
         if (q.after) {
             const now = new Date(q.after);
             now.setHours(0, 0, 0, 0);
@@ -83,7 +84,7 @@ export default class AdminController {
         }
     }
 
-    public static async load(req: Request, res: Response) {
+    public static async loadin(req: Request, res: Response) {
         try {
             const valid = validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
@@ -91,16 +92,7 @@ export default class AdminController {
             const admin = await Admin.findById(valid.username);
             if (!admin) throw new Error('Admin non trouvé');
 
-            admin.online = true;
-            admin.isAuthenticated = true;
-            admin.disconnected = '';
-            await admin.save();
-
-            const response: JsonResponse = {
-                success: true,
-                message: 'Admin enregistré avec succès',
-                data: admin
-            };
+            const response = await authenticate(admin);
 
             res.status(201).json(response);
         } catch (error: any) {

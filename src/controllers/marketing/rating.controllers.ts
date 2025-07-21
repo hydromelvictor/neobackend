@@ -5,10 +5,10 @@ import Rating from "../../models/marketing/rating.models";
 export default class RatingController {
     public static filters(q: any): any {
         const filter: any = {};
-        if (q.idx) {
+        if (q.me) {
             filter.$or = [
-                { lead: q.idx },
-                { product: q.idx },
+                { lead: q.me },
+                { product: q.me },
             ];
         }
         if (q.after) {
@@ -27,7 +27,7 @@ export default class RatingController {
 
     public static async register(req: Request, res: Response) {
         try {
-            const rating = new Rating({ ...req.body, lead: req.user._id });
+            const rating = new Rating({ ...req.body, product: req.params.id, lead: req.user._id });
             await rating.save();
 
             const response: JsonResponse = {

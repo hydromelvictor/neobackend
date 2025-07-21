@@ -5,7 +5,7 @@ import RatingController from '../../controllers/marketing/rating.controllers';
 const router = Router();
 
 router.post(
-    '/',
+    '/:id',
     authenticate,
     device('CREATE RATING'),
     permissions('CREATE-RATING'),

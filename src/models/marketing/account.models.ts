@@ -4,7 +4,7 @@ import paginate from 'mongoose-paginate-v2';
 
 type Assign = {
     org: Types.ObjectId;
-    balance?: number;
+    balance: number;
 }
 
 export interface IAcc extends Document {
@@ -44,8 +44,7 @@ const accSchema = new Schema<IAcc>({
         balance: {
             type: Number,
             default: 0,
-            min: 0,
-            required: true
+            min: 0
         }
     }]
 }, {

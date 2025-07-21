@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, Types } from 'mongoose';
+import mongoose, { Schema, Document } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
 export interface Inot extends Document {

@@ -3236,115 +3236,449 @@ paths:
                       data:
                         type: number
 
-  # /referer:
-  #   post:
-  #     summary: load data
-  #     requestBody:
-  #       required: true
-  #       content:
-  #         application/json:
-  #           schema:
-  #             type: object
-  #             required:
-  #               - fullname
-  #               - email
-  #               - position
-  #               - country
-  #               - city
-  #               - phone
-  #             properties:
-  #               fullname:
-  #                 type: string
-  #               email:
-  #                 type: string
-  #               position:
-  #                 type: string
-  #               country:
-  #                 type: string
-  #               city:
-  #                 type: string
-  #               phone:
-  #                 type: string
+  /referer:
+    post:
+      summary: load data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - fullname
+                - email
+                - position
+                - country
+                - city
+                - phone
+              properties:
+                fullname:
+                  type: string
+                email:
+                  type: string
+                position:
+                  type: string
+                country:
+                  type: string
+                city:
+                  type: string
+                phone:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
   
-  # /referer/register:
-  #   post:
-  #     summary: creation referer
+  /referer/register:
+    post:
+      summary: creation referer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - otp
+              properties:
+                otp:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Referer"
     
-  #   get:
-  #     summary: tout voir
-  #     security:
-  #       - bearerAuth: []
+    get:
+      summary: tout voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_online'
+        - $ref: '#/components/parameters/_auth'
+        - $ref: '#/components/parameters/_before'
+        - $ref: '#/components/parameters/_after'
+        - $ref: '#/components/parameters/_page'
+        - $ref: '#/components/parameters/_limit'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Referer"
   
-  # /referer/password/{id}:
-  #   post:
-  #     summary: create/update password
+  /referer/password/{id}:
+    post:
+      summary: create/update password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
   
-  # /referer/{id}:
-  #   get:
-  #     summary: voir
-  #     security:
-  #       - bearerAuth: []
-  #   put:
-  #     summary: mis a jour
-  #     security:
-  #       - bearerAuth: []
-  #   delete:
-  #     summary: suppression
-  #     security:
-  #       - bearerAuth: []
-
-  # /referer/stats/count:
-  #   get:
-  #     summary: nombre de referant
-  #     security:
-  #       - bearerAuth: []
-
-  # /auth/login/{model}:
-  #   post:
-  #     summary: login by model (employee, manager, referer)
-
-  # /auth/logout/{model}/{id}:
-  #   post:
-  #     summary: logout by model (employee, manager, referer, admin, lead)
-  #     security:
-  #       - bearerAuth: []
-
-  # /auth/forgot/{model}:
-  #   post:
-  #     summary: forgot pasword
-
-  # /auth/verify/{model}:
-  #   post:
-  #     summary: verification
-
-  # /auth/reset/{model}/{id}:
-  #   post:
-  #     summary: reset password
-
-  # /auth/authorization/{model}/{id}:
-  #   post:
-  #     summary: authorization
-  #     security:
-  #       - bearerAuth: []
-
-  # /automate/{id}:
-  #   post:
-  #     summary: creation de relance
-  #   get:
-  #     summary: voir
-  #   delete:
-  #     summary: suppression
-  #   put:
-  #     summary: mis a jour
+  /referer/{id}:
+    get:
+      summary: voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Referer"
+    put:
+      summary: mis a jour
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      requestBody:
+        required: false
+        content:
+          multipart/form-data:
+            schema:
+              $ref: "#/components/schemas/Referer"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: "#/components/schemas/Referer"
+    delete:
+      summary: suppression
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_id"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
   
-  # /automate:
-  #   get:
-  #     summary: tout voir
-  
-  # /automate/stats/count:
-  #   get:
-  #     summary: nombre de relance
+  /referer/stats/count:
+    get:
+      summary: nombre de referant
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_online'
+        - $ref: '#/components/parameters/_auth'
+        - $ref: '#/components/parameters/_before'
+        - $ref: '#/components/parameters/_after'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
 
-  # /automate/stop:
-  #   post:
-  #     summary: stop relance
+  /auth/login/{name}:
+    post:
+      summary: login by model (employee, manager, referer)
+      parameters:
+        - $ref: "#/components/parameters/_name"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Credentials"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          accessToken:
+                            type: string
+                          refreshToken:
+                            type: string
+                          user:
+                            type: object
+                            enum:
+                              - $ref: "#/components/schemas/Employee"
+                              - $ref: "#/components/schemas/Manager"
+                              - $ref: "#/components/schemas/Referer"
+
+  /auth/logout/{name}/{id}:
+    post:
+      summary: logout by model (employee, manager, referer, admin, lead)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+
+  /auth/forgot/{name}:
+    post:
+      summary: forgot pasword
+      parameters:
+        - $ref: '#/components/parameters/_name'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+
+  /auth/verify/{name}:
+    post:
+      summary: verification
+      parameters:
+        - $ref: '#/components/parameters/_name'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                otp:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: string
+
+  /auth/reset/{name}/{id}:
+    post:
+      summary: reset password
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                password:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+
+  /auth/authorization/{name}/{id}:
+    post:
+      summary: authorization
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_name'
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+
+  /automate/{id}:
+    post:
+      summary: creation de relance
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Relance'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Relance'
+    get:
+      summary: voir
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Relance'
+    delete:
+      summary: suppression
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+    put:
+      summary: mis a jour
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: Ok
+
+  /automate:
+    get:
+      summary: tout voir
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Relance'
+
+  /automate/stats/count:
+    get:
+      summary: nombre de relance
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
+
+  /automate/stop:
+    post:
+      summary: stop relance
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'

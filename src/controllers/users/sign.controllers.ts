@@ -14,10 +14,10 @@ const instanciate = (model: string) => {
             return require('../../models/users/employee.models').default;
         case 'admin':
             return require('../../models/users/admin.models').default;
+        case 'lead':
+            return require('../../models/users/lead.models').default;
         case 'referer':
             return require('../../models/users/referer.models').default;
-        case 'lead':
-            return require('../../models/holding/lead.models').default;
         default:
             throw new Error('Invalid model');
     }
@@ -40,7 +40,7 @@ export const authenticate = async (user: any) => {
         success: true,
         message: 'Utilisateur authentifié avec succès',
         data: {
-            ...user,
+            user,
             accessToken: accessToken.data,
             refreshToken: refreshToken.data
         }
@@ -50,7 +50,7 @@ export const authenticate = async (user: any) => {
 
 export const login = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.model);
+        let Instance = instanciate(req.params.name);
 
         const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -74,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.model);
+        let Instance = instanciate(req.params.name);
 
         const user = await Instance.findById(req.params.id);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -105,7 +105,7 @@ export const logout = async (req: Request, res: Response) => {
 
 export const forgot = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.model);
+        let Instance = instanciate(req.params.name);
 
         const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -137,7 +137,7 @@ export const forgot = async (req: Request, res: Response) => {
 
 export const verify = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.model);
+        let Instance = instanciate(req.params.name);
 
         const valid = validateAndUseCode(req.body.otp);
         if (!valid.success) throw new Error('Invalid OTP');
@@ -167,7 +167,7 @@ export const verify = async (req: Request, res: Response) => {
 
 export const reset = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.model);
+        let Instance = instanciate(req.params.name);
 
         const user = await Instance.findById(req.params.id);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -199,7 +199,7 @@ export const reset = async (req: Request, res: Response) => {
 
 export const authorization = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.model);
+        let Instance = instanciate(req.params.name);
         const user = await Instance.findById(req.params.id);
         if (!user) throw new Error('Utilisateur non trouvé');
 

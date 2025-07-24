@@ -162,6 +162,4 @@ export default class RelanceController {
             res.status(400).json(response)
         }
     }
-
-
 }

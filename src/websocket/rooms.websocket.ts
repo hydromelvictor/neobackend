@@ -120,7 +120,7 @@ const rooms = (socket: Socket, io: any) => {
             const response: JsonResponse = {
                 success: true,
                 message: 'join in the room',
-                data: data
+                data: room
             }
             io.to(socket.id).emit('joinRoom', response);
         } catch (err: any) {
@@ -351,7 +351,7 @@ const rooms = (socket: Socket, io: any) => {
         io.use(device('DELETE-REACT'));
         
         try {
-            await Reaction.deleteOne({ message: data.message, hote: socket.data.user._id });
+            await Reaction.deleteOne({ message: data.id, hote: socket.data.user._id });
             const response: JsonResponse = {
                 success: true,
                 message: 'read in the room'

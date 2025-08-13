@@ -5,6 +5,341 @@ info:
   description: >
     API BACKEND NEO
 
+    ### LES WEBSOCKETS ###
+
+    **Authentification :**  
+    Envoyer le token JWT dans l’en-tête `Authorization Bearer`.
+
+    **Les evenements**
+    - `NotifyCreate`
+      - data
+        - state
+          - flottant
+          - avatar
+          - push
+        - image
+          - lien vers l'image
+        - avatar
+          - lien vers l'avatar
+        - name
+          - nom du chemin demander
+        - path
+          - lien du chemin demander
+        - target
+          - zone cible
+        - message
+          - message associer
+        - expired
+          - date d'expiration du chemin
+      - responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Notify'
+    - `NotifyUpdate`
+      - data
+        - id
+          - identifiant unique
+        - ...
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Notify'
+    - `NotifyDelete`
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+    - NotifyList
+      - data
+        - page
+        - limit
+        - state
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Notify'
+    - NotifyRead
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Notify'
+    - findOrCreateRoom
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Room'
+    - findAllRooms
+      - data
+        - page
+        - limit
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Room'
+    - joinRoom
+      - data
+        - room
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object'
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Room'
+    - leaveRoom
+      - data
+        - room
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object'
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Room'
+    - myAllRooms
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              allOf:
+                - $ref: '#/components/schemas/JsonResponse'
+                - type: array
+                  items:
+                    $ref: '#/components/schemas/Room'
+    - sendSms
+      - data
+        - room
+          - identifiant unique
+        - content
+          - contenu du message
+        - state
+          - etat du message
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                - $ref: '#/components/schemas/JsonResponse'
+                - type: object
+                  properties:
+                    data:
+                      $ref: '#/components/schemas/Sms'
+    - readSms
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Sms'
+    - listSms
+      - data
+        - page
+        - limit
+        - room
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Sms'
+    - deleteSms
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+    - addReaction
+      - data
+        - message
+          - identifiant du message
+        - emoji
+          - emoji du message
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+    - deleteReaction
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+    - createStatus
+      - data
+        - org
+        - text
+        - link
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Status'
+    - retrieveStatus
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        $ref: '#/components/schemas/Status'
+    - listStatus
+      - data
+        - page
+        - limit
+        - org
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: array
+                    items:
+                      $ref: '#/components/schemas/Status'
+    - deleteStatus
+      - data
+        - id
+          - identifiant unique
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JsonResponse'
+    - countStatus
+      - data
+        - org
+      - responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: number
+    
+
 servers:
   - url: http://localhost:8001/
     description: Serveur de développement local
@@ -3682,3 +4017,4 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
+

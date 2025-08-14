@@ -9,6 +9,8 @@ import Org from "../models/associate/org.models"
 import { JsonResponse } from "../types/api"
 import device from "./device.websocket"
 import permission from "./permissions.websockets"
+import Neo from "../models/users/neo.models"
+import builder from "../controllers/build"
 
 
 
@@ -218,6 +220,25 @@ const rooms = (socket: Socket, io: any) => {
             }
 
             io.to(data.room).emit('sendSms', response);
+
+            // organisons la reponse immediate si elle doit venir de l'IA
+            if (hote.role !== 'org' && data.ia) {
+                const neo = await Neo.findById(data.ia);
+                if (!neo) throw new Error('neo not found');
+                if (!neo.online) return;
+
+                const response = await builder(neo._id, result, data.room);
+                if (response.error) return;
+                const message = await Sms.create({ room: data.room, hote: neo._id, content: response.content, state: 'external' });
+                const attachs = (await Attach.find({ message: message._id })).map(attach => attach._id);
+                const reactions = (await Reaction.find({ message: message._id })).map(reaction => reaction._id);
+
+                io.to(data.room).emit('sendSms', {
+                    success: true,
+                    message: 'send sms in the room',
+                    data: { ...message, attachments: attachs, reactions }
+                });
+            }
         } catch (err: any) {
             console.log(err.message)
             const response: JsonResponse = {

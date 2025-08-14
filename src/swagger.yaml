@@ -11,6 +11,7 @@ info:
     Envoyer le token JWT dans l’en-tête `Authorization Bearer`.
 
     **Les evenements**
+    
     - `NotifyCreate`
       - data
         - state
@@ -71,7 +72,7 @@ info:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
-    - NotifyList
+    - `NotifyList`
       - data
         - page
         - limit
@@ -87,7 +88,7 @@ info:
                   - type: array
                     items:
                       $ref: '#/components/schemas/Notify'
-    - NotifyRead
+    - `NotifyRead`
       - data
         - id
           - identifiant unique
@@ -103,7 +104,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Notify'
-    - findOrCreateRoom
+    - `findOrCreateRoom`
       - data
         - id
           - identifiant unique
@@ -119,7 +120,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Room'
-    - findAllRooms
+    - `findAllRooms`
       - data
         - page
         - limit
@@ -134,7 +135,7 @@ info:
                   - type: array
                     items:
                       $ref: '#/components/schemas/Room'
-    - joinRoom
+    - `joinRoom`
       - data
         - room
           - identifiant unique
@@ -150,7 +151,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Room'
-    - leaveRoom
+    - `leaveRoom`
       - data
         - room
           - identifiant unique
@@ -166,7 +167,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Room'
-    - myAllRooms
+    - `myAllRooms`
       - responses:
         '200':
           description: OK
@@ -177,7 +178,7 @@ info:
                 - type: array
                   items:
                     $ref: '#/components/schemas/Room'
-    - sendSms
+    - `sendSms`
       - data
         - room
           - identifiant unique
@@ -196,7 +197,7 @@ info:
                   properties:
                     data:
                       $ref: '#/components/schemas/Sms'
-    - readSms
+    - `readSms`
       - data
         - id
           - identifiant unique
@@ -212,7 +213,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Sms'
-    - listSms
+    - `listSms`
       - data
         - page
         - limit
@@ -228,7 +229,7 @@ info:
                   - type: array
                     items:
                       $ref: '#/components/schemas/Sms'
-    - deleteSms
+    - `deleteSms`
       - data
         - id
           - identifiant unique
@@ -239,7 +240,7 @@ info:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
-    - addReaction
+    - `addReaction`
       - data
         - message
           - identifiant du message
@@ -252,7 +253,7 @@ info:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
-    - deleteReaction
+    - `deleteReaction`
       - data
         - id
           - identifiant unique
@@ -263,7 +264,7 @@ info:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
-    - createStatus
+    - `createStatus`
       - data
         - org
         - text
@@ -280,7 +281,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Status'
-    - retrieveStatus
+    - `retrieveStatus`
       - data
         - id
           - identifiant unique
@@ -296,7 +297,7 @@ info:
                     properties:
                       data:
                         $ref: '#/components/schemas/Status'
-    - listStatus
+    - `listStatus`
       - data
         - page
         - limit
@@ -312,7 +313,7 @@ info:
                   - type: array
                     items:
                       $ref: '#/components/schemas/Status'
-    - deleteStatus
+    - `deleteStatus`
       - data
         - id
           - identifiant unique
@@ -323,7 +324,7 @@ info:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
-    - countStatus
+    - `countStatus`
       - data
         - org
       - responses:

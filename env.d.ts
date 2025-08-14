@@ -17,6 +17,7 @@ declare namespace NodeJS {
 
         ENCRYPTION_KEY: string;
         ENCRYPTION_IV: string;
+        GROK: string;
     }
 }
 

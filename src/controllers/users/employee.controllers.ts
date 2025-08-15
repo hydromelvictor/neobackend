@@ -4,7 +4,7 @@ import { JsonResponse } from '../../types/api';
 
 
 export default class EmployeeContorller {
-    static filters = (q: any): any => {
+    public static filters = (q: any): any => {
         const filter: any = {};
 
         if (q.name) filter.fullname = { $regex: q.name, $options: 'i' };
@@ -24,7 +24,7 @@ export default class EmployeeContorller {
         return filter;
     }
 
-    static async signUp(req: Request, res: Response) {
+    public static async signUp(req: Request, res: Response) {
         try {
             const employee = new Employee(req.body);
             await employee.save();
@@ -49,7 +49,7 @@ export default class EmployeeContorller {
         }
     }
 
-    static async retrieve(req: Request, res: Response) {
+    public static async retrieve(req: Request, res: Response) {
         try {
             const employee = await Employee.findById(req.params.id);
             if (!employee) throw new Error('Utilisateur non trouvé');
@@ -74,7 +74,7 @@ export default class EmployeeContorller {
         }
     }
 
-    static async list(req: Request, res: Response) {
+    public static async list(req: Request, res: Response) {
         try {
             const { page = 1, limit = 10 } = req.query;
             const options = { page: parseInt(page as string), limit: parseInt(limit as string), sort: { createdAt: -1 } };
@@ -100,7 +100,7 @@ export default class EmployeeContorller {
         }
     }
 
-    static async update(req: Request, res: Response) {
+    public static async update(req: Request, res: Response) {
         try {
             const employee = await Employee.findById(req.params.id);
             if (!employee) throw new Error('Utilisateur non trouvé');
@@ -138,7 +138,7 @@ export default class EmployeeContorller {
         }
     }
 
-    static async delete(req: Request, res: Response) {
+    public static async delete(req: Request, res: Response) {
         try {
             const employee = await Employee.findById(req.params.id);
             if (!employee) throw new Error('Utilisateur non trouvé');
@@ -164,7 +164,7 @@ export default class EmployeeContorller {
         }
     }
 
-    static async count(req: Request, res: Response) {
+    public static async count(req: Request, res: Response) {
         try {
             const count = await Employee.countDocuments(EmployeeContorller.filters(req.query));
             const response: JsonResponse = {

@@ -5,7 +5,7 @@ import { JsonResponse } from '../../types/api';
 
 
 export default class XaccountController {
-    static async balance(req: Request, res: Response) {
+    public static async balance(req: Request, res: Response) {
         try {
             const account = await Xaccount.findByName(req.params.name);
             const response: JsonResponse = {
@@ -27,12 +27,12 @@ export default class XaccountController {
         }
     }
 
-    static async update(req: Request, res: Response) {
+    public static async update(req: Request, res: Response) {
         try {
             const account = await Xaccount.findByName(req.params.name);
             if (!account) throw new Error('Compte non trouvé');
 
-            account.balance += req.body.balance;
+            account.balance += parseFloat(req.body.balance);
             await account.save();
 
             const response: JsonResponse = {

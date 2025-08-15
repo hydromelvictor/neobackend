@@ -1594,7 +1594,9 @@ components:
               items:
                 type: number
         phone:
-          type: string
+          type: array
+          items:
+            type: string
           description: numero professionnel de l'organisation
         email:
           type: string
@@ -1671,7 +1673,9 @@ paths:
                         type: number
                         description: longitude, latitude
                 phone:
-                  type: string
+                  type: array
+                  items:
+                    type: string
                 email:
                   type: string
                 sector:

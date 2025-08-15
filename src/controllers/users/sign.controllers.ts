@@ -30,7 +30,7 @@ export const authenticate = async (user: any) => {
     user.disconnected = '';
     await user.save();
     
-    const accessToken = generateToken({ id: user._id.toString() }, '15m');
+    const accessToken = generateToken({ id: user._id.toString() }, '1h');
     if (!accessToken.success) throw new Error(`${accessToken.error}`);
     
     const refreshToken = generateToken({ id: user._id.toString() }, '7d');

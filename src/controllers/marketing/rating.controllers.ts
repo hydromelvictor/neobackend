@@ -27,7 +27,7 @@ export default class RatingController {
 
     public static async register(req: Request, res: Response) {
         try {
-            const rating = new Rating({ ...req.body, product: req.params.id, lead: req.user._id });
+            const rating = new Rating({ rating: parseInt(req.body.rating), product: req.params.id, lead: req.user._id });
             await rating.save();
 
             const response: JsonResponse = {

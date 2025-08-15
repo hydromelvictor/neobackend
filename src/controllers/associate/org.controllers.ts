@@ -6,7 +6,7 @@ import Account from '../../models/marketing/account.models';
 import { JsonResponse } from '../../types/api';
 
 export default class OrgController {
-    static filters = (q: any) => {
+    public static filters = (q: any) => {
         const filter: any = {};
 
         if (q.name) {
@@ -41,7 +41,7 @@ export default class OrgController {
         return filter;
     }
 
-    static async register(req: Request, res: Response) {
+    public static async register(req: Request, res: Response) {
         try {
             const exist = await Org.findOne({ reason: req.body.reason });
             if (exist) throw new Error('L\'organisation existe déjà');
@@ -49,7 +49,15 @@ export default class OrgController {
             const manager = await Manager.findById(req.body.manager);
             if (!manager) throw new Error('Le manager n\'existe pas');
 
-            const org = new Org(req.body);
+            const data = { ...req.body };
+            data.location = {
+                type: 'Point',
+                coordinates: [data.lon, data.lat]
+            }
+            delete data.lat;
+            delete data.lon;
+
+            const org = new Org(data);
             await org.save();
             const response: JsonResponse = {
                 success: true,
@@ -78,7 +86,7 @@ export default class OrgController {
         }
     }
 
-    static async retrieve(req: Request, res: Response) {
+    public static async retrieve(req: Request, res: Response) {
         try {
             const org = await Org.findById(req.params.id);
             if (!org) throw new Error('L\'organisation n\'existe pas');
@@ -101,7 +109,7 @@ export default class OrgController {
         }
     }
 
-    static async list(req: Request, res: Response) {
+    public static async list(req: Request, res: Response) {
         try {
             const { page = 1, limit = 10 } = req.query;
             
@@ -125,21 +133,29 @@ export default class OrgController {
         }
     }
 
-    static async update(req: Request, res: Response) {
+    public static async update(req: Request, res: Response) {
         try {
             const org = await Org.findById(req.params.id);
             if (!org) throw new Error('L\'organisation n\'existe pas');
 
-            if (req.body.manager) {
-                const manager = await Manager.findById(req.body.manager);
+            const data = { ...req.body };
+            
+            if (data.manager) {
+                const manager = await Manager.findById(data.manager);
                 if (manager && manager._id.toString() !== org.manager.toString()) throw new Error('Le manager n\'existe pas');
             }
 
-            const reason = req.body.reason;
+            const reason = data.reason;
             const exist = reason ? await Org.findOne({ reason }) : null;
             if (exist && exist._id.toString() !== org._id.toString()) throw new Error(`${reason} already exist`);
             
-            Object.assign(org, req.body);
+            if (data.lon || data.lat) {
+                data.location.coordinates = [data.lon ? data.lon : org.location.coordinates[0], data.lat ? data.lat : org.location.coordinates[1]]
+                delete data.lat;
+                delete data.lon;
+            }
+
+            Object.assign(org, data);
             await org.save();
 
             const response: JsonResponse = {
@@ -160,7 +176,7 @@ export default class OrgController {
         }
     }
 
-    static async delete(req: Request, res: Response) {
+    public static async delete(req: Request, res: Response) {
         try {
             const org = await Org.findById(req.params.id);
             if (!org) throw new Error('L\'organisation n\'existe pas');
@@ -183,7 +199,7 @@ export default class OrgController {
         }
     }
 
-    static async count(req: Request, res: Response) {
+    public static async count(req: Request, res: Response) {
         try {
             const count = await Org.countDocuments(OrgController.filters(req.query));
             const response: JsonResponse = {

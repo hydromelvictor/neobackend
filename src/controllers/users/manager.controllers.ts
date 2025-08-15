@@ -9,7 +9,7 @@ import Account from '../../models/marketing/account.models';
 
 
 export default class ManagerController {
-    static filters = (q: any): any => {
+    public static filters = (q: any): any => {
         const filter: any = {};
 
         if (q.name) {
@@ -36,7 +36,7 @@ export default class ManagerController {
         return filter;
     }
 
-    static async load(req: Request, res: Response): Promise<void> {
+    public static async load(req: Request, res: Response): Promise<void> {
         try {
             const manager = await Manager.findOne({
                 $or: [
@@ -70,7 +70,7 @@ export default class ManagerController {
         }
     }
 
-    static async signUp(req: Request, res: Response): Promise<void> {
+    public static async signUp(req: Request, res: Response): Promise<void> {
         try {
             const valid = validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
@@ -104,7 +104,7 @@ export default class ManagerController {
         }
     }
 
-    static async password(req: Request, res: Response): Promise<void> {
+    public static async password(req: Request, res: Response): Promise<void> {
         try {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
@@ -134,7 +134,7 @@ export default class ManagerController {
         }
     }
 
-    static async retrieve(req: Request, res: Response): Promise<void> {
+    public static async retrieve(req: Request, res: Response): Promise<void> {
         try {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
@@ -158,7 +158,7 @@ export default class ManagerController {
         }
     }
 
-    static async list(req: Request, res: Response): Promise<void> {
+    public static async list(req: Request, res: Response): Promise<void> {
         try {
             const { page = 1, limit = 10 } = req.query;
 
@@ -184,7 +184,7 @@ export default class ManagerController {
         }
     }
 
-    static async update(req: Request, res: Response): Promise<void> {
+    public static async update(req: Request, res: Response): Promise<void> {
         try {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
@@ -222,7 +222,7 @@ export default class ManagerController {
         }
     }
 
-    static async delete(req: Request, res: Response): Promise<void> {
+    public static async delete(req: Request, res: Response): Promise<void> {
         try {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
@@ -247,7 +247,7 @@ export default class ManagerController {
         }
     }
 
-    static async count(req: Request, res: Response): Promise<void> {
+    public static async count(req: Request, res: Response): Promise<void> {
         try {
             const count = await Manager.countDocuments(this.filters(req.query));
 

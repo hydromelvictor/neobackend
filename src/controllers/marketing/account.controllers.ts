@@ -27,7 +27,7 @@ export default class AccountController {
         return filter;
     }
 
-    static async _in_bank(balance: number): Promise<boolean> {
+    public static async _in_bank(balance: number): Promise<boolean> {
         const system = await Xaccount.findByName('system');
         if (!system) throw new Error('Système non trouvé');
 
@@ -39,9 +39,11 @@ export default class AccountController {
         return true;
     }
 
-    static async balance(req: Request, res: Response) {
+    public static async balance(req: Request, res: Response) {
         try {
             const account = await Account.findOwner(req.user._id);
+            if (!account) throw new Error('Compte non trouvé');
+
             const response: JsonResponse = {
                 success: true,
                 message: 'Compte trouvé avec succès',
@@ -61,7 +63,7 @@ export default class AccountController {
         }
     }
 
-    static async list(req: Request, res: Response) {
+    public static async list(req: Request, res: Response) {
         try {
             const filter = AccountController.filters(req.query);
             const options = {
@@ -94,8 +96,10 @@ export default class AccountController {
     public static async assignate(req: Request, res: Response) {
         try {
             const amount = parseFloat(req.body.balance);
+            
             const account = await Account.findOwner(req.user._id);
             if (!account) throw new Error('Compte non trouvé');
+            
             // amount doit etre positif et inferieur ou egal a account.balance
             if (amount <= 0 || amount > account.balance) throw new Error('over');
 
@@ -136,7 +140,7 @@ export default class AccountController {
         }
     }
 
-    static async actes(req: Request, res: Response) {
+    public static async actes(req: Request, res: Response) {
         const session = await mongoose.startSession();
         try {
             const status = req.query.status;

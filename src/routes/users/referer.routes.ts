@@ -28,24 +28,24 @@ router.post(
 router.get(
     '/:id',
     authenticate,
-    device('GET MANAGER'),
-    permissions('READ-MANAGER'),
+    device('GET REFERER'),
+    permissions('READ-REFERER'),
     RefererController.retrieve
 );
 
 router.get(
     '/',
     authenticate,
-    device('LIST MANAGER'),
-    permissions('LIST-MANAGER'),
+    device('LIST REFERER'),
+    permissions('LIST-REFERER'),
     RefererController.list
 );
 
 router.put(
     '/:id',
     authenticate,
-    device('MIS A JOUR MANAGER'),
-    permissions('UPDATE-MANAGER'),
+    device('MIS A JOUR REFERER'),
+    permissions('UPDATE-REFERER'),
     uploads.single('picture'),
     exams('picture'),
     validateInput(TrefUpdate, []),
@@ -55,16 +55,16 @@ router.put(
 router.delete(
     '/:id',
     authenticate,
-    device('DELETE MANAGER'),
-    permissions('DELETE-MANAGER'),
+    device('DELETE REFERER'),
+    permissions('DELETE-REFERER'),
     RefererController.delete
 );
 
 router.get(
     '/stats/count',
     authenticate,
-    device('COUNT MANAGER'),
-    permissions('COUNT-MANAGER'),
+    device('COUNT REFERER'),
+    permissions('COUNT-REFERER'),
     RefererController.count
 );
 

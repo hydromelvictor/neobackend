@@ -55,6 +55,34 @@ const LeadSchema: Schema = new Schema({
     authorization: {
         type: [String],
         default: [
+            'READ-ORG',
+            'LIST-ORG',
+
+            'CREATE-ORDER',
+            'READ-ORDER',
+            'LIST-ORDER',
+            'UPDATE-ORDER',
+            'DELETE-ORDER',
+            'COUNT-ORDER',
+
+            'READ-PRODUCT',
+            'LIST-PRODUCT',
+            'COUNT-PRODUCT',
+
+            'CREATE-RATING',
+            'READ-RATING',
+            'READ-RATING-PRODUCT',
+            'LIST-RATING',
+            'COUNT-RATING',
+
+            'SAVE-ATTACHMENT',
+            'DOWNLOAD-ATTACHMENT',
+            'DELETE-ATTACHMENT',
+
+            'READ-LEAD',
+            'UPDATE-LEAD',
+
+            'READ-RELANCE',
         ],
         validate: {
             validator: function(arr: string[]) {

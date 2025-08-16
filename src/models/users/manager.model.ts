@@ -75,13 +75,83 @@ const ManSchema = new Schema<IMan>({
         type: Boolean, 
         default: false 
     },
-    isAuthenticated: { 
+    isAuthenticated: {
         type: Boolean, 
         default: false 
     },
     authorization: {
         type: [String],
         default: [
+            'READ-ORG',
+            'LIST-ORG',
+            'UPDATE-ORG',
+            'DELETE-ORG',
+            'COUNT-ORG',
+
+            'READ-SETTINGS',
+            'LIST-SETTINGS',
+            'UPDATE-SETTINGS',
+
+            'CREATE-STATUS',
+
+            'READ-ACCOUNT',
+            'LIST-ACCOUNT',
+            'ASSIGN-ACCOUNT',
+            'ACTES-ACCOUNT',
+
+            'READ-TRACKING',
+            'LIST-TRACKING',
+
+            'READ-ORDER',
+            'LIST-ORDER',
+            'COUNT-ORDER',
+
+            'CREATE-PRODUCT',
+            'READ-PRODUCT',
+            'LIST-PRODUCT',
+            'UPDATE-PRODUCT',
+            'DELETE-PRODUCT',
+            'COUNT-PRODUCT',
+
+            'READ-RATING',
+            'READ-RATING-PRODUCT',
+            'LIST-RATING',
+            'COUNT-RATING',
+
+            'SAVE-ATTACHMENT',
+            'DOWNLOAD-ATTACHMENT',
+            'DELETE-ATTACHMENT',
+
+            'READ-EMPLOYEE',
+            'UPDATE-EMPLOYEE',
+            'LIST-EMPLOYEE',
+            'DELETE-EMPLOYEE',
+            'COUNT-EMPLOYEE',
+
+            'READ-LEAD',
+            'LIST-LEAD',
+            'UPDATE-LEAD',
+            'COUNT-LEAD',
+
+            'READ-MANAGER',
+            'UPDATE-MANAGER',
+            'DELETE-MANAGER',
+
+            'SAVE-NEO',
+            'READ-NEO',
+            'LIST-NEO',
+            'UPDATE-NEO',
+            'DELETE-NEO',
+            'COUNT-NEO',
+
+            'READ-REFERER',
+
+            'READ-RELANCE',
+            'LIST-RELANCE',
+            'DELETE-RELANCE',
+            'COUNT-RELANCE',
+            'UPDATE-RELANCE',
+            'STOP-RELANCE',
         ],
         validate: {
             validator: function(arr: string[]) {

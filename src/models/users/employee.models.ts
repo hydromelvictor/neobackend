@@ -69,7 +69,52 @@ const EmSchema = new Schema<IEm>({
     },
     authorization: {
         type: [String],
-        default: []
+        default: [
+            'READ-ORG',
+            'LIST-ORG',
+
+            'READ-SETTINGS',
+
+            'READ-ORDER',
+            'LIST-ORDER',
+            'COUNT-ORDER',
+
+            'READ-PRODUCT',
+            'LIST-PRODUCT',
+            'COUNT-PRODUCT',
+
+            'READ-RATING',
+            'READ-RATING-PRODUCT',
+            'LIST-RATING',
+            'COUNT-RATING',
+
+            'SAVE-ATTACHMENT',
+            'DOWNLOAD-ATTACHMENT',
+            'DELETE-ATTACHMENT',
+
+            'READ-EMPLOYEE',
+            'LIST-EMPLOYEE',
+            'UPDATE-EMPLOYEE',
+            'COUNT-EMPLOYEE',
+
+            'READ-LEAD',
+            'LIST-LEAD',
+            'UPDATE-LEAD',
+            'COUNT-LEAD',
+
+            'READ-MANAGER',
+
+            'READ-NEO',
+            'LIST-NEO',
+            'COUNT-NEO',
+
+            'READ-RELANCE',
+            'LIST-RELANCE',
+            'DELETE-RELANCE',
+            'COUNT-RELANCE',
+            'UPDATE-RELANCE',
+            'STOP-RELANCE',
+        ]
     },
     disconnected: {
         type: String

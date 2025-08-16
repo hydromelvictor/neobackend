@@ -49,7 +49,26 @@ const RefSchema = new Schema<Iref>({
         type: String,
         unique: true
     },
-    authorization: [String],
+    authorization: {
+        type: [String],
+        default: [
+            'READ-ORG',
+            'LIST-ORG',
+            'COUNT-ORG',
+
+            'READ-ACCOUNT',
+            'ACTES-ACCOUNT',
+
+            'READ-TRACKING',
+            'LIST-TRACKING',
+
+            'READ-MANAGER',
+
+            'READ-REFERER',
+            'UPDATE-REFERER',
+            'DELETE-REFERER',
+        ]
+    },
     click: {
         type: Number,
         default: 0

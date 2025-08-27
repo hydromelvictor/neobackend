@@ -88,7 +88,8 @@ const orgSchema = new Schema<IOrg>({
     },
     employees: {
         type: String,
-        default: '1 - 5'
+        default: '1 - 5',
+        enum: ['1 - 5', '6 - 10', '11 - 20', '21 - 50', '51 - 100', '101 - 200', '201 - 500', '501 - 1000', '1001 et plus']
     },
     area: {
         type: String

@@ -37,6 +37,9 @@ export default class AdminController {
     public static async signUp(req: Request, res: Response) {
         try {
             const admin = new Admin(req.body);
+            const exist = await Admin.findOne({ or: [{ phone: admin.phone }, { email: admin.email }, { cni: admin.cni }] });
+            if (exist) throw new Error('Un admin avec ce téléphone, email ou cni existe déjà');
+
             admin.recovery = OneUseToken();
             await admin.save();
 

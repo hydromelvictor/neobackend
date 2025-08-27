@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import Employee from '../../models/users/employee.models';
 import { JsonResponse } from '../../types/api';
+import Org from '../../models/associate/org.models';
 
 
 export default class EmployeeContorller {
@@ -26,7 +27,18 @@ export default class EmployeeContorller {
 
     public static async signUp(req: Request, res: Response) {
         try {
+            const org = await Org.findById(req.body.org);
+            if (!org) throw new Error('Organisation non trouvée');
+            if (!org.access) throw new Error('Organisation non active');
+
             const employee = new Employee(req.body);
+            const exist = await Employee.findOne({
+                $or: [
+                    { email: employee.email },
+                    { phone: employee.phone }
+                ]
+            })
+            if (exist) throw new Error('email or phone exist');
             await employee.save();
 
             const response: JsonResponse = {

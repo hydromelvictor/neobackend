@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { authenticate, device, permissions, uploads, exams } from '../../middleware';
+import { authenticate, device, permissions, uploads, exams, validateInput } from '../../middleware';
+import { TadminCreate } from '../../types/admin';
 import AdminController from '../../controllers/users/admin.controllers';
 
 const router = Router();
@@ -8,6 +9,7 @@ router.post(
     '/',
     device('SAVE DATA'),
     permissions('ADMIN-SAVE-DATA'),
+    validateInput(TadminCreate, ['firstname', 'lastname', 'phone', 'email', 'cni', 'position']),
     AdminController.signUp
 );
 
@@ -22,7 +24,7 @@ router.post(
     device('EXAM DATA'),
     AdminController.loadin
 );
-
+/** PREMIER CORRIDOR */
 router.get(
     '/:id',
     authenticate,

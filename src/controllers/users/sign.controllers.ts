@@ -76,7 +76,7 @@ export const logout = async (req: Request, res: Response) => {
     try {
         let Instance = instanciate(req.params.name);
 
-        const user = await Instance.findById(req.params.id);
+        const user = await Instance.findById(req.user._id);
         if (!user) throw new Error('Utilisateur non trouvé');
 
         user.online = false;

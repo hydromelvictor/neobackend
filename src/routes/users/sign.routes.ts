@@ -11,7 +11,7 @@ router.post(
 );
 
 router.post(
-    '/logout/:model/:id',
+    '/logout/:model',
     authenticate,
     device('LOGOUT'),
     logout

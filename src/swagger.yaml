@@ -4116,7 +4116,38 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
-
+  
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                refreshToken:
+                  type: string
+                name:
+                  type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: object
+                        properties:
+                          accessToken:
+                            type: string
   /automate/{id}:
     post:
       tags:

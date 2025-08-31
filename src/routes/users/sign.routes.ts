@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authenticate, device, permissions } from '../../middleware';
-import { login, logout, forgot, verify, reset, authorization } from '../../controllers/users/sign.controllers';
+import { login, logout, forgot, verify, reset, authorization, refresh_token } from '../../controllers/users/sign.controllers';
 
 const router = Router();
 
@@ -41,6 +41,12 @@ router.post(
     device('AUTHORIZATION'),
     permissions('AUTHORIZATION'),
     authorization
+);
+
+router.post(
+    '/refresh',
+    device('REFRESH TOKEN'),
+    refresh_token
 );
 
 

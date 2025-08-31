@@ -3,7 +3,7 @@ import { JsonResponse } from '../../types/api';
 import { addToBlacklist, validateAndUseCode } from '../../helpers/codecs.helpers';
 import gmail from '../../helpers/gmail.helpers';
 import { sending } from '../../helpers/html.helpers';
-import { generateToken } from '../../helpers/token.helpers';
+import { generateToken, verifyToken } from '../../helpers/token.helpers';
 
 
 const instanciate = (model: string) => {
@@ -221,6 +221,39 @@ export const authorization = async (req: Request, res: Response) => {
         res.status(200).json(response);
     } catch (error: any) {
         console.error('Erreur lors de la mise à jour des autorisations:', error);
+        const response: JsonResponse = {
+            success: false,
+            message: 'Erreur interne du serveur',
+            error: error.message
+        };
+      
+        res.status(500).json(response);
+    }
+}
+
+export const refresh_token = async (req: Request, res: Response) => {
+    try {
+        const refreshToken = req.body.refreshToken;
+        if (!refreshToken) throw new Error('Refresh token manquant');
+
+        const result = verifyToken(refreshToken);
+        if (!result.success) throw new Error('Refresh token invalide');
+
+        const decoded: any = result.data;
+        
+        const accessToken = generateToken({ id: decoded.id }, '1h');
+        if (!accessToken.success) throw new Error(`${accessToken.error}`);
+        
+        res.status(200).json({
+            success: true,
+            message: 'Nouveau token généré avec succès',
+            data: {
+                accessToken: accessToken.data
+            }
+        });
+    } catch (error: any) {
+        console.error('Erreur lors de la validation du code:', error);
+      
         const response: JsonResponse = {
             success: false,
             message: 'Erreur interne du serveur',

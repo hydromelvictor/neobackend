@@ -3428,6 +3428,35 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/JsonResponse'
+    
+    get:
+      tags:
+        - Manager
+      summary: tout voir
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/_name"
+        - $ref: "#/components/parameters/_online"
+        - $ref: "#/components/parameters/_auth"
+        - $ref: "#/components/parameters/_before"
+        - $ref: "#/components/parameters/_after"
+        - $ref: "#/components/parameters/_page"
+        - $ref: "#/components/parameters/_limit"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: "#/components/schemas/Manager"
   
   /manager/register:
     post:
@@ -3457,34 +3486,6 @@ paths:
                     properties:
                       data:
                         $ref: "#/components/schemas/Manager"
-    get:
-      tags:
-        - Manager
-      summary: tout voir
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/_name"
-        - $ref: "#/components/parameters/_online"
-        - $ref: "#/components/parameters/_auth"
-        - $ref: "#/components/parameters/_before"
-        - $ref: "#/components/parameters/_after"
-        - $ref: "#/components/parameters/_page"
-        - $ref: "#/components/parameters/_limit"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/JsonResponse'
-                  - type: object
-                    properties:
-                      data:
-                        type: array
-                        items:
-                          $ref: "#/components/schemas/Manager"
   
   /manager/password/{id}:
     post:

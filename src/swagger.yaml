@@ -1961,7 +1961,6 @@ paths:
                           main:
                             $ref: '#/components/schemas/Account'
 
-  
   /account:
     get:
       tags:
@@ -2711,55 +2710,7 @@ paths:
                     properties:
                       data:
                         type: number
-  
-  /xaccount/{name}:
-    get:
-      tags:
-        - Xaccount
-      summary: voir
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/_cname"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/JsonResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/Xaccount"
-    put:
-      tags:
-        - Xaccount
-      summary: mis a jour
-      security:
-        - bearerAuth: []
-      parameters:
-        - $ref: "#/components/parameters/_cname"
-      requestBody:
-        required: false
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Xaccount"
-      responses:
-        '200':
-          description: OK
-          content:
-            application/json:
-              schema:
-                allOf:
-                  - $ref: '#/components/schemas/JsonResponse'
-                  - type: object
-                    properties:
-                      data:
-                        $ref: "#/components/schemas/Xaccount"
-  
+
   /rooms/{id}:
     post:
       tags:

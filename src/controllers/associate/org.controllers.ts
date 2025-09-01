@@ -67,10 +67,9 @@ export default class OrgController {
 
             await Settings.create({ org: org._id });
             const account = await Account.findOwner(manager._id);
-            if (!account) throw new Error('account not found');
+            if (!account || account.main) throw new Error('account not found');
 
-            account.assign.push({ org: org._id, balance: 0 });
-            account.save();
+            await Account.create({ owner: org._id, inherit: account._id });
 
             res.status(201).json(response);
         } catch (error: any) {

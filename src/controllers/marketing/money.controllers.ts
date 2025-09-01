@@ -7,11 +7,11 @@ import Account from '../../models/marketing/account.models';
 export default class MoneyController {
 
     // nom du service de paiement (Wave, Orange Money, PayPal, Stripe, etc.)
-    private service: string;
+    // private service: string;
     
     constructor(service: string) {
         // constructeur vide
-        this.service = service;
+        // this.service = service;
     }
 
     public static async deposit(

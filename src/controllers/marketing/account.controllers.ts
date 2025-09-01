@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
 import Account from '../../models/marketing/account.models';
-import Xaccount from '../../models/marketing/critical.models';
 import { JsonResponse } from '../../types/api';
-import orgModels from '../../models/associate/org.models';
+import Org from '../../models/associate/org.models';
 import mongoose from 'mongoose';
-import trackingModels from '../../models/marketing/invoice.models';
+import Tracking from '../../models/marketing/invoice.models';
+import MoneyController from './money.controllers';
 
 
 export default class AccountController {
@@ -27,21 +27,49 @@ export default class AccountController {
         return filter;
     }
 
-    public static async _in_bank(balance: number): Promise<boolean> {
-        const system = await Xaccount.findByName('system');
-        if (!system) throw new Error('Système non trouvé');
+    public static async create(req: Request, res: Response) {
+        try {
+            const account = await Account.findOwner(req.user._id);
+            if (!account || account.main) throw new Error('Compte non trouvé');
 
-        system.balance += balance;
-        await system.save();
+            const org = await Org.findById(req.params.id);
+            if (!org) throw new Error('Organisation non trouvée');
 
-        // 
+            // verifie si un compte existe deja pour cette organisation
+            const exist = await Account.findOne({ owner: org._id, inherit: account._id });
+            if (exist) throw new Error('Un compte existe déjà pour cette organisation');
 
-        return true;
+            // creer un sous compte
+
+            const sub = new Account({
+                owner: org._id,
+                inherit: account._id,
+                currency: account.currency,
+            });
+            await sub.save();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'Compte créé avec succès',
+                data: sub
+            };
+            res.status(201).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+
+            res.status(500).json(response);
+        }
     }
 
     public static async balance(req: Request, res: Response) {
         try {
-            const account = await Account.findOwner(req.user._id);
+            const account = await Account.findOwner(req.params.id || req.user._id);
             if (!account) throw new Error('Compte non trouvé');
 
             const response: JsonResponse = {
@@ -92,40 +120,25 @@ export default class AccountController {
         }
     }
 
-    // assigner un montant
-    public static async assignate(req: Request, res: Response) {
+    public static async subAccounts(req: Request, res: Response) {
         try {
-            const amount = parseFloat(req.body.balance);
-            
             const account = await Account.findOwner(req.user._id);
-            if (!account) throw new Error('Compte non trouvé');
-            
-            // amount doit etre positif et inferieur ou egal a account.balance
-            if (amount <= 0 || amount > account.balance) throw new Error('over');
+            if (!account || !account.main) throw new Error('Compte non trouvé');
 
-            const org = await orgModels.findById(req.params.id);
-            if (!org) throw new Error('Organisation non trouvée');
-            
-            let discount = 0
-            let total = 0;
-            for (const item of account.assign) {
-                total += item.balance;
-                discount = account.balance - total
-                if (amount > discount) throw new Error('over');
+            const filter = AccountController.filters(req.query);
+            filter.inherit = account._id;
+            const options = {
+                page: parseInt(req.query.page as string) || 1,
+                limit: parseInt(req.query.limit as string) || 10,
+                sort: { createdAt: -1 }
+            };
 
-                if (item.org.toString() !== org._id.toString()) continue;
-
-                item.balance += amount;
-                break;
-            }
-
-            account.save();
-
+            const accounts = await Account.paginate(filter, options);
             const response: JsonResponse = {
                 success: true,
-                message: 'assign',
-                data: account
-            }
+                message: 'Comptes trouvés avec succès',
+                data: accounts
+            };
             res.status(200).json(response);
         } catch (error: any) {
             console.error('Erreur lors de la validation du code:', error);
@@ -140,95 +153,294 @@ export default class AccountController {
         }
     }
 
-    public static async actes(req: Request, res: Response) {
+    public static async deposit(req: Request, res: Response) {
         const session = await mongoose.startSession();
+        session.startTransaction();
+
+        // operation de depot sur le physique
+        const result = await MoneyController.deposit(req.body);
+        if (!result.success) res.status(500).json(result);
+
+        const data = result.data;
         try {
-            const status = req.query.status;
-            const client = await Account.findOwner(req.user._id);
-            if (!client) throw new Error('Compte non trouvé');
 
-            const balance = parseFloat(req.body.balance);
+            // sur quel compte faire le depot
+            const account = await Account.findOwner(data.account);
+            if (!account) throw new Error('Compte non trouvé');
 
-            let org: any;
-            if (req.query.org) {
-                org = await orgModels.findById(req.query.org);
-                if (!org) throw new Error('Organisation non trouvée');
+            account.balance += data.amount;
+            await account.save({ session });
+
+            // si ce n'est pas un compte principal, on credite le compte parent
+            if (!account.main) {
+                const inherit = await Account.findById(account.inherit);
+                if (!inherit) throw new Error('Compte parent non trouvé');
+
+                inherit.balance += data.amount;
+                await inherit.save({ session });
+            }
+            
+            // mettre a jour la trace
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'COMPLETED';
+            await tracking.save({ session });
+            
+            await session.commitTransaction();
+            session.endSession();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'Dépôt effectué avec succès'
+            };
+            res.status(200).json(response);
+        } catch (error: any) {
+            // en cas d'erreur, on annule la transaction
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'FAILED';
+            await tracking.save({ session });
+            
+            await session.abortTransaction();
+            session.endSession();
+            console.error('Erreur lors de la validation du code:', error);
+
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+
+            res.status(500).json(response);
+        }
+    }
+
+    public static async withdraw(req: Request, res: Response) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        // operation de retrait sur le physique
+        const result = await MoneyController.withdraw(req.body);
+        if (!result.success) res.status(500).json(result);
+
+        const data = result.data;
+        try {
+
+            // de quel compte faire le retrait
+            const account = await Account.findOwner(data.account);
+            if (!account) throw new Error('Compte non trouvé');
+
+            if (account.balance < data.amount) throw new Error('Solde insuffisant');
+            account.balance -= data.amount;
+            await account.save({ session });
+
+            // si ce n'est pas un compte principal, on debite le compte parent
+            if (!account.main) {
+                const inherit = await Account.findById(account.inherit);
+                if (!inherit) throw new Error('Compte parent non trouvé');
+
+                if (inherit.balance < data.amount) throw new Error('Solde insuffisant sur le compte parent');
+                inherit.balance -= data.amount;
+                await inherit.save({ session });
+            }
+            
+            // mettre a jour la trace
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'COMPLETED';
+            await tracking.save({ session });
+            
+            await session.commitTransaction();
+            session.endSession();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'Retrait effectué avec succès'
+            };
+            res.status(200).json(response);
+        } catch (error: any) {
+            // en cas d'erreur, on annule la transaction
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'FAILED';
+            await tracking.save({ session });
+            
+            await session.abortTransaction();
+            session.endSession();
+            console.error('Erreur lors de la validation du code:', error);
+
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+            
+            res.status(500).json(response);
+        }
+    }
+
+    public static async pay(req: Request, res: Response) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+
+        // operation de paiement sur le physique
+        const result = await MoneyController.payment(req.body);
+        if (!result.success) res.status(500).json(result);
+
+        const data = result.data;
+        try {
+
+            // de quel compte faire le paiement
+            const from = await Account.findOwner(data.from);
+            if (!from) throw new Error('Compte émetteur non trouvé');
+
+            if (from.balance < data.amount) throw new Error('Solde insuffisant');
+            from.balance -= data.amount;
+            await from.save({ session });
+
+            // si ce n'est pas un compte principal, on debite le compte parent
+            if (!from.main) {
+                const inherit = await Account.findById(from.inherit);
+                if (!inherit) throw new Error('Compte parent non trouvé');
+
+                if (inherit.balance < data.amount) throw new Error('Solde insuffisant sur le compte parent');
+                inherit.balance -= data.amount;
+                await inherit.save({ session });
             }
 
-            if (status === 'deposit') {
-                const check = balance > 0 && await AccountController._in_bank(balance);
-                if (check) {
-                    client.balance += balance;
-                    await client.save();
+            // si le compte destinataire est fourni, on credite ce compte
+            if (data.to) {
+                const to = await Account.findOwner(data.to);
+                if (!to) throw new Error('Compte destinataire non trouvé');
 
-                    await trackingModels.create({
-                        type: 'deposit',
-                        amount: balance + 0.05 * balance,
-                        currency: req.body.currency,
-                        baseCurrency: 'XOF',
-                        status: 'completed',
-                        description: 'deposité avec succès',
-                        to: client._id,
-                        processedAt: new Date()
-                    });
-                }
-            } else if (status === 'withdrawal') {
-                const check = client.balance >= balance && await AccountController._in_bank(-balance);
-                if (check) {
-                    client.balance -= req.body.balance;
-                    client.assign.forEach(item => {
-                        if (org && item.org.toString() === org._id.toString() && item.balance && item.balance >= req.body.balance) {
-                            item.balance -= req.body.balance;
-                        }
-                    });
-                    await client.save();
+                to.balance += data.amount;
+                await to.save({ session });
 
-                    await trackingModels.create({
-                        type: 'withdrawal',
-                        amount: balance + 0.05 * balance,
-                        currency: req.body.currency,
-                        baseCurrency: 'XOF',
-                        status: 'completed',
-                        description: 'retrait avec succès',
-                        from: client._id,
-                        processedAt: new Date()
-                    });
+                // si ce n'est pas un compte principal, on credite le compte parent
+                if (!to.main) {
+                    const inherit = await Account.findById(to.inherit);
+                    if (!inherit) throw new Error('Compte parent non trouvé');
+
+                    inherit.balance += data.amount;
+                    await inherit.save({ session });
                 }
             } else {
-                const check = client.balance >= balance && balance > 0;
-                const neo = await Xaccount.findByName('neo');
-                if (!neo) throw new Error('Système non trouvé');
+                // sinon on credite le compte system
+                const system = await Account.findOne({ name: 'system' });
+                if (!system) throw new Error('Compte system non trouvé');
 
-                if (check) {
-                    // atomic
-                    session.startTransaction();
-                    client.balance -= balance;
-                    client.assign.forEach(item => {
-                        if (org && item.org.toString() === org._id.toString() && item.balance && item.balance >= balance) {
-                            item.balance -= balance;
-                        }
-                    });
-                    neo.balance += balance;
-                    await client.save({ session });
-                    await neo.save({ session });
-
-                    await trackingModels.create({
-                        type: 'payment',
-                        amount: balance + 0.05 * balance,
-                        currency: req.body.currency,
-                        baseCurrency: 'XOF',
-                        status: 'completed',
-                        description: 'paiement effectué avec succès',
-                        from: client._id,
-                        to: neo._id,
-                        processedAt: new Date()
-                    }, { session });
-
-                    await session.commitTransaction();
-                    session.endSession();
-                }
+                system.balance += data.amount;
+                await system.save({ session });
             }
+            
+            // mettre a jour la trace
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'COMPLETED';
+            await tracking.save({ session });
+            
+            await session.commitTransaction();
+            session.endSession();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'Paiement effectué avec succès'
+            };
+            res.status(200).json(response);
         } catch (error: any) {
+            // en cas d'erreur, on annule la transaction
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'FAILED';
+            await tracking.save({ session });
+            
+            await session.abortTransaction();
+            session.endSession();
+            console.error('Erreur lors de la validation du code:', error);
+
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+
+            res.status(500).json(response);
+        }
+    }
+
+    public static async refund(req: Request, res: Response) {
+        const session = await mongoose.startSession();
+        session.startTransaction();
+        
+        // operation de remboursement sur le physique
+        const result = await MoneyController.refund(req.params.id);
+        if (!result.success) res.status(500).json(result);
+
+        const data = result.data;
+        try {
+
+            // de quel compte faire le remboursement
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            const to = await Account.findOwner(tracking.from);
+            if (!to) throw new Error('Compte destinataire non trouvé');
+
+            to.balance += tracking.amount;
+            await to.save({ session });
+
+            // si ce n'est pas un compte principal, on credite le compte parent
+            if (!to.main) {
+                const inherit = await Account.findById(to.inherit);
+                if (!inherit) throw new Error('Compte parent non trouvé');
+
+                inherit.balance += tracking.amount;
+                await inherit.save({ session });
+            }
+
+            const from = await Account.findOwner(tracking.to);
+            if (!from) throw new Error('Compte émetteur non trouvé');
+
+            if (from.balance < tracking.amount) throw new Error('Solde insuffisant');
+            from.balance -= tracking.amount;
+            await from.save({ session });
+
+            // si ce n'est pas un compte principal, on debite le compte parent
+            if (!from.main) {
+                const inherit = await Account.findById(from.inherit);
+                if (!inherit) throw new Error('Compte parent non trouvé');
+
+                if (inherit.balance < tracking.amount) throw new Error('Solde insuffisant sur le compte parent');
+                inherit.balance -= tracking.amount;
+                await inherit.save({ session });
+            }
+            
+            // mettre a jour la trace
+            tracking.status = 'REFUNDED';
+            await tracking.save({ session });
+            
+            await session.commitTransaction();
+            session.endSession();
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'Remboursement effectué avec succès'
+            };
+            res.status(200).json(response);
+        } catch (error: any) {
+            // en cas d'erreur, on annule la transaction
+            const tracking = await Tracking.findById(data.trackingId);
+            if (!tracking) throw new Error('Trace non trouvée');
+
+            tracking.status = 'FAILED';
+            await tracking.save({ session });
+            
             await session.abortTransaction();
             session.endSession();
             console.error('Erreur lors de la validation du code:', error);

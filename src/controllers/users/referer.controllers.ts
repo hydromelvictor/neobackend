@@ -200,18 +200,18 @@ export default class RefererController {
             const referer = await Referer.findById(req.params.id);
             if (!referer) throw new Error('Manager not found');
 
-            const email = req.body.email;
-            const phone = req.body.phone;
-            const promo = req.body.promo
-            const exist = await Referer.findOne({
-                $or: [
-                    email ? { email } : {},
-                    phone ? { phone } : {},
-                    promo ? { promo } : {}
-                ]
-            })
-            if (exist?._id.toString() !== referer._id.toString()) throw new Error('email or phone exist');
-                        
+            if (req.body.email || req.body.phone || req.body.promo) {
+                const existing = await Referer.findOne({
+                    $or: [
+                        { email: req.body.email },
+                        { phone: req.body.phone },
+                        { promo: req.body.promo }
+                    ],
+                    _id: { $ne: referer._id }
+                });
+                if (existing) throw new Error('Manager with the same email, phone or promo already exists');
+            }
+            
             Object.assign(referer, req.body);
             await referer.save();
 

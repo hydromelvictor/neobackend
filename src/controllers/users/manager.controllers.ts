@@ -189,16 +189,17 @@ export default class ManagerController {
             const manager = await Manager.findById(req.params.id);
             if (!manager) throw new Error('Manager not found');
 
-            const email = req.body.email;
-            const phone = req.body.phone;
-            const exist = await Manager.findOne({
-                $or: [
-                    email ? { email } : {},
-                    phone ? { phone } : {}
-                ]
-            })
-            if (exist?._id.toString() !== manager._id.toString()) throw new Error('email or phone exist');
-                        
+            if (req.body.email || req.body.phone) {
+                const existing = await Manager.findOne({
+                    $or: [
+                        { email: req.body.email },
+                        { phone: req.body.phone }
+                    ],
+                    _id: { $ne: manager._id }
+                });
+                if (existing) throw new Error('Another manager with the same email or phone already exists');
+            }
+            
             Object.assign(manager, req.body);
             await manager.save();
 

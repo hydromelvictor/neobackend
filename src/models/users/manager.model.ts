@@ -94,10 +94,14 @@ const ManSchema = new Schema<IMan>({
 
             'CREATE-STATUS',
 
+            'CREATE-SUB-ACCOUNT',
+            'LIST-SUB-ACCOUNT',
             'READ-ACCOUNT',
             'LIST-ACCOUNT',
-            'ASSIGN-ACCOUNT',
-            'ACTES-ACCOUNT',
+            'DEPOSIT-ACCOUNT',
+            'WITHDRAW-ACCOUNT',
+            'PAY-ACCOUNT',
+            'REFUND-ACCOUNT',
 
             'READ-TRACKING',
             'LIST-TRACKING',

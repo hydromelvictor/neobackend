@@ -3,15 +3,15 @@ import paginate from 'mongoose-paginate-v2';
 
 export interface Inv extends Document {
     _id: Types.ObjectId;
-    type: 'deposit' | 'withdrawal' | 'payment';
+    type: 'DEPOSIT' | 'WITHDRAWAL' | 'PAYMENT';
     amount: number;
     currency: string;
     baseCurrency: string;
     exchangeRate: number;
-    status: 'pending' | 'completed' | 'failed' | 'cancelled';
+    status: 'PENDING' | 'COMPLETED' | 'FAILED' | 'REFUNDED';
     description: string;
-    from: Schema.Types.ObjectId;
-    to: Schema.Types.ObjectId;
+    from: Types.ObjectId;
+    to: Types.ObjectId;
     processedAt: Date;
 }
 
@@ -20,7 +20,7 @@ interface InvModel extends mongoose.PaginateModel<Inv> {};
 const TraSchema = new Schema<Inv>({
     type: {
         type: String,
-        enum: ['deposit', 'withdrawal', 'payment'],
+        enum: ['DEPOSIT', 'WITHDRAWAL', 'PAYMENT'],
         required: true
     },
     amount: {
@@ -42,15 +42,15 @@ const TraSchema = new Schema<Inv>({
     },
     status: {
         type: String,
-        enum: ['pending', 'completed', 'failed', 'cancelled'],
-        default: 'pending'
+        enum: ['PENDING', 'COMPLETED', 'FAILED', 'REFUNDED'],
+        default: 'PENDING',
     },
     description: {
         type: String,
         default: ''
     },
-    from: Schema.Types.ObjectId,
-    to: Schema.Types.ObjectId,
+    from: Types.ObjectId,
+    to: Types.ObjectId,
     processedAt: Date
 }, { timestamps: true });
 

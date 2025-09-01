@@ -165,6 +165,15 @@ export default class AdminController {
             const admin = await Admin.findById(req.params.id);
             if (!admin) throw new Error('Admin non trouvé');
 
+            if (req.body.phone || req.body.email || req.body.cni) {
+                const exist = await Admin.findOne(
+                    { $or: [
+                        { phone: req.body.phone }, 
+                        { email: req.body.email }, 
+                        { cni: req.body.cni }
+                    ], _id: { $ne: admin._id } });
+                if (exist) throw new Error('Un admin avec ce téléphone, email ou cni existe déjà');
+            }
             Object.assign(admin, req.body);
             await admin.save();
 

@@ -6,7 +6,7 @@ import EventEmitter from "events";
 import { OneUseToken } from './helpers/codecs.helpers';
 import Admin from './models/users/admin.models'
 import Rate from './models/automation/rate.models';
-import Xaccount from './models/marketing/critical.models';
+import Account from './models/marketing/account.models';
 import axios from 'axios';
 
 
@@ -15,7 +15,7 @@ class ServerEvents extends EventEmitter {}
 export const serverEvents = new ServerEvents();
 
 
-const admin = {
+const _admin = {
     firstname: 'neo-admin',
     lastname: 'II',
     phone: '00225-000',
@@ -37,10 +37,14 @@ const admin = {
 
         'CREATE-STATUS',
 
+        'CREATE-SUB-ACCOUNT',
+        'LIST-SUB-ACCOUNT',
         'READ-ACCOUNT',
         'LIST-ACCOUNT',
-        'ASSIGN-ACCOUNT',
-        'ACTES-ACCOUNT',
+        'DEPOSIT-ACCOUNT',
+        'WITHDRAW-ACCOUNT',
+        'PAY-ACCOUNT',
+        'REFUND-ACCOUNT',
 
         'READ-TRACKING',
         'LIST-TRACKING',
@@ -132,25 +136,31 @@ const admin = {
     ]
 }
 
-const xcc = {
+const acc = {
     name: 'system'
 }
 
 
 const init = async () => {
     try {
-        const exist = await Admin.findOne({ phone: admin.phone });
-        if (!exist) {
-            const d = new Admin(admin);
-            await d.save();
+        let admin = await Admin.findOne({ phone: _admin.phone });
+        if (!admin) {
+            admin = new Admin(_admin);
+            await admin.save();
 
             console.log('super admin created successfull')
         }
 
-        const x = await Xaccount.findOne({ name: xcc.name });
-        if (!x) {
-            await Xaccount.create({ name: 'system' });
-            console.log('systm account create');
+        let account = await Account.findOne({ name: acc.name });
+        if (!account) {
+            account = await Account.create({
+                owner: admin._id,
+                name: 'system',
+                main: true,
+                currency: 'XOF',
+                balance: 0
+            });
+            console.log('system account create');
         }
 
         const rates = await Rate.find({ base: 'XOF' });

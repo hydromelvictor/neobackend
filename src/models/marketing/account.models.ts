@@ -2,17 +2,15 @@ import mongoose, { Schema, Document, Types } from 'mongoose';
 import paginate from 'mongoose-paginate-v2';
 
 
-type Assign = {
-    org: Types.ObjectId;
-    balance: number;
-}
-
 export interface IAcc extends Document {
     _id: Types.ObjectId;
     owner: Types.ObjectId;
+    name?: string;
+    main: boolean;
+    inherit?: Types.ObjectId;
     currency: string,
     balance: number,
-    assign: Assign[]
+    privateBalance?: number,
 }
 
 interface IAccModel extends mongoose.PaginateModel<IAcc> {
@@ -22,6 +20,20 @@ interface IAccModel extends mongoose.PaginateModel<IAcc> {
 const accSchema = new Schema<IAcc>({
     owner: {
         type: Schema.Types.ObjectId,
+        required: true
+    },
+    inherit: {
+        type: Schema.Types.ObjectId,
+        ref: 'Account'
+    },
+    name: {
+        type: String,
+        trim: true,
+        unique: true
+    },
+    main: {
+        type: Boolean,
+        default: false,
         required: true
     },
     currency: {
@@ -35,18 +47,11 @@ const accSchema = new Schema<IAcc>({
         min: 0,
         required: true
     },
-    assign: [{
-        org: {
-            type: Schema.Types.ObjectId,
-            ref: 'Org',
-            required: true
-        },
-        balance: {
-            type: Number,
-            default: 0,
-            min: 0
-        }
-    }]
+    privateBalance: {
+        type: Number,
+        default: 0,
+        min: 0
+    }
 }, {
     timestamps: true
 });

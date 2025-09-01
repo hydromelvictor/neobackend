@@ -103,10 +103,14 @@ export default class LeadController {
             const lead = await Lead.findByPhone(req.params.id);
             if (!lead) throw new Error('lead not found');
 
-            const phone = req.body.phone;
-            const exist = await Lead.findByPhone(phone);
-            if (exist && exist._id.toString() !== lead._id.toString()) throw new Error('lead already exists');
-
+            if (req.body.phone) {
+                const exist = await Lead.findOne({
+                    phone: req.body.phone,
+                    _id: { $ne: lead._id }
+                });
+                if (exist) throw new Error('phone already used');
+            }
+            
             Object.assign(lead, req.body);
             await lead.save();
 

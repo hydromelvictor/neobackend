@@ -117,16 +117,16 @@ export default class EmployeeContorller {
             const employee = await Employee.findById(req.params.id);
             if (!employee) throw new Error('Utilisateur non trouvé');
 
-            const email = req.body.email;
-            const phone = req.body.phone;
-            const exist = await Employee.findOne({
-                $or: [
-                    email ? { email } : {},
-                    phone ? { phone } : {}
-                ]
-            })
-            if (exist?._id.toString() !== employee._id.toString()) throw new Error('email or phone exist');
-            
+            if (req.body.email || req.body.phone) {
+                const exist = await Employee.findOne({
+                    $or: [
+                        { email: req.body.email },
+                        { phone: req.body.phone }
+                    ], _id: { $ne: employee._id }
+                })
+                if (exist) throw new Error('email or phone exist');
+            }
+
             Object.assign(employee, req.body);
             await employee.save();
 

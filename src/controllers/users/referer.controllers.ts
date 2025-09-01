@@ -88,7 +88,7 @@ export default class RefererController {
             const referer = new Referer(result.data);
             await referer.save();
 
-            accountModels.create({ owner: referer._id });
+            accountModels.create({ owner: referer._id, main: true });
 
             const response: JsonResponse = {
                 success: true,

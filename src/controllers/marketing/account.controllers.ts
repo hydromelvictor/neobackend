@@ -72,10 +72,15 @@ export default class AccountController {
             const account = await Account.findOwner(req.params.id || req.user._id);
             if (!account) throw new Error('Compte non trouvé');
 
+            const auxilliaries = await Account.find({ inherit: account._id });
+
             const response: JsonResponse = {
                 success: true,
                 message: 'Compte trouvé avec succès',
-                data: account
+                data: {
+                    ...account,
+                    aux: auxilliaries
+                }
             };
             res.status(200).json(response);
         } catch (error: any) {

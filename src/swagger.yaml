@@ -1300,25 +1300,6 @@ components:
           format: date-time
           description: derniere mis a jour de l'utilisateur
 
-    Xaccount:
-      type: object
-      description: >
-        compte des admins
-      required:
-        - name
-        - balance
-      properties:
-        _id:
-          type: string
-          format: ObjectId
-          description: identifiant unique
-        name:
-          type: string
-          description: nom du compte
-        balance:
-          type: number
-          description: solde de l'utilisateur
-
     Account:
       type: object
       description: >
@@ -1334,23 +1315,21 @@ components:
           type: string
           format: ObjectId
           description: identifiant de l'utilisateur proprietaire
+        name:
+          type: string
+          description: nom de l'application
+        main:
+          type: boolean
+          description: definis le compte principal
+        inherit:
+          type: boolean
+          description: definis si le compte est heriter du compte principal
         currency:
           type: string
           description: devise de l'application
         balance:
           type: number
           description: solde de l'utilisateur
-        assign:
-          type: array
-          items:
-            type: object
-            properties:
-              org:
-                type: string
-                format: ObjectId
-              balance:
-                type: number
-          description: assigner des fonds au organisation du manager
         createdAt:
           type: string
           format: date-time
@@ -1953,13 +1932,15 @@ paths:
                       data:
                         $ref: '#/components/schemas/Status'
   
-  /account/me:
+  /account/me/{?id}:
     get:
       tags:
         - Account
-      summary: voir mon compte
+      summary: voir mon compte ou un compte auxiliaire
       security:
         - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
       responses:
         '200':
           description: Ok
@@ -1971,7 +1952,15 @@ paths:
                   - type: object
                     properties:
                       data:
-                        $ref: '#/components/schemas/Account'
+                        type: object
+                        properties:
+                          aux:
+                            type: array
+                            items:
+                              $ref: '#/components/schemas/Account'
+                          main:
+                            $ref: '#/components/schemas/Account'
+
   
   /account:
     get:
@@ -1999,11 +1988,39 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/Account'
-  /account/{id}:
-    put:
+  
+  /account/sub-accounts:
+    get:
       tags:
         - Account
-      summary: assigner des fonds a une organisation
+      summary: tout voir les comptes auxiliaire
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_min'
+        - $ref: '#/components/parameters/_max'
+        - $ref: '#/components/parameters/_after'
+        - $ref: '#/components/parameters/_before'
+      responses:
+        '200':
+          description: Ok
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/JsonResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Account'
+  
+  /account/connect/deposit/{?id}:
+    post:
+      tags:
+        - Account
+      summary: faire un depot sur son compte
       security:
         - bearerAuth: []
       parameters:
@@ -2014,9 +2031,138 @@ paths:
           application/json:
             schema:
               type: object
+              required:
+                - amount
+                - account
+                - currency
               properties:
-                balance:
+                amount:
                   type: number
+                account:
+                  type: string
+                  description: identifiant du compte a crediter
+                currency:
+                  type: string
+                  description: devise du compte a crediter
+                description:
+                  type: string
+                  description: description du depot
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+  /account/connect/withdraw/{?id}:
+    post:
+      tags:
+        - Account
+      summary: faire un retrait sur son compte
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - account
+                - currency
+              properties:
+                amount:
+                  type: number
+                account:
+                  type: string
+                  description: identifiant du compte a debiter
+                currency:
+                  type: string
+                  description: devise du compte a debiter
+                description:
+                  type: string
+                  description: description du retrait
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+
+  /account/connect/pay/{?id}:
+    post:
+      tags:
+        - Account
+      summary: faire un paiement sur son compte
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - amount
+                - account
+                - currency
+                - from
+              properties:
+                amount:
+                  type: number
+                account:
+                  type: string
+                  description: identifiant du compte a debiter
+                currency:
+                  type: string
+                  description: devise du compte a debiter
+                from:
+                  type: string
+                  description: identifiant du compte a crediter
+                description:
+                  type: string
+                  description: description du paiement
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+  /account/connect/refund/{id}:
+    post:
+      tags:
+        - Account
+      summary: faire un remboursement sur son compte
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+  
+  /account/{id}:
+    post:
+      tags:
+        - Account
+      summary: creation d'un compte auxiliaire
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/_id'
       responses:
         '200':
           description: OK
@@ -2029,12 +2175,6 @@ paths:
                     properties:
                       data:
                         $ref: '#/components/schemas/Account'
-  
-  # /account/actes:
-  #   post:
-  #     summary: action sur les fonds
-  #     security:
-  #       - bearerAuth: []
 
   /invoice:
     get:

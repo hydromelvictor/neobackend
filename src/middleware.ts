@@ -108,7 +108,7 @@ export const device = (actionType: string) => {
       const geo = ip ? geoipLookup(ip) : null;
 
       const device = new Device({
-        hote: req.user._id,
+        hote: req.user ? req.user._id : null,
         path: req.originalUrl,
         type: actionType,
         method: req.method,

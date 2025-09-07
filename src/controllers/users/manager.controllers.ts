@@ -73,7 +73,7 @@ export default class ManagerController {
     public static async signUp(req: Request, res: Response): Promise<void> {
         try {
             const valid = validateAndUseCode(req.body.otp);
-            if (!valid.success) throw new Error('Invalid OTP');
+            if (!valid.success) throw new Error(valid.error || 'Code invalide');
 
             const result = verifyToken(valid.username as string);
             if (!result.success) throw new Error(`${result.error}`);

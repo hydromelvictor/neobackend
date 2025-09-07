@@ -90,35 +90,13 @@ router.get(
 );
 
 router.get(
-  '/admin/active',
+  '/admin/clean',
   authenticate,
-  device('GET ACTIVE BLACKLIST CODE'),
-  permissions('READ-BLACKLIST'),
-  BlacklistController.listActiveCodes
+  device('CLEAN BLACKLIST'),
+  permissions('CLEAN-BLACKLIST'),
+  BlacklistController.cleanBlacklist
 );
 
-router.post(
-  '/admin/cleanup',
-  authenticate,
-  device('BLACKLIST SYSTEM FORCE CLEAN UP'),
-  permissions('DELETE-BLACKLIST'),
-  BlacklistController.forceCleanup
-);
 
-router.post(
-  '/admin/auto-cleanup/start',
-  authenticate,
-  device('BLACKLIST SYSTEM AUTO CLEAN UP'),
-  permissions('DELETE-BLACKLIST'),
-  BlacklistController.startAutoCleanup
-);
-
-router.post(
-  '/admin/auto-cleanup/stop',
-  authenticate,
-  device('BLACKLIST SYSTEM STOP AUTO CLEAN UP'),
-  permissions('STOP-BLACKLIST'),
-  BlacklistController.stopAutoCleanup
-);
 
 export default router;

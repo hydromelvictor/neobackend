@@ -5,13 +5,10 @@ import {
   addToBlacklist,
   validateAndUseCode,
   removeFromBlacklist,
-  cleanupExpiredCodes,
+  cleanupBlacklist,
   getStats,
   getCodeInfo,
-  listActiveCodes,
-  OneUseToken,
-  startAutoCleanup,
-  stopAutoCleanup
+  OneUseToken
 } from '../../helpers/codecs.helpers';
 
 const CodeInfoSchema = z.object({
@@ -20,10 +17,6 @@ const CodeInfoSchema = z.object({
     .regex(/^\d{6}$/, 'Le code doit contenir uniquement des chiffres')
 });
 
-
-
-// Variable pour stocker l'ID de l'intervalle de nettoyage
-let cleanupIntervalId: NodeJS.Timeout | null = null;
 
 export class BlacklistController {
   
@@ -35,7 +28,7 @@ export class BlacklistController {
     try {
       const username = req.body.username;
       // Génération du code
-      const code = addToBlacklist(username);
+      const code = await addToBlacklist(username);
 
       const response: JsonResponse<{ code: string; username: string }> = {
         success: true,
@@ -70,7 +63,7 @@ export class BlacklistController {
       const { code } = req.body;
 
       // Validation du code
-      const result = validateAndUseCode(code);
+      const result = await validateAndUseCode(code);
 
       if (result.success) {
         const response: JsonResponse<{ username: string }> = {
@@ -117,7 +110,7 @@ export class BlacklistController {
       const { code } = req.body;
 
       // Suppression du code
-      const result = removeFromBlacklist(code);
+      const result = await removeFromBlacklist(code);
 
       if (result.success) {
         const response: JsonResponse<{ username: string }> = {
@@ -241,142 +234,16 @@ export class BlacklistController {
     }
   }
 
-  /**
-   * Liste tous les codes actifs (pour debug/admin)
-   * GET /api/blacklist/active
-   */
-  static async listActiveCodes(req: Request, res: Response): Promise<void> {
+
+  static async cleanBlacklist(): Promise<void> {
     try {
-      const activeCodes = listActiveCodes();
-
-      const response: JsonResponse<typeof activeCodes> = {
-        success: true,
-        message: `${activeCodes.length} codes actifs trouvés`,
-        data: activeCodes
-      };
-
-      res.status(200).json(response);
-      
-    } catch (error: any) {
-      console.error('Erreur lors de la récupération des codes actifs:', error);
-      
-      const response: JsonResponse = {
-        success: false,
-        message: 'Erreur interne du serveur',
-        error: error.message
-      };
-      
-      res.status(500).json(response);
+      await cleanupBlacklist();
+      console.log('Blacklist vidée avec succès');
+    } catch (error) {
+      console.error('Erreur lors de la vidange de la blacklist:', error);
     }
   }
 
-  /**
-   * Force le nettoyage des codes expirés
-   * POST /api/blacklist/cleanup
-   */
-  static async forceCleanup(req: Request, res: Response): Promise<void> {
-    try {
-      const cleanedCount = cleanupExpiredCodes();
-
-      const response: JsonResponse<{ cleanedCount: number }> = {
-        success: true,
-        message: `Nettoyage effectué: ${cleanedCount} codes supprimés`,
-        data: { cleanedCount }
-      };
-
-      res.status(200).json(response);
-      
-    } catch (error: any) {
-      console.error('Erreur lors du nettoyage:', error);
-      
-      const response: JsonResponse = {
-        success: false,
-        message: 'Erreur interne du serveur',
-        error: error.message
-      };
-      
-      res.status(500).json(response);
-    }
-  }
-
-  /**
-   * Démarre le nettoyage automatique
-   * POST /api/blacklist/auto-cleanup/start
-   */
-  static async startAutoCleanup(req: Request, res: Response): Promise<void> {
-    try {
-      if (cleanupIntervalId) {
-        const response: JsonResponse = {
-          success: false,
-          message: 'Le nettoyage automatique est déjà actif',
-          error: 'Auto-cleanup déjà en cours'
-        };
-        
-        res.status(409).json(response);
-        return;
-      }
-
-      cleanupIntervalId = startAutoCleanup();
-
-      const response: JsonResponse = {
-        success: true,
-        message: 'Nettoyage automatique démarré avec succès'
-      };
-
-      res.status(200).json(response);
-      
-    } catch (error: any) {
-      console.error('Erreur lors du démarrage du nettoyage automatique:', error);
-      
-      const response: JsonResponse = {
-        success: false,
-        message: 'Erreur interne du serveur',
-        error: error.message
-      };
-      
-      res.status(500).json(response);
-    }
-  }
-
-  /**
-   * Arrête le nettoyage automatique
-   * POST /api/blacklist/auto-cleanup/stop
-   */
-  static async stopAutoCleanup(req: Request, res: Response): Promise<void> {
-    try {
-      if (!cleanupIntervalId) {
-        const response: JsonResponse = {
-          success: false,
-          message: 'Aucun nettoyage automatique en cours',
-          error: 'Auto-cleanup non actif'
-        };
-        
-        res.status(409).json(response);
-        return;
-      }
-
-      stopAutoCleanup(cleanupIntervalId);
-      cleanupIntervalId = null;
-
-      const response: JsonResponse = {
-        success: true,
-        message: 'Nettoyage automatique arrêté avec succès'
-      };
-
-      res.status(200).json(response);
-      
-    } catch (error: any) {
-      console.error('Erreur lors de l\'arrêt du nettoyage automatique:', error);
-      
-      const response: JsonResponse = {
-        success: false,
-        message: 'Erreur interne du serveur',
-        error: error.message
-      };
-      
-      res.status(500).json(response);
-    }
-  }
 
   /**
    * Génère un token unique à usage unique

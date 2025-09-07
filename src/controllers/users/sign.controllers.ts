@@ -110,7 +110,7 @@ export const forgot = async (req: Request, res: Response) => {
         const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');
 
-        const otp = addToBlacklist(user._id.toISOString());
+        const otp = await addToBlacklist(user._id.toISOString());
         gmail(
             req.body.email,
             'Réinitialisation de mot de passe',
@@ -139,7 +139,7 @@ export const verify = async (req: Request, res: Response) => {
     try {
         let Instance = instanciate(req.params.name);
 
-        const valid = validateAndUseCode(req.body.otp);
+        const valid = await validateAndUseCode(req.body.otp);
         if (!valid.success) throw new Error('Invalid OTP');
 
         const user = await Instance.findById(valid.username);

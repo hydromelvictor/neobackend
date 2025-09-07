@@ -68,7 +68,7 @@ export default class AdminController {
             const admin = await Admin.findOne({ email: req.body.email });
             if (!admin) throw new Error('Admin non trouvé');
 
-            const otp = addToBlacklist(admin._id.toString());
+            const otp = await addToBlacklist(admin._id.toString());
             await gmail(admin.email, 'VERIFICATION DE MAIL', emailToSign(`${admin.firstname} ${admin.lastname}`, otp));
 
             const response: JsonResponse = {
@@ -89,7 +89,7 @@ export default class AdminController {
 
     public static async loadin(req: Request, res: Response) {
         try {
-            const valid = validateAndUseCode(req.body.otp);
+            const valid = await validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
 
             const admin = await Admin.findById(valid.username);

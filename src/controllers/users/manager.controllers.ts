@@ -49,7 +49,7 @@ export default class ManagerController {
             const token = generateToken(req.body);
             if (!token.success) throw new Error(`${token.error}`);
 
-            const otp = addToBlacklist(token.data as string);
+            const otp = await addToBlacklist(token.data as string);
             await gmail(req.body.email, 'VERIFICATION DE MAIL', emailToSign(`${req.body.firstname} ${req.body.lastname}`, otp));
 
             const response: JsonResponse = {
@@ -72,7 +72,7 @@ export default class ManagerController {
 
     public static async signUp(req: Request, res: Response): Promise<void> {
         try {
-            const valid = validateAndUseCode(req.body.otp);
+            const valid = await validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error(valid.error || 'Code invalide');
 
             const result = verifyToken(valid.username as string);

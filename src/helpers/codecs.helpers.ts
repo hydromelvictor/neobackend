@@ -1,11 +1,11 @@
 import ShortUniqueId from 'short-uuid';
 import crypto from 'crypto';
+import Redis from "ioredis";
 
 // Interface pour les entrées de blacklist
 interface BlacklistEntry {
   username: string;
   createdAt: Date;
-  expiresAt: Date;
   attempts: number;
   maxAttempts: number;
 }
@@ -19,7 +19,11 @@ const CONFIG = {
 };
 
 // Stockage en mémoire avec informations détaillées
-export const blacklist: { [key: string]: BlacklistEntry } = {};
+export const blacklist = new Redis({host: "127.0.0.1", port: 6379});
+blacklist.on("error", (err) => {
+  console.error("Redis error:", err);
+});
+//export const blacklist: { [key: string]: BlacklistEntry } = {};
 
 // Statistiques
 export const stats = {
@@ -38,7 +42,7 @@ const generateSecureCode = (): string => {
 };
 
 // Fonction pour générer un code et l'ajouter à la blacklist
-export const addToBlacklist = (username: string): string => {
+export const addToBlacklist = async (username: string): Promise<string> => {
   if (!username || username.trim().length === 0) {
     throw new Error('Nom d\'utilisateur requis');
   }
@@ -50,20 +54,20 @@ export const addToBlacklist = (username: string): string => {
   do {
     code = generateSecureCode();
     attempts++;
-  } while (blacklist[code]);
+  } while (await blacklist.exists(code));
 
   // Calcule l'expiration
   const now = new Date();
   const expiresAt = new Date(now.getTime() + CONFIG.EXPIRATION_MINUTES * 60 * 1000);
 
   // Ajoute à la blacklist
-  blacklist[code] = {
+  await blacklist.hmset(code, {
     username: username.trim(),
-    createdAt: now,
-    expiresAt,
-    attempts: 0,
-    maxAttempts: CONFIG.MAX_ATTEMPTS,
-  };
+    createdAt: now.toISOString(),
+    attempts: '0',
+    maxAttempts: CONFIG.MAX_ATTEMPTS.toString(),
+  });
+  await blacklist.expireat(code, Math.floor(expiresAt.getTime() / 1000));
 
   stats.totalGenerated++;
   
@@ -73,121 +77,115 @@ export const addToBlacklist = (username: string): string => {
 };
 
 // Fonction pour vérifier et utiliser un code
-export const validateAndUseCode = (code: string): { success: boolean; username?: string; error?: string } => {
+export const validateAndUseCode = async (
+  code: string
+): Promise<{ success: boolean; username?: string; error?: string }> => {
   if (!code || code.length !== CONFIG.CODE_LENGTH) {
     stats.totalInvalidAttempts++;
-    return { success: false, error: 'Code invalide' };
+    return { success: false, error: "Code invalide" };
   }
 
-  const entry = blacklist[code];
-  
-  if (!entry) {
+  // Récupérer toutes les infos stockées
+  const entry = await blacklist.hgetall(code);
+
+  if (!entry || Object.keys(entry).length === 0) {
     stats.totalInvalidAttempts++;
-    return { success: false, error: 'Code introuvable' };
+    return { success: false, error: "Code introuvable ou expiré" };
   }
 
-  // Vérifie l'expiration
-  if (new Date() > entry.expiresAt) {
-    delete blacklist[code];
-    stats.totalExpired++;
-    return { success: false, error: 'Code expiré' };
-  }
+  // Incrémenter le compteur de tentatives dans Redis
+  const attempts = await blacklist.hincrby(code, "attempts", 1);
+  const maxAttempts = parseInt(entry.maxAttempts, 10);
 
-  // Vérifie le nombre de tentatives
-  entry.attempts++;
-  
-  if (entry.attempts > entry.maxAttempts) {
-    delete blacklist[code];
+  if (attempts > maxAttempts) {
+    // Trop de tentatives → suppression
+    await blacklist.del(code);
     stats.totalInvalidAttempts++;
-    return { success: false, error: 'Trop de tentatives' };
+    return { success: false, error: "Trop de tentatives" };
   }
 
-  // Code valide, on le supprime (utilisation unique)
+  // Code valide → suppression (utilisation unique)
   const username = entry.username;
-  delete blacklist[code];
+  await blacklist.del(code);
   stats.totalUsed++;
-  
-  console.log(`Code ${code} utilisé avec succès pour ${username}`);
-  
+
+  console.log(`✅ Code ${code} utilisé avec succès pour ${username}`);
+
   return { success: true, username };
 };
 
+
 // Fonction pour supprimer un code spécifique
-export const removeFromBlacklist = (code: string): { success: boolean; username?: string; error?: string } => {
+export const removeFromBlacklist = async (
+  code: string
+): Promise<{ success: boolean; username?: string; error?: string }> => {
   if (!code) {
-    return { success: false, error: 'Code invalide' };
+    return { success: false, error: "Code invalide" };
   }
 
-  const entry = blacklist[code];
-  
-  if (entry) {
+  const entry = await blacklist.hgetall(code);
+
+  if (entry && Object.keys(entry).length > 0) {
     const username = entry.username;
-    delete blacklist[code];
-    console.log(`Code ${code} supprimé manuellement de la blacklist`);
+    await blacklist.del(code);
+
+    console.log(`🗑️ Code ${code} supprimé manuellement de la blacklist`);
     return { success: true, username };
   } else {
-    return { success: false, error: 'Code introuvable dans la blacklist' };
+    return { success: false, error: "Code introuvable ou déjà expiré" };
   }
 };
 
-// Fonction pour nettoyer les codes expirés
-export const cleanupExpiredCodes = (): number => {
-  const now = new Date();
-  let cleanedCount = 0;
 
-  for (const [code, entry] of Object.entries(blacklist)) {
-    if (now > entry.expiresAt) {
-      delete blacklist[code];
-      cleanedCount++;
-      stats.totalExpired++;
-    }
+// Fonction pour nettoyer la blacklist
+export const cleanupBlacklist = async (): Promise<void> => {
+  const keys = await blacklist.keys("*");
+  if (keys.length > 0) {
+    await blacklist.del(...keys);
+    console.log("🚮 Blacklist vidée");
   }
-
-  if (cleanedCount > 0) {
-    console.log(`${cleanedCount} codes expirés supprimés`);
-  }
-
-  return cleanedCount;
 };
 
-// Fonction pour obtenir les statistiques
-export const getStats = () => ({
-  ...stats,
-  currentActive: Object.keys(blacklist).length,
-  uptime: process.uptime(),
-});
+// Fonction pour les statistiq
+export const getStats = (): {
+  totalGenerated: number;
+  totalExpired: number;
+  totalUsed: number;
+  totalInvalidAttempts: number;
+  currentActive: number;
+  uptime: number;
+} => {
+  return {
+    totalGenerated: stats.totalGenerated,
+    totalExpired: stats.totalExpired,
+    totalUsed: stats.totalUsed,
+    totalInvalidAttempts: stats.totalInvalidAttempts,
+    currentActive: stats.totalGenerated - stats.totalUsed,
+    uptime: process.uptime(),
+  };
+
+};
+
+
 
 // Fonction pour obtenir des informations sur un code
-export const getCodeInfo = (code: string): BlacklistEntry | null => {
-  return blacklist[code] || null;
+export const getCodeInfo = async (code: string): Promise<BlacklistEntry | null> => {
+    const entry = await blacklist.hgetall(code);
+    if (!entry || Object.keys(entry).length === 0) {
+      return null;
+    }
+    return {
+      username: entry.username,
+      createdAt: new Date(entry.createdAt),
+      attempts: parseInt(entry.attempts, 10),
+      maxAttempts: parseInt(entry.maxAttempts, 10),
+    };
 };
 
-// Fonction pour lister tous les codes actifs (pour debug)
-export const listActiveCodes = (): Array<{ code: string; username: string; expiresAt: Date; attempts: number }> => {
-  return Object.entries(blacklist).map(([code, entry]) => ({
-    code,
-    username: entry.username,
-    expiresAt: entry.expiresAt,
-    attempts: entry.attempts,
-  }));
-};
 
 // Générateur de token unique (inchangé)
 export const OneUseToken = (): string => ShortUniqueId.generate();
 
-// Fonction pour démarrer le nettoyage automatique
-export const startAutoCleanup = (): NodeJS.Timeout => {
-  console.log('Démarrage du nettoyage automatique des codes expirés');
-  return setInterval(() => {
-    cleanupExpiredCodes();
-  }, CONFIG.CLEANUP_INTERVAL);
-};
-
-// Fonction pour arrêter le nettoyage automatique
-export const stopAutoCleanup = (intervalId: NodeJS.Timeout): void => {
-  clearInterval(intervalId);
-  console.log('Nettoyage automatique arrêté');
-};
 
 // Export de la configuration pour permettre la personnalisation
 export { CONFIG };

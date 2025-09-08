@@ -6,7 +6,6 @@ import {
   validateAndUseCode,
   removeFromBlacklist,
   cleanupBlacklist,
-  getStats,
   getCodeInfo,
   OneUseToken
 } from '../../helpers/codecs.helpers';
@@ -70,7 +69,7 @@ export class BlacklistController {
           success: true,
           message: 'Code validé avec succès',
           data: {
-            username: result.username!
+            username: result.token!
           }
         };
         
@@ -117,7 +116,7 @@ export class BlacklistController {
           success: true,
           message: 'Code supprimé avec succès',
           data: {
-            username: result.username!
+            username: result.token!
           }
         };
         
@@ -205,36 +204,6 @@ export class BlacklistController {
     }
   }
 
-  /**
-   * Obtient les statistiques du système
-   * GET /api/blacklist/stats
-   */
-  static async getSystemStats(req: Request, res: Response): Promise<void> {
-    try {
-      const stats = getStats();
-
-      const response: JsonResponse<typeof stats> = {
-        success: true,
-        message: 'Statistiques récupérées avec succès',
-        data: stats
-      };
-
-      res.status(200).json(response);
-      
-    } catch (error: any) {
-      console.error('Erreur lors de la récupération des statistiques:', error);
-      
-      const response: JsonResponse = {
-        success: false,
-        message: 'Erreur interne du serveur',
-        error: error.message
-      };
-      
-      res.status(500).json(response);
-    }
-  }
-
-
   static async cleanBlacklist(): Promise<void> {
     try {
       await cleanupBlacklist();
@@ -263,46 +232,6 @@ export class BlacklistController {
       
     } catch (error: any) {
       console.error('Erreur lors de la génération du token:', error);
-      
-      const response: JsonResponse = {
-        success: false,
-        message: 'Erreur interne du serveur',
-        error: error.message
-      };
-      
-      res.status(500).json(response);
-    }
-  }
-
-  /**
-   * Endpoint de santé pour vérifier l'état du service
-   * GET /api/blacklist/health
-   */
-  static async healthCheck(req: Request, res: Response): Promise<void> {
-    try {
-      const stats = getStats();
-      const isHealthy = stats.currentActive >= 0; // Simple vérification
-
-      const response: JsonResponse<{ 
-        status: string; 
-        timestamp: string; 
-        activeCodes: number;
-        uptime: number;
-      }> = {
-        success: isHealthy,
-        message: isHealthy ? 'Service en bonne santé' : 'Service dégradé',
-        data: {
-          status: isHealthy ? 'healthy' : 'unhealthy',
-          timestamp: new Date().toISOString(),
-          activeCodes: stats.currentActive,
-          uptime: stats.uptime
-        }
-      };
-
-      res.status(isHealthy ? 200 : 503).json(response);
-      
-    } catch (error: any) {
-      console.error('Erreur lors du health check:', error);
       
       const response: JsonResponse = {
         success: false,

@@ -8,6 +8,7 @@ import Admin from './models/users/admin.models'
 import Rate from './models/automation/rate.models';
 import Account from './models/marketing/account.models';
 import axios from 'axios';
+import List from './models/stats/blacklist.models';
 
 
 class ServerEvents extends EventEmitter {}
@@ -161,6 +162,12 @@ const init = async () => {
                 balance: 0
             });
             console.log('system account create');
+        }
+
+        let blacklist = await List.findByName('blacklist');
+        if (!blacklist) {
+            blacklist = await List.create({ name: 'blacklist' });
+            console.log('blacklist created');
         }
 
         const rates = await Rate.find({ base: 'XOF' });

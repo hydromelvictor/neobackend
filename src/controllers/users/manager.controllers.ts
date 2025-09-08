@@ -75,7 +75,7 @@ export default class ManagerController {
             const valid = await validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error(valid.error || 'Code invalide');
 
-            const result = verifyToken(valid.username as string);
+            const result = verifyToken(valid.token as string);
             if (!result.success) throw new Error(`${result.error}`);
 
             const manager = new Manager(result.data);

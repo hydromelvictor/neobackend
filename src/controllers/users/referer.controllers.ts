@@ -82,7 +82,7 @@ export default class RefererController {
             const valid = await validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
 
-            const result = verifyToken(valid.username as string);
+            const result = verifyToken(valid.token as string);
             if (!result.success) throw new Error(`${result.error}`);
 
             const referer = new Referer(result.data);

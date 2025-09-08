@@ -92,7 +92,7 @@ export default class AdminController {
             const valid = await validateAndUseCode(req.body.otp);
             if (!valid.success) throw new Error('Invalid OTP');
 
-            const admin = await Admin.findById(valid.username);
+            const admin = await Admin.findById(valid.token);
             if (!admin) throw new Error('Admin non trouvé');
 
             const response = await authenticate(admin);

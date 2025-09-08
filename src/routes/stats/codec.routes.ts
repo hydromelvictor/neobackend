@@ -56,14 +56,6 @@ router.get(
   BlacklistController.generateOneUseToken
 );
 
-router.get(
-  '/',
-  authenticate,
-  device('READ HEALTH'),
-  permissions('READ-HEALTH'),
-  BlacklistController.healthCheck
-);
-
 router.delete(
   '/admin/remove',
   authenticate,
@@ -79,14 +71,6 @@ router.get(
   device('GET INFO OTP'),
   permissions('READ-OTP'),
   BlacklistController.getCodeInfo
-);
-
-router.get(
-  '/admin/stats',
-  authenticate,
-  device('GET SYSTEM BLACKLIST'),
-  permissions('READ-BLACKLIST'),
-  BlacklistController.getSystemStats
 );
 
 router.get(

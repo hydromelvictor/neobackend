@@ -142,7 +142,7 @@ export const verify = async (req: Request, res: Response) => {
         const valid = await validateAndUseCode(req.body.otp);
         if (!valid.success) throw new Error('Invalid OTP');
 
-        const user = await Instance.findById(valid.username);
+        const user = await Instance.findById(valid.token);
         if (!user) throw new Error('Utilisateur non trouvé');
 
         const response: JsonResponse = {

@@ -1,14 +1,7 @@
 import ShortUniqueId from 'short-uuid';
 import crypto from 'crypto';
-import Redis from "ioredis";
+import List from '../models/stats/blacklist.models';
 
-// Interface pour les entrées de blacklist
-interface BlacklistEntry {
-  username: string;
-  createdAt: Date;
-  attempts: number;
-  maxAttempts: number;
-}
 
 // Configuration
 const CONFIG = {
@@ -16,21 +9,6 @@ const CONFIG = {
   EXPIRATION_MINUTES: 15, // Les codes expirent après 15 minutes
   MAX_ATTEMPTS: 3,        // Maximum 3 tentatives par code
   CLEANUP_INTERVAL: 5 * 60 * 1000, // Nettoyage toutes les 5 minutes
-};
-
-// Stockage en mémoire avec informations détaillées
-export const blacklist = new Redis({host: "127.0.0.1", port: 6379});
-blacklist.on("error", (err) => {
-  console.error("Redis error:", err);
-});
-//export const blacklist: { [key: string]: BlacklistEntry } = {};
-
-// Statistiques
-export const stats = {
-  totalGenerated: 0,
-  totalExpired: 0,
-  totalUsed: 0,
-  totalInvalidAttempts: 0,
 };
 
 // Fonction pour générer un code sécurisé
@@ -42,36 +20,38 @@ const generateSecureCode = (): string => {
 };
 
 // Fonction pour générer un code et l'ajouter à la blacklist
-export const addToBlacklist = async (username: string): Promise<string> => {
-  if (!username || username.trim().length === 0) {
+export const addToBlacklist = async (token: string): Promise<string> => {
+  if (!token || token.trim().length === 0) {
     throw new Error('Nom d\'utilisateur requis');
   }
 
   let code = '';
   let attempts = 0;
 
+  const blacklist = await List.findByName('blacklist');
+  if (!blacklist) throw new Error('Blacklist not found');
+
   // Génère un code unique
   do {
     code = generateSecureCode();
     attempts++;
-  } while (await blacklist.exists(code));
+  } while (blacklist.data.some((entry: any) => entry.code === code));
 
   // Calcule l'expiration
   const now = new Date();
   const expiresAt = new Date(now.getTime() + CONFIG.EXPIRATION_MINUTES * 60 * 1000);
 
-  // Ajoute à la blacklist
-  await blacklist.hmset(code, {
-    username: username.trim(),
-    createdAt: now.toISOString(),
-    attempts: '0',
-    maxAttempts: CONFIG.MAX_ATTEMPTS.toString(),
+  blacklist.data.push({
+    code,
+    token,
+    createdAt: now,
+    expiresAt,
+    attempts: 0,
+    maxAttempts: CONFIG.MAX_ATTEMPTS,
   });
-  await blacklist.expireat(code, Math.floor(expiresAt.getTime() / 1000));
-
-  stats.totalGenerated++;
+  await blacklist.save();
   
-  console.log(`Code ${code} généré pour l'utilisateur ${username}, expire à ${expiresAt.toLocaleString()}`);
+  console.log(`Code ${code} généré pour l'utilisateur ${token}, expire à ${expiresAt.toLocaleString()}`);
   
   return code;
 };
@@ -79,107 +59,100 @@ export const addToBlacklist = async (username: string): Promise<string> => {
 // Fonction pour vérifier et utiliser un code
 export const validateAndUseCode = async (
   code: string
-): Promise<{ success: boolean; username?: string; error?: string }> => {
+): Promise<{ success: boolean; token?: string; error?: string }> => {
   if (!code || code.length !== CONFIG.CODE_LENGTH) {
-    stats.totalInvalidAttempts++;
     return { success: false, error: "Code invalide" };
   }
 
-  // Récupérer toutes les infos stockées
-  const entry = await blacklist.hgetall(code);
+  // Récupérer la blacklist
+  const blacklist = await List.findByName("blacklist");
+  if (!blacklist) throw new Error("Blacklist not found");
 
-  if (!entry || Object.keys(entry).length === 0) {
-    stats.totalInvalidAttempts++;
-    return { success: false, error: "Code introuvable ou expiré" };
+  // Trouver l’entrée correspondante
+  const entry = blacklist.data.find((e: any) => e.code === code);
+
+  if (!entry) return { success: false, error: "Code introuvable ou expiré" };
+
+  // Vérifier expiration
+  const now = new Date();
+  if (entry.expiresAt && now > entry.expiresAt) {
+    await List.updateOne(
+      { name: "blacklist" },
+      { $pull: { data: { code } } }
+    );
+
+    return { success: false, error: "Code expiré" };
   }
 
-  // Incrémenter le compteur de tentatives dans Redis
-  const attempts = await blacklist.hincrby(code, "attempts", 1);
-  const maxAttempts = parseInt(entry.maxAttempts, 10);
+  // Incrémenter le compteur de tentatives
+  await List.updateOne(
+    { name: "blacklist" },
+    { $set: { "data.$[elem].attempts": entry.attempts + 1 } },
+    { arrayFilters: [{ "elem.code": code }] }
+  );
 
-  if (attempts > maxAttempts) {
+  if (entry.attempts > entry.maxAttempts) {
     // Trop de tentatives → suppression
-    await blacklist.del(code);
-    stats.totalInvalidAttempts++;
+    await List.updateOne(
+      { name: "blacklist" },
+      { $pull: { data: { code } } }
+    );
+
     return { success: false, error: "Trop de tentatives" };
   }
 
-  // Code valide → suppression (utilisation unique)
-  const username = entry.username;
-  await blacklist.del(code);
-  stats.totalUsed++;
+  // Code valide → suppression après usage unique
+  const token = entry.token;
+  await List.updateOne(
+    { name: "blacklist" },
+    { $pull: { data: { code } } }
+  );
 
-  console.log(`✅ Code ${code} utilisé avec succès pour ${username}`);
+  console.log(`✅ Code ${code} utilisé avec succès pour le token ${token}`);
 
-  return { success: true, username };
+  return { success: true, token };
 };
 
 
 // Fonction pour supprimer un code spécifique
 export const removeFromBlacklist = async (
   code: string
-): Promise<{ success: boolean; username?: string; error?: string }> => {
+): Promise<{ success: boolean; token?: string; error?: string }> => {
   if (!code) {
     return { success: false, error: "Code invalide" };
   }
 
-  const entry = await blacklist.hgetall(code);
+  const blacklist = await List.findByName("blacklist");
+  if (!blacklist) throw new Error("Blacklist not found");
 
-  if (entry && Object.keys(entry).length > 0) {
-    const username = entry.username;
-    await blacklist.del(code);
-
-    console.log(`🗑️ Code ${code} supprimé manuellement de la blacklist`);
-    return { success: true, username };
-  } else {
-    return { success: false, error: "Code introuvable ou déjà expiré" };
+  if (!blacklist.data.some((entry: any) => entry.code === code)) {
+    return { success: false, error: "Code introuvable" };
   }
+
+  const token = blacklist.data.find((entry: any) => entry.code === code).token;
+
+  return { success: true, token }
 };
 
 
 // Fonction pour nettoyer la blacklist
 export const cleanupBlacklist = async (): Promise<void> => {
-  const keys = await blacklist.keys("*");
-  if (keys.length > 0) {
-    await blacklist.del(...keys);
-    console.log("🚮 Blacklist vidée");
-  }
+  const blacklist = await List.findByName("blacklist");
+  if (!blacklist) throw new Error("Blacklist not found");
+
+  await List.updateOne(
+    { name: "blacklist" },
+    { $pull: { data: { expiresAt: { $lt: new Date() } } } }
+  );
 };
-
-// Fonction pour les statistiq
-export const getStats = (): {
-  totalGenerated: number;
-  totalExpired: number;
-  totalUsed: number;
-  totalInvalidAttempts: number;
-  currentActive: number;
-  uptime: number;
-} => {
-  return {
-    totalGenerated: stats.totalGenerated,
-    totalExpired: stats.totalExpired,
-    totalUsed: stats.totalUsed,
-    totalInvalidAttempts: stats.totalInvalidAttempts,
-    currentActive: stats.totalGenerated - stats.totalUsed,
-    uptime: process.uptime(),
-  };
-
-};
-
 
 
 // Fonction pour obtenir des informations sur un code
-export const getCodeInfo = async (code: string): Promise<BlacklistEntry | null> => {
-    const entry = await blacklist.hgetall(code);
-    if (!entry || Object.keys(entry).length === 0) {
-      return null;
-    }
-    return {
-      username: entry.username,
-      createdAt: new Date(entry.createdAt),
-      attempts: parseInt(entry.attempts, 10),
-      maxAttempts: parseInt(entry.maxAttempts, 10),
-    };
+export const getCodeInfo = async (code: string): Promise<any> => {
+  const blacklist = await List.findByName("blacklist");
+  if (!blacklist) throw new Error("Blacklist not found");
+
+  return blacklist.data.find((entry: any) => entry.code === code);
 };
 
 

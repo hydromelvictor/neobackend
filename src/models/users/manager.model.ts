@@ -67,10 +67,7 @@ const ManSchema = new Schema<IMan>({
         minlength: [3, 'Position must be at least 3 characters'],
         maxlength: [20, 'Position cannot exceed 20 characters']
     },
-    password: { 
-        type: String,
-        required: [true, 'Password is required']
-    },
+    password: String,
     online: { 
         type: Boolean, 
         default: false 

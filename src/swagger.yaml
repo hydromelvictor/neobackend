@@ -1651,18 +1651,10 @@ paths:
                   type: string
                 address:
                   type: string
-                location:
-                  type: object
-                  properties:
-                    type:
-                      type: string
-                      example: Point
-                      description: toujours mettre Point
-                    coordinates:
-                      type: array
-                      items:
-                        type: number
-                        description: longitude, latitude
+                lon:
+                  type: number
+                lat:
+                  type: number
                 phone:
                   type: array
                   items:

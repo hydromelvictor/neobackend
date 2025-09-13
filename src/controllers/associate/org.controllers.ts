@@ -4,6 +4,7 @@ import Manager from '../../models/users/manager.model';
 import Settings from '../../models/associate/settings.models';
 import Account from '../../models/marketing/account.models';
 import { JsonResponse } from '../../types/api';
+import Referer from '../../models/users/referer.models';
 
 export default class OrgController {
     public static filters = (q: any) => {
@@ -46,13 +47,19 @@ export default class OrgController {
             const exist = await Org.findOne({ reason: req.body.reason });
             if (exist) throw new Error('L\'organisation existe déjà');
 
-            const manager = await Manager.findById(req.body.manager);
+            const manager = await Manager.findById(req.user._id);
             if (!manager) throw new Error('Le manager n\'existe pas');
 
             const data = { ...req.body };
+            data.manager = manager._id;
             data.location = {
                 type: 'Point',
                 coordinates: [data.lon, data.lat]
+            }
+            if (data.referer) {
+                const referer = await Referer.findById(data.referer);
+                if (!referer) throw new Error('Le référent n\'existe pas');
+                data.referer = referer._id;
             }
             delete data.lat;
             delete data.lon;

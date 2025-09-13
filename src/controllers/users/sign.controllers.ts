@@ -50,7 +50,7 @@ export const authenticate = async (user: any) => {
 
 export const login = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.name);
+        let Instance = instanciate(req.params.model);
 
         const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');

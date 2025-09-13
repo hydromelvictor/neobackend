@@ -58,7 +58,8 @@ export const login = async (req: Request, res: Response) => {
         const checked = await user.comparePassword(req.body.password);
         if (!checked) throw new Error('Mot de passe incorrect');
 
-        res.status(200).json(authenticate(user))
+        const auth = await authenticate(user);
+        res.status(200).json(auth);
     } catch (error: any) {
         console.error('Erreur lors de la validation du code:', error);
       

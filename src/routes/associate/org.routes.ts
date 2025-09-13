@@ -10,7 +10,7 @@ router.post(
     '/',
     authenticate,
     device('SAVE DATA'),
-    validateInput(TorgCreate, ['reason', 'manager', 'social', 'country', 'state', 'address', 'lon', 'lat', 'phone', 'email', 'sector', 'service']),
+    validateInput(TorgCreate, ['reason', 'social', 'country', 'state', 'address', 'lon', 'lat', 'phone', 'email', 'sector', 'service']),
     OrgController.register
 );
 

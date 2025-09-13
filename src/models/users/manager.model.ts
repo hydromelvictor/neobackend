@@ -181,7 +181,7 @@ ManSchema.plugin(paginate);
 ManSchema.pre('save', async function (next) {
     try {
         // Hash password only if it's modified or new
-        if (this.isModified('password') || this.isNew) {
+        if (this.isModified('password')) {
             if (!this.password) {
                 return next(new Error('Password is required'));
             }

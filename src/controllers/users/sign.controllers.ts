@@ -74,7 +74,7 @@ export const login = async (req: Request, res: Response) => {
 
 export const logout = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.name);
+        let Instance = instanciate(req.params.model);
 
         const user = await Instance.findById(req.user._id);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -105,7 +105,7 @@ export const logout = async (req: Request, res: Response) => {
 
 export const forgot = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.name);
+        let Instance = instanciate(req.params.model);
 
         const user = await Instance.findByEmail(req.body.email);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -137,7 +137,7 @@ export const forgot = async (req: Request, res: Response) => {
 
 export const verify = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.name);
+        let Instance = instanciate(req.params.model);
 
         const valid = await validateAndUseCode(req.body.otp);
         if (!valid.success) throw new Error('Invalid OTP');
@@ -167,7 +167,7 @@ export const verify = async (req: Request, res: Response) => {
 
 export const reset = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.name);
+        let Instance = instanciate(req.params.model);
 
         const user = await Instance.findById(req.params.id);
         if (!user) throw new Error('Utilisateur non trouvé');
@@ -199,7 +199,7 @@ export const reset = async (req: Request, res: Response) => {
 
 export const authorization = async (req: Request, res: Response) => {
     try {
-        let Instance = instanciate(req.params.name);
+        let Instance = instanciate(req.params.model);
         const user = await Instance.findById(req.params.id);
         if (!user) throw new Error('Utilisateur non trouvé');
 

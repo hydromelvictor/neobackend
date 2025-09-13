@@ -57,7 +57,7 @@ export default class OrgController {
                 coordinates: [data.lon, data.lat]
             }
             if (data.referer) {
-                const referer = await Referer.findById(data.referer);
+                const referer = await Referer.findOne({ promo: data.referer });
                 if (!referer) throw new Error('Le référent n\'existe pas');
                 data.referer = referer._id;
             }

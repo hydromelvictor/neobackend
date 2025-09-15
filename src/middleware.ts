@@ -92,7 +92,7 @@ export const authenticate = async (req: Request, res: Response, next: NextFuncti
 /**
  * 
  * @param req 
- * @param res 
+ * @param res
  * @param next 
  * @returns 
  */

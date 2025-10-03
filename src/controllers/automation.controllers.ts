@@ -36,7 +36,8 @@ export default class Meeting {
                 const relance = builder(
                     meet.assign, 
                     `Tu as une réunion prévue avec le lead ${meet.lead} intitulée "${meet.title}". C'est maintenant.`,
-                    data.room
+                    data.room,
+                    data.lead
                 );
                 console.log(`C'est l'heure de la réunion: ${meet.title} avec le lead ${meet.lead}`);
                 meet.current = false;

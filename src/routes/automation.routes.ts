@@ -24,25 +24,11 @@ router.get(
     RelanceController.list
 );
 
-router.delete(
-    '/:id',
-    device('DELETE RELANCE'),
-    permissions('DELETE-RELANCE'),
-    RelanceController.delete
-);
-
 router.get(
     '/stats/count',
     device('COUNT RELANCE'),
     permissions('COUNT-RELANCE'),
     RelanceController.count
-);
-
-router.put(
-    '/:id',
-    device('UPDATE RELANCE'),
-    permissions('UPDATE-RELANCE'),
-    RelanceController.update
 );
 
 router.post(

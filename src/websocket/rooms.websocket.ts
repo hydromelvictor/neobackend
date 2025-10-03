@@ -1,254 +1,253 @@
-import mongoose from "mongoose"
+// import mongoose from "mongoose"
 import { Socket } from "socket.io"
-import Room from "../models/network/discussion.models"
-import Guest from "../models/network/guest.models"
+// import Room from "../models/network/discussion.models"
 import Sms from "../models/network/message.models"
 import Attach from "../models/network/attachment.models"
 import Reaction from "../models/network/reaction.models"
-import Org from "../models/associate/org.models"
+// import Org from "../models/associate/org.models"
 import { JsonResponse } from "../types/api"
 import device from "./device.websocket"
-import permission from "./permissions.websockets"
-import Neo from "../models/users/neo.models"
-import builder from "../ai/commercial"
+// import permission from "./permissions.websockets"
+// import Neo from "../models/users/neo.models"
+// import builder from "../ai/commercial"
 
 
 
 const rooms = (socket: Socket, io: any) => {
-    socket.on('findOrCreateRoom', async (params) => {
-        io.use(device('INIT CHAT'));
-        io.use(permission('INIT-CHAT'));
+    // socket.on('findOrCreateRoom', async (params) => {
+    //     io.use(device('INIT CHAT'));
+    //     io.use(permission('INIT-CHAT'));
 
-        try {
-            const room = await Room.findById(params.id);
-            let data: any = {};
-            if (room) {
-                data.room = room._id;
-                data.name = room?.name;
+    //     try {
+    //         const room = await Room.findById(params.id);
+    //         let data: any = {};
+    //         if (room) {
+    //             data.room = room._id;
+    //             data.name = room?.name;
                 
-                const guests = await Guest.find({ room: room._id });
-                for (const guest of guests) {
-                    const Instance = await mongoose.model(guest.role.charAt(0).toUpperCase() + guest.role.slice(1)).findById(guest.hote);
-                    if (!Instance) throw new Error('hote not found');
+    //             const guests = await Guest.find({ room: room._id });
+    //             for (const guest of guests) {
+    //                 const Instance = await mongoose.model(guest.role.charAt(0).toUpperCase() + guest.role.slice(1)).findById(guest.hote);
+    //                 if (!Instance) throw new Error('hote not found');
                     
-                    const hote = Instance.findById(guest.hote);
-                    if (!hote) throw new Error('hote not found');
+    //                 const hote = Instance.findById(guest.hote);
+    //                 if (!hote) throw new Error('hote not found');
                     
-                    data.guests.push({ ...hote, guestId: guest.hote });
-                }
+    //                 data.guests.push({ ...hote, guestId: guest.hote });
+    //             }
 
-                const sms = await Sms.find({ room: room._id }).sort({ createdAt: -1 }).limit(5);
-                for (const message of sms) {
-                    const attachs = await Attach.find({ message: message._id });
-                    const reactions = await Reaction.find({ message: message._id });
+    //             const sms = await Sms.find({ room: room._id }).sort({ createdAt: -1 }).limit(5);
+    //             for (const message of sms) {
+    //                 const attachs = await Attach.find({ message: message._id });
+    //                 const reactions = await Reaction.find({ message: message._id });
                     
-                    const messages = { ...message, attachments: attachs, reactions };
-                    data.messages.push(messages);
-                }
-            } else {
-                const room = await Room.create({ status: 'private' });
-                data.room = room._id;
-                data.name = room?.name;
+    //                 const messages = { ...message, attachments: attachs, reactions };
+    //                 data.messages.push(messages);
+    //             }
+    //         } else {
+    //             const room = await Room.create({ status: 'private' });
+    //             data.room = room._id;
+    //             data.name = room?.name;
 
-                const guest = await Guest.create({ room: room._id, hote: socket.data.user._id, role: 'lead' });
-                data.guests.push({ ...socket.data.user, guestId: guest.hote });
+    //             const guest = await Guest.create({ room: room._id, hote: socket.data.user._id, role: 'lead' });
+    //             data.guests.push({ ...socket.data.user, guestId: guest.hote });
 
-                const org = await Org.findById(params.org);
-                if (!org) throw new Error('locator not found');
+    //             const org = await Org.findById(params.org);
+    //             if (!org) throw new Error('locator not found');
 
-                data.guests.push({ ...org, guestId: org._id });
+    //             data.guests.push({ ...org, guestId: org._id });
 
-                // ajouter les guests au rooms
-                socket.join(data.room.toString());
-            }
+    //             // ajouter les guests au rooms
+    //             socket.join(data.room.toString());
+    //         }
 
-            const response: JsonResponse = {
-                success: true,
-                message: 'read in the room',
-                data: data
-            }
-            io.to(data.room).emit('findOrCreateRoom', response);
-        } catch (err: any) {
-            console.log(err.message)
-            const response: JsonResponse = {
-                success: true,
-                message: 'read failed',
-                error: err.message
-            }
-            io.to(socket.id).emit('findOrCreateRoom', response);
-        }
-    })
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'read in the room',
+    //             data: data
+    //         }
+    //         io.to(data.room).emit('findOrCreateRoom', response);
+    //     } catch (err: any) {
+    //         console.log(err.message)
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'read failed',
+    //             error: err.message
+    //         }
+    //         io.to(socket.id).emit('findOrCreateRoom', response);
+    //     }
+    // })
 
-    socket.on('findAllRooms', async (data) => {
-        io.use(device('LIST CHAT'));
-        io.use(permission('LIST-CHAT'));
+    // socket.on('findAllRooms', async (data) => {
+    //     io.use(device('LIST CHAT'));
+    //     io.use(permission('LIST-CHAT'));
 
-        try {
-            const options = {
-                page: parseInt(data.page),
-                limit: parseInt(data.limit),
-                sort: { createdAt: -1 }
-            }
-            const rooms = await Room.paginate({}, options);
-            const count = await Room.countDocuments();
+    //     try {
+    //         const options = {
+    //             page: parseInt(data.page),
+    //             limit: parseInt(data.limit),
+    //             sort: { createdAt: -1 }
+    //         }
+    //         const rooms = await Room.paginate({}, options);
+    //         const count = await Room.countDocuments();
 
-            const response: JsonResponse = {
-                success: true,
-                message: 'list rooms',
-                data: { rooms, count }
-            }
-            io.to(socket.id).emit('findAllRooms', response);
-        } catch (err: any) {
-            console.log(err.message)
-            const response: JsonResponse = {
-                success: true,
-                message: 'list failed',
-                error: err.message
-            }
-            io.to(socket.id).emit('findAllRooms', response);
-        }
-    })
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'list rooms',
+    //             data: { rooms, count }
+    //         }
+    //         io.to(socket.id).emit('findAllRooms', response);
+    //     } catch (err: any) {
+    //         console.log(err.message)
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'list failed',
+    //             error: err.message
+    //         }
+    //         io.to(socket.id).emit('findAllRooms', response);
+    //     }
+    // })
 
-    socket.on('joinRoom', async (data) => {
-        io.use(device('JOIN ROOM CHAT'));
-        io.use(device('JOIN-CHAT'));
+    // socket.on('joinRoom', async (data) => {
+    //     io.use(device('JOIN ROOM CHAT'));
+    //     io.use(device('JOIN-CHAT'));
 
-        try {
-            const room = await Room.findById(data.room);
-            if (!room) throw new Error('room not found');
+    //     try {
+    //         const room = await Room.findById(data.room);
+    //         if (!room) throw new Error('room not found');
 
-            socket.join(data.room);
+    //         socket.join(data.room);
 
-            const response: JsonResponse = {
-                success: true,
-                message: 'join in the room',
-                data: room
-            }
-            io.to(socket.id).emit('joinRoom', response);
-        } catch (err: any) {
-            console.log(err.message)
-            const response: JsonResponse = {
-                success: true,
-                message: 'join failed',
-                error: err.message
-            }
-            io.to(socket.id).emit('joinRoom', response);
-        }
-    })
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'join in the room',
+    //             data: room
+    //         }
+    //         io.to(socket.id).emit('joinRoom', response);
+    //     } catch (err: any) {
+    //         console.log(err.message)
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'join failed',
+    //             error: err.message
+    //         }
+    //         io.to(socket.id).emit('joinRoom', response);
+    //     }
+    // })
 
-    socket.on('leaveRoom', async (data) => {
-        io.use(device('LEAVE ROOM CHAT'));
-        io.use(device('LEAVE-CHAT'));
+    // socket.on('leaveRoom', async (data) => {
+    //     io.use(device('LEAVE ROOM CHAT'));
+    //     io.use(device('LEAVE-CHAT'));
 
-        try {
-            const room = await Room.findById(data.room);
-            if (!room) throw new Error('room not found');
+    //     try {
+    //         const room = await Room.findById(data.room);
+    //         if (!room) throw new Error('room not found');
 
-            socket.leave(data.room);
+    //         socket.leave(data.room);
             
-            await Attach.deleteMany({ message: { $in: await Sms.find({ room: data.room }) } });
-            await Reaction.deleteMany({ message: { $in: await Sms.find({ room: data.room }) } });
-            await Sms.deleteMany({ room: data.room });
-            await Guest.deleteMany({ room: data.room });
-            await Room.deleteOne({ _id: data.room });
+    //         await Attach.deleteMany({ message: { $in: await Sms.find({ room: data.room }) } });
+    //         await Reaction.deleteMany({ message: { $in: await Sms.find({ room: data.room }) } });
+    //         await Sms.deleteMany({ room: data.room });
+    //         await Guest.deleteMany({ room: data.room });
+    //         await Room.deleteOne({ _id: data.room });
 
-            const response: JsonResponse = {
-                success: true,
-                message: 'leave room',
-                data: room
-            }
-            io.to(socket.id).emit('leaveRoom', response);
-        } catch (err: any) {
-            console.log(err.message)
-            const response: JsonResponse = {
-                success: true,
-                message: 'leave failed',
-                error: err.message
-            }
-            io.to(socket.id).emit('leaveRoom', response);
-        }
-    })
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'leave room',
+    //             data: room
+    //         }
+    //         io.to(socket.id).emit('leaveRoom', response);
+    //     } catch (err: any) {
+    //         console.log(err.message)
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'leave failed',
+    //             error: err.message
+    //         }
+    //         io.to(socket.id).emit('leaveRoom', response);
+    //     }
+    // })
 
-    socket.on('myAllRooms', async () => {
-        io.use(device('PERSONAL LIST CHAT'));
-        io.use(device('PERSONAL-CHAT'));
+    // socket.on('myAllRooms', async () => {
+    //     io.use(device('PERSONAL LIST CHAT'));
+    //     io.use(device('PERSONAL-CHAT'));
 
-        try {
-            const rooms = await Guest.find({ hote: { $in: [socket.data.user._id, socket.data.user.org || ''] } });
+    //     try {
+    //         const rooms = await Guest.find({ hote: { $in: [socket.data.user._id, socket.data.user.org || ''] } });
 
-            const response: JsonResponse = {
-                success: true,
-                message: 'list my all rooms',
-                data: rooms
-            }
-            io.to(socket.id).emit('myAllRooms', response);
-        } catch (err: any) {
-            console.log(err.message)
-            const response: JsonResponse = {
-                success: true,
-                message: 'list failed',
-                error: err.message
-            }
-            io.to(socket.id).emit('myAllRooms', response);
-        }
-    })
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'list my all rooms',
+    //             data: rooms
+    //         }
+    //         io.to(socket.id).emit('myAllRooms', response);
+    //     } catch (err: any) {
+    //         console.log(err.message)
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'list failed',
+    //             error: err.message
+    //         }
+    //         io.to(socket.id).emit('myAllRooms', response);
+    //     }
+    // })
 
-    socket.on('sendSms', async (data) => {
-        io.use(device('SEND CHAT'));
-        io.use(device('SEND-CHAT'));
+    // socket.on('sendSms', async (data) => {
+    //     io.use(device('SEND CHAT'));
+    //     io.use(device('SEND-CHAT'));
 
-        try {
-            const sms = await Sms.create({ room: data.room, hote: socket.data.user._id, content: data.content, state: data.state });
+    //     try {
+    //         const sms = await Sms.create({ room: data.room, hote: socket.data.user._id, content: data.content, state: data.state });
             
-            let hote = await Guest.findById(socket.data.user._id);
-            if (!hote) throw new Error('hote not found');
+    //         let hote = await Guest.findById(socket.data.user._id);
+    //         if (!hote) throw new Error('hote not found');
 
-            hote = await mongoose.model(hote.role.charAt(0).toUpperCase() + hote.role.slice(1)).findById(hote.hote);
-            if (!hote) throw new Error('hote not found');
+    //         hote = await mongoose.model(hote.role.charAt(0).toUpperCase() + hote.role.slice(1)).findById(hote.hote);
+    //         if (!hote) throw new Error('hote not found');
 
-            let result: any = { ...sms, hote, attachments: [], reactions: [] };
+    //         let result: any = { ...sms, hote, attachments: [], reactions: [] };
 
-            if (sms.state !== 'external' && !sms.content) return;
-            else {
-                result.attachments = (await Attach.find({ message: sms._id })).map(attach => attach._id);
-            }
+    //         if (sms.state !== 'external' && !sms.content) return;
+    //         else {
+    //             result.attachments = (await Attach.find({ message: sms._id })).map(attach => attach._id);
+    //         }
 
-            const response: JsonResponse = {
-                success: true,
-                message: 'send sms in the room',
-                data: result
-            }
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'send sms in the room',
+    //             data: result
+    //         }
 
-            io.to(data.room).emit('sendSms', response);
+    //         io.to(data.room).emit('sendSms', response);
 
-            // organisons la reponse immediate si elle doit venir de l'IA
-            if (hote.role !== 'org' && data.ia) {
-                const neo = await Neo.findById(data.ia);
-                if (!neo) throw new Error('neo not found');
-                if (!neo.online) return;
+    //         // organisons la reponse immediate si elle doit venir de l'IA
+    //         if (hote.role !== 'org' && data.ia) {
+    //             const neo = await Neo.findById(data.ia);
+    //             if (!neo) throw new Error('neo not found');
+    //             if (!neo.online) return;
 
-                const response = await builder(neo._id, result, data.room);
-                if (response.error) return;
-                const message = await Sms.create({ room: data.room, hote: neo._id, content: response.content, state: 'external' });
-                const attachs = (await Attach.find({ message: message._id })).map(attach => attach._id);
-                const reactions = (await Reaction.find({ message: message._id })).map(reaction => reaction._id);
+    //             const response = await builder(neo._id, result, data.room);
+    //             if (response.error) return;
+    //             const message = await Sms.create({ room: data.room, hote: neo._id, content: response.content, state: 'external' });
+    //             const attachs = (await Attach.find({ message: message._id })).map(attach => attach._id);
+    //             const reactions = (await Reaction.find({ message: message._id })).map(reaction => reaction._id);
 
-                io.to(data.room).emit('sendSms', {
-                    success: true,
-                    message: 'send sms in the room',
-                    data: { ...message, attachments: attachs, reactions }
-                });
-            }
-        } catch (err: any) {
-            console.log(err.message)
-            const response: JsonResponse = {
-                success: true,
-                message: 'send sms failed',
-                error: err.message
-            }
-            io.to(socket.id).emit('sendSms', response);
-        }
-    })
+    //             io.to(data.room).emit('sendSms', {
+    //                 success: true,
+    //                 message: 'send sms in the room',
+    //                 data: { ...message, attachments: attachs, reactions }
+    //             });
+    //         }
+    //     } catch (err: any) {
+    //         console.log(err.message)
+    //         const response: JsonResponse = {
+    //             success: true,
+    //             message: 'send sms failed',
+    //             error: err.message
+    //         }
+    //         io.to(socket.id).emit('sendSms', response);
+    //     }
+    // })
 
     socket.on('readSms', async (data) => {
         io.use(device('READ CHAT'));

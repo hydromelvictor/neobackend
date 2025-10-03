@@ -1,21 +1,61 @@
 import { Request, Response } from 'express';
 import { JsonResponse } from '../types/api';
-import Relance from '../models/automation/relance.models';
+import Meet from '../models/automation/meet.models';
 import automate from '../automate';
+import { title } from 'process';
+import builder from '../ai/commercial';
 
-export default class RelanceController {
+
+export default class Meeting {
+    static filters = (q: any) => {
+        const filter: any = {};
+        if (q.title) filter[title] = { $regex: q.title, $options: 'i' };
+        if (q.after) {
+            const now = new Date(q.after as string);
+            now.setHours(0, 0, 0, 0);
+            filter.moment = { $gte: now };
+        }
+        if (q.before) {
+            const now = new Date(q.before as string);
+            now.setHours(0, 0, 0, 0);
+            filter.moment = { $lte: now };
+        }
+
+        if (q.assign) filter['assign'] = q.assign;
+        if (q.lead) filter['lead'] = q.lead;
+        if (q.current) filter['current'] = q.current === 'true';
+        return filter;
+    }
+
     public static async create(req: Request, res: Response) {
         try {
-            const relance = await Relance.create({ assign: req.params.id, ...req.body });
-            automate.addJob(relance._id.toString(), relance.relance.toString(), async () => {
-                // dire a l'IA de relancer la conversation avec le client
+            const data = { ...req.body };
+            const meet = await Meet.create(data)
+            automate.addJob(meet._id.toString(), meet.moment.toISOString(), async () => {
+                // demander a neo de recontacter le lead
+                const relance = builder(
+                    meet.assign, 
+                    `Tu as une réunion prévue avec le lead ${meet.lead} intitulée "${meet.title}". C'est maintenant.`,
+                    data.room
+                );
+                console.log(`C'est l'heure de la réunion: ${meet.title} avec le lead ${meet.lead}`);
+                meet.current = false;
+                await meet.save();
+
                 const response: JsonResponse = {
                     success: true,
-                    message: 'add relance',
+                    message: 'meet triggered',
+                    target: data.room,
                     data: relance
                 }
-                res.status(200).json(response)
-            });
+                return response;
+            })
+            const response: JsonResponse = {
+                success: true,
+                message: 'meet',
+                data: meet
+            }
+            res.status(200).json(response)
         } catch (err: any) {
             const response: JsonResponse = {
                 success: false,
@@ -28,13 +68,13 @@ export default class RelanceController {
 
     public static async retrieve(req: Request, res: Response) {
         try {
-            const relance = await Relance.findById(req.params.id);
-            if (!relance) throw new Error('not found');
+            const meet = await Meet.findById(req.params.id);
+            if (!meet) throw new Error('not found');
 
             const response: JsonResponse = {
                 success: true,
-                message: 'retrieve relance',
-                data: relance
+                message: 'retrieve meet',
+                data: meet
             }
             res.status(200).json(response)
         } catch (err: any) {
@@ -49,40 +89,18 @@ export default class RelanceController {
 
     public static async list(req: Request, res: Response) {
         try {
-            const filter: any = {};
-            if (req.query.assign) filter['assign'] = req.query.assign;
-
+            const filter = Meeting.filters(req.query);
             const options: any = {
                 page: req.query.page || 1,
                 limit: req.query.limit || 10,
                 sort: { createdAt: -1 }
             }
-            const relance = await Relance.paginate(filter, options);
+            const meet = await Meet.paginate(filter, options);
+
             const response: JsonResponse = {
                 success: true,
-                message: 'list relance',
-                data: relance
-            }
-            res.status(200).json(response)
-        } catch (err: any) {
-            const response: JsonResponse = {
-                success: false,
-                message: 'failed',
-                error: err.message
-            }
-            res.status(400).json(response)
-        }
-    }
-
-    public static async delete(req: Request, res: Response) {
-        try {
-            const relance = await Relance.findById(req.params.id);
-            if (!relance) throw new Error('not found');
-
-            await relance.deleteOne();
-            const response: JsonResponse = {
-                success: true,
-                message: 'delete relance'
+                message: 'list meet',
+                data: meet
             }
             res.status(200).json(response)
         } catch (err: any) {
@@ -97,15 +115,8 @@ export default class RelanceController {
 
     public static async count(req: Request, res: Response) {
         try {
-            const filter: any = {};
-            if (req.query.assign) filter['assign'] = req.query.assign;
-
-            const options: any = {
-                page: req.query.page || 1,
-                limit: req.query.limit || 10,
-                sort: { createdAt: -1 }
-            }
-            const count = await Relance.countDocuments(filter, options);
+            const filter = Meeting.filters(req.query);
+            const count = await Meet.countDocuments(filter);
             const response: JsonResponse = {
                 success: true,
                 message: 'count relance',
@@ -122,35 +133,12 @@ export default class RelanceController {
         }
     }
 
-    public static async update(req: Request, res: Response) {
-        try {
-            const relance = await Relance.findById(req.params.id);
-            if (!relance) throw new Error('not found');
-
-            Object.assign(relance, req.body);
-            await relance.save();
-
-            const response: JsonResponse = {
-                success: true,
-                message: 'update relance'
-            }
-            res.status(200).json(response);
-        } catch (err: any) {
-            const response: JsonResponse = {
-                success: false,
-                message: 'failed',
-                error: err.message
-            }
-            res.status(400).json(response)
-        }
-    }
-
     public static async stop(req: Request, res: Response) {
         try {
             automate.stopAll();
             const response: JsonResponse = {
                 success: true,
-                message: 'stop relance'
+                message: 'stoped all jobs',
             }
             res.status(200).json(response)
         } catch (err: any) {
@@ -163,3 +151,4 @@ export default class RelanceController {
         }
     }
 }
+

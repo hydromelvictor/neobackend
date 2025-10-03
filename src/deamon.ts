@@ -20,7 +20,7 @@ const _admin = {
     firstname: 'neo-admin',
     lastname: 'II',
     phone: '00225-000',
-    email: 'support@neo.com',
+    email: 'epinzagneivancesar@gmail.com',
     cni: 'neo-cni',
     position: 'System',
     recovery: OneUseToken(),

@@ -1,4 +1,5 @@
 import * as cron from 'node-cron';
+import { JsonResponse } from './types/api';
 
 
 class Automation {
@@ -14,13 +15,19 @@ class Automation {
     return Automation.instance;
   }
 
-  public addJob(name: string, schedule: string, task: () => void): void {
+  public addJob(name: string, schedule: string, task: () => any): any {
     const job = cron.schedule(schedule, () => {
       console.log(`Début de la tâche: ${name}`);
       try {
         task();
       } catch (error) {
         console.error(`Erreur dans ${name}:`, error);
+        const response: JsonResponse = {
+          success: false,
+          message: `Erreur dans la tâche ${name}`,
+          error: (error as Error).message
+        };
+        return response;
       }
     });
 

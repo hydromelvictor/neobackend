@@ -5,6 +5,10 @@ import Settings from '../../models/associate/settings.models';
 import Account from '../../models/marketing/account.models';
 import { JsonResponse } from '../../types/api';
 import Referer from '../../models/users/referer.models';
+import { generateToken, verifyToken } from '../../helpers/token.helpers';
+import gmail from '../../helpers/gmail.helpers';
+import { sending } from '../../helpers/html.helpers';
+import { OneUseToken } from '../../helpers/codecs.helpers';
 
 export default class OrgController {
     public static filters = (q: any) => {
@@ -73,10 +77,11 @@ export default class OrgController {
             };
 
             await Settings.create({ org: org._id });
+            
             const account = await Account.findOwner(manager._id);
-            if (!account || account.main) throw new Error('account not found');
+            if (!account || !account.main) throw new Error('account not found');
 
-            await Account.create({ owner: org._id, inherit: account._id });
+            await Account.create({ owner: org._id, inherit: account._id, name: OneUseToken() });
 
             res.status(201).json(response);
         } catch (error: any) {
@@ -146,10 +151,7 @@ export default class OrgController {
 
             const data = { ...req.body };
             
-            if (data.manager) {
-                const manager = await Manager.findById(data.manager);
-                if (manager && manager._id.toString() !== org.manager.toString()) throw new Error('Le manager n\'existe pas');
-            }
+            if (data.manager) delete data.manager;
 
             const reason = data.reason;
             const exist = reason ? await Org.findOne({ reason }) : null;
@@ -167,6 +169,76 @@ export default class OrgController {
             const response: JsonResponse = {
                 success: true,
                 message: 'L\'organisation a été mise à jour avec succès',
+                data: org
+            };
+            res.status(200).json(response);
+        } catch (error: any) {
+            console.error('Erreur lors de la récupération de l\'organisation:', error);
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    public static async managementRequest(req: Request, res: Response) {
+        try {
+            const org = await Org.findById(req.params.id);
+            if (!org) throw new Error('L\'organisation n\'existe pas');
+
+            const link = req.body.link;
+            if (!link) throw new Error('Le lien est requis');
+
+            const token = generateToken({ org: org._id }, '15m');
+            if (!token.success) throw new Error(token.error);
+            
+            gmail(
+                org.email,
+                'Demande de gestion de votre organisation',
+                sending('management_request', `${link}?token=${token.data}`)
+            )
+
+            const response: JsonResponse = {
+                success: true,
+                message: 'email envoyé avec success'
+            }
+            res.status(200).json(response)
+        } catch (error: any) {
+            console.error('Erreur lors de la validation du code:', error);
+      
+            const response: JsonResponse = {
+                success: false,
+                message: 'Erreur interne du serveur',
+                error: error.message
+            };
+      
+            res.status(500).json(response);
+        }
+    }
+
+    public static async management(req: Request, res: Response) {
+        try {
+            const check = verifyToken(req.params.token);
+            if (!check.success) throw new Error(check.error);
+
+            const obj: any = check.data;
+
+            const org = await Org.findById(obj.org);
+            if (!org) throw new Error('L\'organisation n\'existe pas');
+
+            const data = { ...req.body };
+
+            const manager = await Manager.findById(data.manager);
+            if (!manager) throw new Error('Le manager n\'existe pas');
+
+            org.manager = manager._id;
+            await org.save();
+            const response: JsonResponse = {
+                success: true,
+                message: 'Le management de l\'organisation a été mis à jour avec succès',
                 data: org
             };
             res.status(200).json(response);

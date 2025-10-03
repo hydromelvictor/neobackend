@@ -43,8 +43,7 @@ const SmSchema = new Schema<ISms>({
     },
     hote: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Guest'
+        required: true
     },
     content: String,
     state: {

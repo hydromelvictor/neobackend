@@ -10,7 +10,7 @@ import { JsonResponse } from "../types/api"
 import device from "./device.websocket"
 import permission from "./permissions.websockets"
 import Neo from "../models/users/neo.models"
-import builder from "../controllers/build"
+import builder from "../ai/commercial"
 
 
 

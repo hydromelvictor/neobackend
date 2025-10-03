@@ -5,6 +5,7 @@ import Org from '../../models/associate/org.models';
 import mongoose from 'mongoose';
 import Tracking from '../../models/marketing/invoice.models';
 import MoneyController from './money.controllers';
+import { OneUseToken } from '../../helpers/codecs.helpers';
 
 
 export default class AccountController {
@@ -44,6 +45,7 @@ export default class AccountController {
             const sub = new Account({
                 owner: org._id,
                 inherit: account._id,
+                name: OneUseToken(),
                 currency: account.currency,
             });
             await sub.save();

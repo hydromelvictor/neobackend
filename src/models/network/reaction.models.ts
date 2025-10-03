@@ -20,8 +20,7 @@ const ReactSchema = new Schema<IReact>({
     },
     hote: {
         type: mongoose.Schema.Types.ObjectId,
-        required: true,
-        ref: 'Guest'
+        required: true
     },
     emoji: {
         name: String,

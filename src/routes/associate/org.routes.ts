@@ -41,6 +41,22 @@ router.put(
     OrgController.update
 );
 
+router.post(
+    '/management/:id',
+    authenticate,
+    device('MANAGEMENR REQUEST'),
+    permissions('UPDATE-ORG'),
+    OrgController.managementRequest
+);
+
+router.put(
+    '/managment/:token',
+    authenticate,
+    device('MANAGEMENR'),
+    permissions('UPDATE-ORG'),
+    OrgController.management
+);
+
 router.delete(
     '/:id',
     authenticate,
